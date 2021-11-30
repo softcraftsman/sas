@@ -14,6 +14,7 @@ $(function() {
         $('#institutionName').append(config.Institution);
         $('#logo').attr("src", config.Logo);
         $('#logoFooter').attr("src", config.LogoFooter);
+        $('#instructions').append(config.Instructions);
         configGlobal = config;
      });
     
@@ -199,5 +200,7 @@ $(function() {
             scrollTop: 0,
         }, 1500);
     });
+
+    document.getElementById("year").innerHTML = new Date().getFullYear();
     
 });
