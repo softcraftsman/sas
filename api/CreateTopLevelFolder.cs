@@ -17,6 +17,19 @@ namespace SAS.CreateTopLevelFolder
             [HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)] HttpRequest req,
             ILogger log)
         {
+            // Requies Storage Blob Data Contributor or Owner
+
+            // Pass the authorization bearer token through form the from end to the back end API services
+
+            /*
+                [] Add Folder Owner to Container ACL as Execute
+                [] Create Folder
+                [] Assign RWX for Folder to Folder Owner
+                [] Add Fund Code to metadata
+            */
+
+
+
             log.LogInformation("C# HTTP trigger function processed a request.");
 
             string name = req.Query["name"];
