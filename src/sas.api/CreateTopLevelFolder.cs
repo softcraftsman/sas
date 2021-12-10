@@ -8,6 +8,9 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
+using Azure.Storage.Files.DataLake;
+using Azure.Storage.Files.DataLake.Models;
+
 namespace sas.api.CreateTopLevelFolder
 {
     public static class CreateTopLevelFolder

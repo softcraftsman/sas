@@ -2,25 +2,12 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Launch client",
-      "command": "swa start http://localhost:4280 --api=http://localhost:7071",
+      "name": "Launch Edge",
       "request": "launch",
-      "type": "node-terminal"
-    },
-    {
-      "name": "Attach to .NET Functions",
-      "type": "coreclr",
-      "request": "attach",
-      "processId": "${command:azureFunctions.pickProcess}"
-    }
-  ],
-  "compounds": [
-    {
-      "name": "Client/Server",
-      "configurations": [
-        "Attach to .NET Functions",
-        "Run npm start"
-      ]
+      "type": "pwa-msedge",
+      "url": "http://localhost:4280",
+      "webRoot": "${workspaceFolder}",
+      "preLaunchTask": "swa start"
     }
   ]
 }
