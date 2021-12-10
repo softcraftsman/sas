@@ -34,15 +34,36 @@ namespace sas.api.CreateTopLevelFolder
 
             string name = req.Query["name"];
 
+            var user = StaticWebAppsAuth.Parse(req);
+
+            name = user.Identity.Name;
+
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             dynamic data = JsonConvert.DeserializeObject(requestBody);
             name = name ?? data?.name;
 
             string responseMessage = string.IsNullOrEmpty(name)
-                ? "This HTTP triggered function executed successfully. Pass a name in the query string or in the request body for a personalized response."
+                ? "This HTTP triggered function executed successfully. Login or pass a name in the query string or in the request body for a personalized response."
                 : $"Hello, {name}. This HTTP triggered function executed successfully.";
 
             return new OkObjectResult(responseMessage);
         }
+
+        public static async Task ManageDirectoryACLs(DataLakeFileSystemClient fileSystemClient)
+        {
+            var directoryClient = fileSystemClient.GetDirectoryClient("");
+            var directoryAccessControl = await directoryClient.GetAccessControlAsync();
+            foreach (var item in directoryAccessControl.Value.AccessControlList)
+            {
+                Console.WriteLine(item.ToString());
+            }
+
+            var accessControlList = PathAccessControlExtensions.ParseAccessControlList("user::rwx,group::r-x,other::rw-");
+
+            directoryClient.SetAccessControlList(accessControlList);
+
+        }
     }
+
+
 }
