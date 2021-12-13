@@ -17,16 +17,15 @@ namespace sas.api
     public static class CreateTopLevelFolder
     {
         [FunctionName("CreateTopLevelFolder")]
-        public static async Task<IActionResult> Run(
+        public static IActionResult Run(
             [HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)] HttpRequest req, 
-            ILogger log, 
-            TopLevelFolderParameters tlfp)
+            ILogger log)
         {
-
             // GET - Send Instructions back to calling client
             if (req.Method == HttpMethods.Get) {
                 log.LogInformation("CreateTopLevelFolder GET method called.");
-                var help = $"Use a POST method with the body containing the properties of {nameof(TopLevelFolderParameters)}";
+                var tlfp = JsonConvert.SerializeObject(new TopLevelFolderParameters());
+                var help = $"Use a POST method with the body containing the properties of {nameof(TopLevelFolderParameters)}\n{tlfp}";
                 return new OkObjectResult(help);
             }
 
@@ -35,9 +34,9 @@ namespace sas.api
             {
                 log.LogInformation("CreateTopLevelFolder POST method called.");
                 // Validate Parameters
-                if (tlfp is null) {
-                    return new BadRequestObjectResult($"{nameof(TopLevelFolderParameters)} is missing or badly formatted. ");
-                }
+                //if (tlfp is null) {
+                //    return new BadRequestObjectResult($"{nameof(TopLevelFolderParameters)} is missing or badly formatted. ");
+                //}
 
                 // Do Work Here
                 /*
