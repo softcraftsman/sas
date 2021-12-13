@@ -11,7 +11,7 @@ using Newtonsoft.Json;
 using Azure.Storage.Files.DataLake;
 using Azure.Storage.Files.DataLake.Models;
 
-namespace sas.api.CreateTopLevelFolder
+namespace sas.api
 {
     public static class ListStorageAccounts
     {
@@ -27,7 +27,9 @@ namespace sas.api.CreateTopLevelFolder
                 return new BadRequestObjectResult(dlsa);
             }
 
-            return new OkObjectResult(dlsa);
+            var accounts = dlsa.Replace(',',';').Split(';');
+
+            return new OkObjectResult(accounts);
         }
     }
 }

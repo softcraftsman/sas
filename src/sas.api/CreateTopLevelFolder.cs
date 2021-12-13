@@ -10,46 +10,47 @@ using Newtonsoft.Json;
 
 using Azure.Storage.Files.DataLake;
 using Azure.Storage.Files.DataLake.Models;
+using sas.api;
 
-namespace sas.api.CreateTopLevelFolder
+namespace sas.api
 {
     public static class CreateTopLevelFolder
     {
         [FunctionName("CreateTopLevelFolder")]
         public static async Task<IActionResult> Run(
-            [HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)] HttpRequest req,
-            ILogger log)
+            [HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)] HttpRequest req, 
+            ILogger log, 
+            TopLevelFolderParameters tlfp)
         {
-            // Requies Storage Blob Data Contributor or Owner
 
-            // Pass the authorization bearer token through form the from end to the back end API services
+            // GET - Send Instructions back to calling client
+            if (req.Method == HttpMethods.Get) {
+                log.LogInformation("CreateTopLevelFolder GET method called.");
+                var help = $"Use a POST method with the body containing the properties of {nameof(TopLevelFolderParameters)}";
+                return new OkObjectResult(help);
+            }
 
-            /*
-                [] Add Folder Owner to Container ACL as Execute
-                [] Create Folder
-                [] Assign RWX for Folder to Folder Owner
-                [] Add Fund Code to metadata
-            */
+            // POST - Method
+            if (req.Method == HttpMethods.Post)
+            {
+                log.LogInformation("CreateTopLevelFolder POST method called.");
+                // Validate Parameters
+                if (tlfp is null) {
+                    return new BadRequestObjectResult($"{nameof(TopLevelFolderParameters)} is missing or badly formatted. ");
+                }
 
+                // Do Work Here
+                /*
+                    [] Add Folder Owner to Container ACL as Execute
+                    [] Create Folder
+                    [] Assign RWX for Folder to Folder Owner
+                    [] Add Fund Code to metadata
+                */
+                return new OkResult();
+            }
 
-
-            log.LogInformation("C# HTTP trigger function processed a request.");
-
-            string name = req.Query["name"];
-
-            var user = StaticWebAppsAuth.Parse(req);
-
-            name = user.Identity.Name;
-
-            string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-            dynamic data = JsonConvert.DeserializeObject(requestBody);
-            name = name ?? data?.name;
-
-            string responseMessage = string.IsNullOrEmpty(name)
-                ? "This HTTP triggered function executed successfully. Login or pass a name in the query string or in the request body for a personalized response."
-                : $"Hello, {name}. This HTTP triggered function executed successfully.";
-
-            return new OkObjectResult(responseMessage);
+            // Error
+            return new BadRequestResult();
         }
 
         public static async Task ManageDirectoryACLs(DataLakeFileSystemClient fileSystemClient)
