@@ -1,25 +1,4 @@
 {
-    "routes": [
-        {
-            "route": "/api/*",
-            "methods": [
-                "GET"
-            ],
-            "allowedRoles": [
-                "registeredusers"
-            ]
-        },
-        {
-            "route": "/api/*",
-            "allowedRoles": [
-                "authenticated"
-            ]
-        },
-        {
-            "route": "/login",
-            "rewrite": "/.auth/login/aad"
-        }
-    ],
     "responseOverrides": {
         "401": {
             "redirect": "/login",
