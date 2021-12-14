@@ -10,7 +10,7 @@ const StorageAccountSelector = ({ accounts, onChange }) => {
     useEffect(() => {
         const selected = accounts[0] && accounts[0].id
         onChange && onChange(selected)
-    }, [accounts])
+    }, [accounts, onChange])
 
     const handleChange = event => {
         onChange && onChange(event.target.value)

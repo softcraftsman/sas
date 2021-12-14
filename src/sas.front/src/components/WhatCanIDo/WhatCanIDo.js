@@ -13,7 +13,7 @@ const WhatCanIDo = () => {
                     <div className="col-lg-4 col-md-7 col-sm-9">
                         <div className="single-features mt-40">
                             <div className="features-title-icon d-flex justify-content-between">
-                                <h4 className="features-title"><a href="#">Create a new space</a></h4>
+                                <h4 className="features-title"><a href="#create">Create a new space</a></h4>
                             </div>
                             <div className="features-content">
                                 <p className="text">
@@ -25,7 +25,7 @@ const WhatCanIDo = () => {
                     <div className="col-lg-4 col-md-7 col-sm-9">
                         <div className="single-features mt-40">
                             <div className="features-title-icon d-flex justify-content-between">
-                                <h4 className="features-title"><a href="#">Share files with others</a></h4>
+                                <h4 className="features-title"><a href="#share">Share files with others</a></h4>
                             </div>
                             <div className="features-content">
                                 <p className="text">
@@ -37,7 +37,7 @@ const WhatCanIDo = () => {
                     <div className="col-lg-4 col-md-7 col-sm-9">
                         <div className="single-features mt-40">
                             <div className="features-title-icon d-flex justify-content-between">
-                                <h4 className="features-title"><a href="#">Manage access to files</a></h4>
+                                <h4 className="features-title"><a href="#manage">Manage access to files</a></h4>
                             </div>
                             <div className="features-content">
                                 <p className="text">
@@ -51,7 +51,7 @@ const WhatCanIDo = () => {
                     <div className="col-lg-4 col-md-7 col-sm-9">
                         <div className="single-features mt-40">
                             <div className="features-title-icon d-flex justify-content-between">
-                                <h4 className="features-title"><a href="#">Cost, space and more</a></h4>
+                                <h4 className="features-title"><a href="#cost">Cost, space and more</a></h4>
                             </div>
                             <div className="features-content">
                                 <p className="text">
@@ -63,7 +63,7 @@ const WhatCanIDo = () => {
                     <div className="col-lg-4 col-md-7 col-sm-9">
                         <div className="single-features mt-40">
                             <div className="features-title-icon d-flex justify-content-between">
-                                <h4 className="features-title"><a href="#">Automatic policies</a></h4>
+                                <h4 className="features-title"><a href="#policies">Automatic policies</a></h4>
                             </div>
                             <div className="features-content">
                                 <p className="text">
@@ -75,11 +75,11 @@ const WhatCanIDo = () => {
                     <div className="col-lg-4 col-md-7 col-sm-9">
                         <div className="single-features mt-40">
                             <div className="features-title-icon d-flex justify-content-between">
-                                <h4 className="features-title"><a href="#">How to connect directly</a></h4>
+                                <h4 className="features-title"><a href="#connect">How to connect directly</a></h4>
                             </div>
                             <div className="features-content">
                                 <p className="text">
-                                    See detailed information about how to connect directly to your spaces via <a href="https://docs.microsoft.com/en-us/cli/azure/install-azure-cli" target="_blank">Azure CLI</a> and <a href="https://azure.microsoft.com/en-us/features/storage-explorer/" target="_blank">Storage Explorer</a>.
+                                    See detailed information about how to connect directly to your spaces via <a href="https://docs.microsoft.com/en-us/cli/azure/install-azure-cli" target="_blank" rel="noreferrer">Azure CLI</a> and <a href="https://azure.microsoft.com/en-us/features/storage-explorer/" target="_blank" rel="noreferrer">Storage Explorer</a>.
                                 </p>
                             </div>
                         </div>
