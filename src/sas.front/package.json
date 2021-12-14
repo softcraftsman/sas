@@ -1,5 +1,5 @@
 {
-  "name": "sql-server-reporting-services",
+  "name": "storage-account-manager",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
