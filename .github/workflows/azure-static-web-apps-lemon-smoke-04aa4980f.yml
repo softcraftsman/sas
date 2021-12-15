@@ -24,10 +24,9 @@ jobs:
 
       # Replace Environment variables
       - name: Replace Environment variables
-        uses: microsoft/variable-substitution@v1
+        uses: falnyr/replace-env-vars-action@master
         with:
-          # comma separated list of XML/JSON/YAML files in which tokens are to be substituted. Files names must be specified relative to the folder-path.
-          files: src/sas.front/src/.env
+          filename: src/sas.front/src/.env
         env:
           REACT_APP_BASE_URL: ${{ secrets.WEB_URL }}
 
