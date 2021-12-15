@@ -20,7 +20,7 @@ jobs:
           submodules: true
 
       - name: Display contents of original .env file
-        run: cat src\sas.front\src\.env
+        run: cat src/sas.front/src/.env
 
       # Replace Environment variables
       - name: Replace Environment variables
