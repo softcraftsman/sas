@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { useMsal } from "@azure/msal-react"
-import { loginRequest } from "../config/authConfig"
+import { useMsal } from '@azure/msal-react'
+import { loginRequest } from '../config/authConfig'
 
 const useAuthentication = () => {
     const { instance, accounts } = useMsal()
@@ -10,28 +10,30 @@ const useAuthentication = () => {
 
     useEffect(() => {
         const request = { ...loginRequest, account: accounts[0] }
-        const managementRequest = { ...request, scopes: ["https://management.azure.com/user_impersonation"] }
-        const storageRequest = { ...request, scopes: ["https://storage.azure.com/user_impersonation"] }
+        const managementRequest = { ...request, scopes: ['https://management.azure.com/user_impersonation'] }
+        const storageRequest = { ...request, scopes: ['https://storage.azure.com/user_impersonation'] }
 
-        const setTokens = response => {
-            setAuth(response)
-            setManagementToken(response.accessToken)
-    
+        const setTokens = async managementResponse => {
+            setAuth(managementResponse)
+            setManagementToken(managementResponse.accessToken)
+
             // Retrieve the Storage Account Token
-            instance.acquireTokenSilent(storageRequest)
-                .then(response => {
-                    setStorageToken(response.accessToken)
-                })
+            const storageAccountResponse = await instance.acquireTokenSilent(storageRequest)
+            setStorageToken(storageAccountResponse.accessToken)
         }
-    
-        // Retrieve the management access token
-        instance.acquireTokenSilent(managementRequest)
-            .then(response => setTokens(response))
-            .catch((e) => {
-                instance.acquireTokenPopup(managementRequest)
-                    .then(response => setTokens(response))
-            })
 
+        const getToken = async () => {
+            // Retrieve the management access token
+            try {
+                const silentResponse = await instance.acquireTokenSilent(managementRequest)
+                setTokens(silentResponse)
+            } catch (e) {
+                const popupResponse = await instance.acquireTokenPopup(managementRequest)
+                setTokens(popupResponse)
+            }
+        }
+
+        getToken()
 
     }, [accounts, instance]);
 

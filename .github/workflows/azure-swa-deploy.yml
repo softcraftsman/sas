@@ -28,7 +28,9 @@ jobs:
         with:
           filename: src/sas.front/src/.env
         env:
-          REACT_APP_BASE_URL: ${{ secrets.WEB_URL }}
+          BASE_URL: ${{ secrets.WEB_URL }}
+          TENANT_ID: ${{ secrets.TENANT_ID }}
+          CLIENT_ID: ${{ secrets.APP_REGISTRATION_CLIENT_ID }}
 
       - name: Display contents of updated .env file
         run: cat src/sas.front/src/.env

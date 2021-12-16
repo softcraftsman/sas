@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from "react"
-import { useAuthentication } from "../../hooks/useAuthentication"
-import { getStorageAccounts } from "../../services/StorageAccounts"
-import { getContainers } from "../../services/StorageAccountSdk"
-import StorageAccountSelector from "../StorageAccountSelector"
-import FileSystems from "../FileSystems"
+import React, { useEffect, useState } from 'react'
+import { useAuthentication } from '../../hooks/useAuthentication'
+import { getStorageAccounts } from '../../services/StorageAccounts.service'
+import { getContainers } from '../../services/StorageAccountSdk.service'
+import StorageAccountSelector from '../StorageAccountSelector'
+import FileSystems from '../FileSystems'
 
 /**
  * Renders list of Storage Accounts
