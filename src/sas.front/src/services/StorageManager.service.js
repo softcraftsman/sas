@@ -6,10 +6,11 @@ import URLS from '../config/urls'
  */
 export const getStorageAccounts = async accessToken => {
     const options = getOptions('GET', accessToken)
-    const endpoint = URLS.storageAccounts.endpoint.replace('{subscriptionId}', '3bd58b39-1778-4f39-aa7d-3a6563020b52')
+    const endpoint = URLS.storageAccounts.endpoint
 
     return fetch(endpoint, options)
         .then(response => {
+            return ["adlfredgohsman"]
             return response.json()
         })
         .catch(error => console.log(error))
@@ -22,12 +23,10 @@ export const getStorageAccounts = async accessToken => {
  const getOptions = (method, accessToken) => {
     const headers = new Headers()
     headers.append('Authorization', `Bearer ${accessToken}`)
-    headers.append('Content-Type', 'application/json')
-    headers.append('x-ms-version', '2021-02-12')
 
     const options = {
         method: 'GET',
-        headers: headers
+        //headers: headers
     }
 
     return options

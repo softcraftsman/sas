@@ -7,8 +7,7 @@ import { InteractiveBrowserCredential } from '@azure/identity'
  * Returns the list of folders for the azure datalake storage account
  */
 export const getContainers = async (storageAccountId) => {
-    const name = storageAccountId.substring(storageAccountId.lastIndexOf('/') + 1)
-    const endpoint = URLS.fileSystems.endpoint.replace('{name}', name)
+    const endpoint = URLS.fileSystems.endpoint.replace('{name}', storageAccountId)
     const credential = new InteractiveBrowserCredential({
         tenantId: process.env.REACT_APP_TENANT_ID,
         clientId: process.env.REACT_APP_CLIENT_ID
