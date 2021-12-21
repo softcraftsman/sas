@@ -1,11 +1,11 @@
 {
     "configurations": {
-        "app":{
+        "app": {
+            "context": "http://localhost:3000",
+            "apiLocation": "src/sas.api",
             "appLocation": "src/sas.front",
-            "context": "src/sas.front",
-            "run": "cd ../../src/sas.api && func host start",
-            "apiLocation": "http://localhost:7071",
-            "verbose": "false"
+            "run": "npm start",
+            "devserverTimeout": 900000
         }
     }
 }
