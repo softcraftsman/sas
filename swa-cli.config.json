@@ -1,0 +1,11 @@
+{
+    "configurations": {
+        "app":{
+            "appLocation": "src/sas.front",
+            "context": "src/sas.front",
+            "run": "cd ../../src/sas.api && func host start",
+            "apiLocation": "http://localhost:7071",
+            "verbose": "false"
+        }
+    }
+}
