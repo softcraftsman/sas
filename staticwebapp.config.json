@@ -5,8 +5,9 @@
             "statusCode": 302
         }
     },
-    "globalHeaders": {
-    },
+  "globalHeaders": {
+    "content-security-policy": "default-src 'self' 'unsafe-inline' https://login.microsoftonline.com https://fonts.googleapis.com https://fonts.gstatic.com https://*.blob.core.windows.net ; img-src 'self' data: https://*.blob.core.windows.net"
+  },
     "mimeTypes": {
         ".json": "text/json"
     }
