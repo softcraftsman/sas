@@ -18,6 +18,10 @@ Create a Static Web App in the Azure Portal. Name it anything you like. Choose w
 Copy the Static Web App URL for use later.
 Copy the deployment token (Click on Manage deployment token) for use later.
 
+Add the App Settings under the Static Web App using Settings -> Configuration. Add a new application setting called DATALAKE_STORAGE_ACCOUNTS. List the name of the storage accounts to use. Just the name is adequate. Separate the accounts by comma or semicolon.
+
+![App Settings](./assets/app-settings.png)
+
 ## Create an application
 In the Azure portal, go to the Azure Active Directory. Add a new App Registration.
 * Provide an Application Name
@@ -36,9 +40,9 @@ The GitHub workflow has a few required secrets that need to be created to enable
 - TENANT_ID
 - CLIENT_ID
 
-![App Settings](./assets/app-settings.png)
+![App Settings](./assets/aad-settings.png)
 
 ## Build
 Now that all of the pieces are present, go to Actions in GitHub and run the Azure SWA Deploy workflow (It should automatically run when code is committed as well).
 
-[![Azure Static Web Apps CI/CD](./sas/actions/workflows/azure-swa-deploy.yml/badge.svg)](./actions/workflows/azure-swa-deploy.yml)
+[![Azure Static Web Apps CI/CD](../../sas/actions/workflows/azure-swa-deploy.yml/badge.svg)](../../actions/workflows/azure-swa-deploy.yml)
