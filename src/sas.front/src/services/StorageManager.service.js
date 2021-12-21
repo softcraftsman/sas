@@ -10,7 +10,7 @@ export const getStorageAccounts = async accessToken => {
 
     return fetch(endpoint, options)
         .then(response => {
-            return ["adlfredgohsman"]
+            //return ["adlfredgohsman"]
             return response.json()
         })
         .catch(error => console.log(error))
