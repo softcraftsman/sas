@@ -45,4 +45,4 @@ The GitHub workflow has a few required secrets that need to be created to enable
 ## Build
 Now that all of the pieces are present, go to Actions in GitHub and run the Azure SWA Deploy workflow (It should automatically run when code is committed as well).
 
-[![Azure Static Web Apps CI/CD](../../sas/actions/workflows/azure-swa-deploy.yml/badge.svg)](../../actions/workflows/azure-swa-deploy.yml)
+[![Azure Static Web Apps CI/CD](../../actions/workflows/azure-swa-deploy.yml/badge.svg)](../../actions/workflows/azure-swa-deploy.yml)
