@@ -8,7 +8,7 @@ import { FloatingLabel, Form } from "react-bootstrap"
 const StorageAccountSelector = ({ accounts, onChange }) => {
 
     useEffect(() => {
-        const selected = accounts[0] && accounts[0].id
+        const selected = accounts[0]
         onChange && onChange(selected)
     }, [accounts, onChange])
 
@@ -19,7 +19,7 @@ const StorageAccountSelector = ({ accounts, onChange }) => {
     return (
         <FloatingLabel controlId="storageAccountSelector" label="Storage Account">
             <Form.Select aria-label="Select Storage Account" onChange={handleChange}>
-                {accounts.map(item => <option key={item.id} value={item.id}>{item.name}</option>)}
+                {accounts.map(item => <option key={item} value={item}>{item}</option>)}
             </Form.Select>
         </FloatingLabel>
     )

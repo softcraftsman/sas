@@ -36,9 +36,12 @@ Copy the Application (client) ID for use later.
 ## Add secrets
 The GitHub workflow has a few required secrets that need to be created to enable it properly. Create the following secrets by going to Settings -> Secrets.
 
-- SAS_DEPLOYMENT_TOKEN
-- TENANT_ID
-- CLIENT_ID
+Secret|Value|Notes
+---|---|---
+APP_REGISTRATION_CLIENT_ID|00000000-0000-0000-0000-000000000000|ID of the App Registration in AAD, refered to as the Application (client) ID in the Azure Portal
+SAS_DEPLOYMENT_TOKEN||
+TENANT_ID|00000000-0000-0000-0000-000000000000|ID of the Azure Active Directory Tenant, refered to as the Tenant ID in the Azure Portal
+WEB_URL|https://happy-desert-01a9eac0f.azurestaticapps.net|Url to the website
 
 ![App Settings](./assets/aad-settings.png)
 

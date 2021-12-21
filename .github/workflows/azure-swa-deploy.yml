@@ -9,6 +9,9 @@ on:
     branches:
       - main
 
+env:
+  ENV_FILE: src/sas.front/.env
+
 jobs:
   build_and_deploy_job:
     if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
@@ -20,20 +23,20 @@ jobs:
           submodules: true
 
       - name: Display contents of original .env file
-        run: cat src/sas.front/src/.env
+        run: cat ${{ env.ENV_FILE }}
 
       # Replace Environment variables
       - name: Replace Environment variables
         uses: falnyr/replace-env-vars-action@master
         with:
-          filename: src/sas.front/src/.env
+          filename: ${{ env.ENV_FILE }}
         env:
-          REACT_APP_BASE_URL: ${{ secrets.WEB_URL }}
+          BASE_URL: ${{ secrets.WEB_URL }}
           TENANT_ID: ${{ secrets.TENANT_ID }}
-          CLIENT_ID: ${{ secrets.CLIENT_ID }}
+          CLIENT_ID: ${{ secrets.APP_REGISTRATION_CLIENT_ID }}
 
       - name: Display contents of updated .env file
-        run: cat src/sas.front/src/.env
+        run: cat ${{ env.ENV_FILE }}
 
       - name: Build And Deploy
         id: builddeploy

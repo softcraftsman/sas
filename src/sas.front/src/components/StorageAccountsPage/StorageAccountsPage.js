@@ -1,31 +1,26 @@
-import React, { useEffect, useState } from "react"
-import { useAuthentication } from "../../hooks/useAuthentication"
-import { getStorageAccounts } from "../../services/StorageAccounts"
-import { getContainers } from "../../services/StorageAccountSdk"
-import StorageAccountSelector from "../StorageAccountSelector"
-import FileSystems from "../FileSystems"
+import React, { useEffect, useState } from 'react'
+import { useAuthentication } from '../../hooks/useAuthentication'
+import { getStorageAccounts } from '../../services/StorageManager.service'
+import { getContainers } from '../../services/StorageAccountSdk.service'
+import StorageAccountSelector from '../StorageAccountSelector'
+import FileSystems from '../FileSystems'
 
 /**
  * Renders list of Storage Accounts
  */
 const StorageAccountsPage = () => {
-    const { managementToken } = useAuthentication()
+    const { auth } = useAuthentication()
     const [storageAccounts, setStorageAccounts] = useState([])
     const [selectedStorageAccount, setSelectedStorageAccount] = useState('')
     const [fileSystems, setFileSystems] = useState()
 
     // Retrieve the list of Storage Accounts
     useEffect(() => {
-        managementToken && getStorageAccounts(managementToken)
+        auth && auth.accessToken && getStorageAccounts(auth.accessToken)
             .then(response => {
-                const supportedStorageAccounts = response.value.filter((item) => {
-                    // Only interested in Azure Data Lake Storage Gen2 accounts that have Hierarchial Namespace enabled
-                    return item.kind === 'StorageV2' && item.properties.isHnsEnabled
-                })
-
-                setStorageAccounts(supportedStorageAccounts)
+                setStorageAccounts(response)
             })
-    }, [managementToken])
+    }, [auth])
 
 
     // Retrieve the list of File Systems

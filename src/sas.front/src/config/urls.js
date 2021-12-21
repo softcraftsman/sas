@@ -6,7 +6,7 @@ const URLS = {
     },
     storageAccounts: {
         method: 'GET',
-        endpoint: 'https://management.azure.com/subscriptions/{subscriptionId}/providers/Microsoft.Storage/storageAccounts?api-version=2021-04-01'
+        endpoint: '/api/liststorageaccounts'
     },
     fileSystems: {
         method: 'GET',
