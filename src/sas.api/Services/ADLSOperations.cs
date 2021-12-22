@@ -7,13 +7,8 @@ using Azure.Storage.Files.DataLake.Models;
 
 public class ADLSOperations
 {
-    public static bool AddsFolderOwnerToContainerACLAsExecute(string folderOwner, string container, bool isDefaultScope)
+    public static bool AddsFolderOwnerToContainerACLAsExecute(string folderOwner, string container, bool isDefaultScope, string storageAccountName, string storageAccountKey, string storageRootContainer, string storageAccountUri)
     {
-        //Retrieve both Storage Account Name and Key from environment variables
-        var storageAccountName = ReturnStorageAccountName();
-        var storageAccountKey = ReturnStorageAccountKey();
-        var storageAccountUri = ReturnStorageAccountUri();
-
         //Creates a shared key credential to access the storage account on behalf of the application
         StorageSharedKeyCredential sharedKeyCredential = new StorageSharedKeyCredential(storageAccountName, storageAccountKey);
 

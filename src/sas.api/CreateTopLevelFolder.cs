@@ -20,6 +20,12 @@ namespace sas.api
         [FunctionName("CreateTopLevelFolder")]
         public static IActionResult Run([HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)] HttpRequest req, ILogger log)
         {
+            //Retrieving environment variables
+            var storageAccountName = System.Environment.GetEnvironmentVariable("storageAccountName");
+            var storageAccountKey = System.Environment.GetEnvironmentVariable("storageAccountKey");
+            var storageServiceUri = System.Environment.GetEnvironmentVariable("storageServiceUri");
+            var storageRootContainer = System.Environment.GetEnvironmentVariable("storageRootContainer");
+
             // GET - Send Instructions back to calling client
             if (req.Method == HttpMethods.Get) {
                 log.LogInformation("CreateTopLevelFolder GET method called.");
@@ -63,7 +69,7 @@ namespace sas.api
                 //Add Folder Owner to Container ACL as Execute
                 log.LogInformation($"Adding '{bodyDeserialized.FolderOwner}' (Fold Owner) to the container '{bodyDeserialized.Container}' as 'Execute'...");
                 
-                var resultAddOwnerExecuteRootContainer = ADLSOperations.AddsFolderOwnerToContainerACLAsExecute(bodyDeserialized.FolderOwner, bodyDeserialized.Container, true);
+                var resultAddOwnerExecuteRootContainer = ADLSOperations.AddsFolderOwnerToContainerACLAsExecute(bodyDeserialized.FolderOwner, bodyDeserialized.Container, true, storageAccountName, storageAccountKey, storageRootContainer, storageServiceUri);
 
                 if(!resultAddOwnerExecuteRootContainer)
                 {
