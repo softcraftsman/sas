@@ -1,9 +1,5 @@
 import URLS from '../config/urls'
-import {
-    AzureStorageDataLake,
-    DataLakeServiceClient,
-    StorageSharedKeyCredential
-} from '@azure/storage-file-datalake'
+import { DataLakeServiceClient } from '@azure/storage-file-datalake'
 import { InteractiveBrowserCredential } from '@azure/identity'
 
 /**
@@ -41,7 +37,7 @@ export const getDirectories = async (storageAccount, fileSystem) => {
         // Get additional information
         const directoryClient = fileSystemClient.getDirectoryClient(fs.name)
         const properties = await directoryClient.getProperties()
-        
+
         // Nothing really useful is returned by getAccessControl
         //const accessControl = await directoryClient.getAccessControl()
 

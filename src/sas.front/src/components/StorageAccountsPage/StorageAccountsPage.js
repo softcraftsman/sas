@@ -61,7 +61,7 @@ const StorageAccountsPage = () => {
         }
 
         selectedFileSystem && retrieveDirectories(selectedStorageAccount, selectedFileSystem)
-    }, [selectedFileSystem])
+    }, [selectedStorageAccount, selectedFileSystem])
 
     const handleStorageAccountChange = id => {
         setSelectedStorageAccount(id)
