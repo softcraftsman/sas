@@ -63,7 +63,7 @@ namespace sas.api
                 //Add Folder Owner to Container ACL as Execute
                 log.LogInformation($"Adding '{bodyDeserialized.FolderOwner}' (Fold Owner) to the container '{bodyDeserialized.Container}' as 'Execute'...");
                 
-                var resultAddOwnerExecuteRootContainer = ADLSOperations.AddsFolderOwnerToContainerACLAsExecute(bodyDeserialized.Container, bodyDeserialized.FolderOwner);
+                var resultAddOwnerExecuteRootContainer = ADLSOperations.AddsFolderOwnerToContainerACLAsExecute(bodyDeserialized.FolderOwner, bodyDeserialized.Container, true);
 
                 if(!resultAddOwnerExecuteRootContainer)
                 {
@@ -121,21 +121,6 @@ namespace sas.api
 
             log.LogInformation("Internal Server Error - 500. Only GET and POST are acceptable.");
             return new BadRequestResult();
-        }
-
-        public static async Task ManageDirectoryACLs(DataLakeFileSystemClient fileSystemClient)
-        {
-            var directoryClient = fileSystemClient.GetDirectoryClient("");
-            var directoryAccessControl = await directoryClient.GetAccessControlAsync();
-            foreach (var item in directoryAccessControl.Value.AccessControlList)
-            {
-                Console.WriteLine(item.ToString());
-            }
-
-            var accessControlList = PathAccessControlExtensions.ParseAccessControlList("user::rwx,group::r-x,other::rw-");
-
-            directoryClient.SetAccessControlList(accessControlList);
-
         }
     }
 
