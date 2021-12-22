@@ -8,9 +8,13 @@ const URLS = {
         method: 'GET',
         endpoint: '/api/liststorageaccounts'
     },
+    containers: {
+        method: 'GET',
+        endpoint: 'https://{name}.blob.core.windows.net'
+    },
     fileSystems: {
         method: 'GET',
-        endpoint: 'https://{name}.blob.core.windows.net/?comp=list'
+        endpoint: 'https://{name}.dfs.core.windows.net'
     }
 }
 

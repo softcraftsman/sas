@@ -1,18 +1,22 @@
 import React, { useEffect, useState } from 'react'
 import { useAuthentication } from '../../hooks/useAuthentication'
 import { getStorageAccounts } from '../../services/StorageManager.service'
-import { getContainers } from '../../services/StorageAccountSdk.service'
-import StorageAccountSelector from '../StorageAccountSelector'
-import FileSystems from '../FileSystems'
+import { getFileSystems, getDirectories } from '../../services/DataLake.service'
+import Selector from '../Selector'
+import DirectoriesTable from '../DirectoriesTable/DirectoriesTable'
 
 /**
  * Renders list of Storage Accounts
  */
 const StorageAccountsPage = () => {
     const { auth } = useAuthentication()
-    const [storageAccounts, setStorageAccounts] = useState([])
+    
     const [selectedStorageAccount, setSelectedStorageAccount] = useState('')
+    const [selectedFileSystem, setSelectedFileSystem] = useState('')
+    
+    const [storageAccounts, setStorageAccounts] = useState([])
     const [fileSystems, setFileSystems] = useState()
+    const [directories, setDirectories] = useState()
 
     // Retrieve the list of Storage Accounts
     useEffect(() => {
@@ -23,37 +27,57 @@ const StorageAccountsPage = () => {
     }, [auth])
 
 
-    // Retrieve the list of File Systems
+    // Retrieve the list of File Systems for the selected Azure Data Lake Storage Account
     useEffect(() => {
-        const retrieveFileSystems = async id => {
-            const iter = await getContainers(selectedStorageAccount)
+        const retrieveFileSystems = async storageAccount => {
+            let iter = await getFileSystems(storageAccount)
             const _fileSystems = []
-            let i = 1
-            let container = await iter.next()
 
-            while (!container.done) {
-                console.log(`Container ${i++}: ${container.value.name}`);
-                _fileSystems.push(container.value.name)
-                container = await iter.next()
+            for await (const fs of iter) {
+                console.log(`File System: ${fs.name}`);
+                _fileSystems.push(fs.name)
             }
 
             setFileSystems(_fileSystems)
         }
 
-        selectedStorageAccount && retrieveFileSystems()
+        selectedStorageAccount && retrieveFileSystems(selectedStorageAccount)
     }, [selectedStorageAccount])
 
+    // Retrieve the list of Directories for the selected File System
+    useEffect(() => {
+        const retrieveDirectories = async (storageAccount, fileSystem) => {
+            const toSpace = kb => `${kb} KB`
+            const list = await getDirectories(storageAccount, fileSystem)
+            const _directories = list.map(item => ({
+                name: item.name,
+                spaceUsed: toSpace(item.contentLength),
+                monthlyCost: 'free',
+                members: '?',
+                storageType: item.accessTier
+            }))
+
+            setDirectories(_directories)
+        }
+
+        selectedFileSystem && retrieveDirectories(selectedStorageAccount, selectedFileSystem)
+    }, [selectedFileSystem])
 
     const handleStorageAccountChange = id => {
         setSelectedStorageAccount(id)
+    }
+
+    const handleFileSystemChange = id => {
+        setSelectedFileSystem(id)
     }
 
 
     return (
         <>
             <h3>Storage Account</h3>
-            <StorageAccountSelector accounts={storageAccounts} onChange={handleStorageAccountChange} />
-            <FileSystems items={fileSystems} />
+            <Selector id='storageAccountSelector' items={storageAccounts} label='Storage Account' onChange={handleStorageAccountChange} />
+            <Selector id='fileSystemSelector' items={fileSystems} label='File System' onChange={handleFileSystemChange} />
+            <DirectoriesTable data={directories} />
         </>
     )
 }

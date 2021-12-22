@@ -1,3 +1,5 @@
+import React from "react"
+
 const Slider = () => {
     return (
         <section id="home" className="slider_area">
