@@ -26,7 +26,7 @@ public class ADLSOperations
         //Update root container's ACL
         var result = directoryClient.UpdateAccessControlRecursive(accessControlListUpdate, null);
  
-        if(result.Value.BatchFailures.Length == 0)
+        if(result.GetRawResponse().Status == 200)
         {
             return true;
         }
