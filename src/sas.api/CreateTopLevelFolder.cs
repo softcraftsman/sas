@@ -90,7 +90,7 @@ namespace sas.api
                         //Assign RWX for Folder to Folder Owner
                         log.LogInformation($"Assigning RWX permission to Folder Owner ({bodyDeserialized.FolderOwner}) at folder's ({bodyDeserialized.Folder}) level...");
 
-                        var resultPermissionsAssignment = ADLSOperations.AssignsRWXToFolderOwner(bodyDeserialized.FolderOwner, bodyDeserialized.Folder);
+                        var resultPermissionsAssignment = ADLSOperations.AssignsRWXToFolderOwner(bodyDeserialized.FolderOwner, bodyDeserialized.Container, bodyDeserialized.Folder);
 
                         if(!resultPermissionsAssignment)
                         {
