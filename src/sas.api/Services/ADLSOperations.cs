@@ -71,7 +71,7 @@ public class ADLSOperations
         
         var response = directory.Create();
 
-        if(response.GetRawResponse().Status != 200 || response.GetRawResponse().Status != 201)
+        if(response.GetRawResponse().Status != 201)
         {
             return false;
         }
@@ -98,22 +98,41 @@ public class ADLSOperations
             if (item.EntityId == folderOwner)
             {
                 index = accessControlListUpdate.IndexOf(item);
-                
-                accessControlListUpdate[index] = new PathAccessControlItem(AccessControlType.Other, RolePermissions.Read | RolePermissions.Write | RolePermissions.Execute);
+                break;
+            }
+        }
 
+        if (index > -1)
+        {
+            switch (accessControlListUpdate[index].AccessControlType)
+            {
+                case AccessControlType.User:
+                    accessControlListUpdate[index] = new PathAccessControlItem(AccessControlType.User, RolePermissions.Read | RolePermissions.Write | RolePermissions.Execute, entityId: folderOwner);
+                break;
+
+                case AccessControlType.Group:
+                    accessControlListUpdate[index] = new PathAccessControlItem(AccessControlType.Group, RolePermissions.Read | RolePermissions.Write | RolePermissions.Execute, entityId: folderOwner);
+                break;
+
+                case AccessControlType.Other:
+                    accessControlListUpdate[index] = new PathAccessControlItem(AccessControlType.Other, RolePermissions.Read | RolePermissions.Write | RolePermissions.Execute, entityId: folderOwner);
+                break;
+                
+                case AccessControlType.Mask:
+                    accessControlListUpdate[index] = new PathAccessControlItem(AccessControlType.Mask, RolePermissions.Read | RolePermissions.Write | RolePermissions.Execute, entityId: folderOwner);
                 break;
             }
         }
 
         var result = directoryClient.SetAccessControlList(accessControlListUpdate);
 
-        if(result.GetRawResponse().Status != 200 || result.GetRawResponse().Status != 201)
+        if(result.GetRawResponse().Status != 200)
         {
-            return true;
+            return false;
         }
         else
         {
-            return false;
+            return true;
         }
     }
 
