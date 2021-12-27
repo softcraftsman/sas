@@ -294,7 +294,7 @@ public class ADLSOperations
     public bool SavesFundCodeIntoContainerMetadata(string fundCode, string container, out string error)
     {
         log.LogTrace($"Saving FundCode into container's metadata...");
-        var result = SavesFundCodeIntoContainerMetadata(fundCode, container);
+        var result = SavesFundCodeIntoContainerMetadata(fundCode, container, "");
         error = result ? null : "Error trying to save de Fund Code into Container's metadata. Error 500.";
         return result;
     }
