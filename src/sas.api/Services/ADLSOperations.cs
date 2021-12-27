@@ -171,12 +171,12 @@ public class ADLSOperations
         }
     }
 
-    public static async Task<bool> SavesFundCodeIntoContainerMetadata(string fundCode, string container)
+    public static bool SavesFundCodeIntoContainerMetadata(string fundCode, string container, string folder)
     {
         var storageAccountConnectionString = System.Environment.GetEnvironmentVariable("storageConnectionString");
 
         // Create a BlobServiceClient object which will be used to create a container client
-        BlobClient blob = new BlobClient(storageAccountConnectionString, container, "");
+        BlobClient blob = new BlobClient(storageAccountConnectionString, container, folder);
 
         try
         {
@@ -185,7 +185,12 @@ public class ADLSOperations
             // Add metadata to the dictionary by calling the Add method
             metadata.Add("FundCode", fundCode);
 
-            await blob.SetMetadataAsync(metadata);
+            var result = blob.SetMetadata(metadata);
+
+            if (result.GetRawResponse().Status != 200)
+            {
+                return false;
+            }
 
             return true;
         }
