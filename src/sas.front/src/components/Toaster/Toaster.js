@@ -8,8 +8,10 @@ const Toaster = ({ message }) => {
     const [isOpen, setIsOpen] = useState(false)
 
     useEffect(() => {
-        setMessages({ ...messages, message })
-    }, [message])
+        setMessages(previousState => {
+            return { ...previousState, message }
+        })
+    }, [])
 
     const handleClose = (event) => {
         setIsOpen(false)
