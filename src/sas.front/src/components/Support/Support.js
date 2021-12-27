@@ -1,3 +1,5 @@
+import React from "react"
+
 const Support = () => {
     reutrn(
         <section id="support" className="contact-area">

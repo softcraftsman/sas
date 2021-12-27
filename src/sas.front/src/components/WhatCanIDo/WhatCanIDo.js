@@ -1,3 +1,5 @@
+import React from "react"
+
 const WhatCanIDo = () => {
     return (
         <section id="whatcanido" className="features-area">

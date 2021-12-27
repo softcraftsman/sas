@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Azure;
 using Azure.Storage;
+using Azure.Storage.Blobs;
 using Azure.Storage.Files.DataLake;
 using Azure.Storage.Files.DataLake.Models;
 using Microsoft.Extensions.Logging;
@@ -169,9 +171,28 @@ public class ADLSOperations
         }
     }
 
-    public static bool SavesFundCodeIntoContainerMetadata(string fundCode, string container)
+    public static async Task<bool> SavesFundCodeIntoContainerMetadata(string fundCode, string container)
     {
-        return true;
+        var storageAccountConnectionString = System.Environment.GetEnvironmentVariable("storageConnectionString");
+
+        // Create a BlobServiceClient object which will be used to create a container client
+        BlobClient blob = new BlobClient(storageAccountConnectionString, container, "");
+
+        try
+        {
+            IDictionary<string, string> metadata = new Dictionary<string, string>();
+
+            // Add metadata to the dictionary by calling the Add method
+            metadata.Add("FundCode", fundCode);
+
+            await blob.SetMetadataAsync(metadata);
+
+            return true;
+        }
+        catch (RequestFailedException e)
+        {
+            return false;
+        }
     }
 
     public static async Task ManageDirectoryACLs(DataLakeFileSystemClient fileSystemClient)

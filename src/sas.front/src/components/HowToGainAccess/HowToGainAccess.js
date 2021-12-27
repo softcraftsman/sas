@@ -1,3 +1,5 @@
+import React from "react"
+
 const HowToGainAccess = () => {
     return (
         <section id="howtogainaccess" className="portfolio-area portfolio-four pb-100">
