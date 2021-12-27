@@ -1,6 +1,6 @@
 import React, { useState } from "react"
 import { useAuthentication } from "../../hooks/useAuthentication"
-import Button from "react-bootstrap/Button"
+import Button from '@material-ui/core/Button'
 import ProfileData from "../ProfileData";
 import { getMyProfile } from "../../services/profile";
 
@@ -21,7 +21,7 @@ export const ProfileContent = () => {
             {profile ?
                 <ProfileData profile={profile} />
                 :
-                <Button variant="secondary" onClick={handleRequestProfile}>Request Profile Information</Button>
+                <Button variant="contained" onClick={handleRequestProfile}>Request Profile Information</Button>
             }
         </>
     )

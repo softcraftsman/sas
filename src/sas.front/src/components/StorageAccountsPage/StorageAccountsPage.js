@@ -50,10 +50,13 @@ const StorageAccountsPage = () => {
             const toSpace = kb => `${kb} KB`
             const list = await getDirectories(storageAccount, fileSystem)
             const _directories = list.map(item => ({
-                name: item.name,
-                spaceUsed: toSpace(item.contentLength),
+                fundCode: '123456',
+                members: ['John', 'Paul', 'George', 'Ringo'],
                 monthlyCost: 'free',
-                members: '?',
+                name: item.name,
+                policy: '9',
+                region: 'WestUS',
+                spaceUsed: toSpace(item.contentLength),
                 storageType: item.accessTier
             }))
 

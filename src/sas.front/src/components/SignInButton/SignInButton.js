@@ -1,7 +1,7 @@
 import React from 'react'
 import { useMsal } from '@azure/msal-react'
 import { loginRequest } from '../../config/authConfig'
-import Button from 'react-bootstrap/Button'
+import Button from '@material-ui/core/Button'
 
 /**
  * Renders a button which, when selected, will open a popup for login
@@ -18,6 +18,6 @@ export const SignInButton = () => {
     }
     
     return (
-        <Button variant='secondary' className='ml-auto' onClick={() => handleLogin(instance)}>Sign in</Button>
+        <Button variant='contained' onClick={() => handleLogin(instance)}>Sign in</Button>
     )
 }
