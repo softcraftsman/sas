@@ -23,9 +23,9 @@ public class ADLSOperations
         return serviceClient;
     }
 
-    private static DataLakeDirectoryClient GetsReferenceToContainer(DataLakeServiceClient serviceClient, string storageRootContainer)
+    private static DataLakeDirectoryClient GetsReferenceToContainer(DataLakeServiceClient serviceClient, string storageRootContainer, string folder)
     {
-        DataLakeDirectoryClient directoryClient = serviceClient.GetFileSystemClient(storageRootContainer).GetDirectoryClient("");
+        DataLakeDirectoryClient directoryClient = serviceClient.GetFileSystemClient(storageRootContainer).GetDirectoryClient(folder);
 
         return directoryClient;
     }
@@ -41,11 +41,11 @@ public class ADLSOperations
     {
         var serviceClient = CreatesDataLakeConnection();
         
-        var directoryClient = GetsReferenceToContainer(serviceClient, storageRootContainer);
+        var directoryClient = GetsReferenceToContainer(serviceClient, storageRootContainer, "");
 
         List<PathAccessControlItem> accessControlListUpdate = new List<PathAccessControlItem>()
         {
-            new PathAccessControlItem(AccessControlType.User, RolePermissions.Execute, isDefaultScope,entityId: folderOwner)
+            new PathAccessControlItem(AccessControlType.User, RolePermissions.Execute, isDefaultScope, entityId: folderOwner)
         };
 
         //Update root container's ACL
@@ -71,7 +71,7 @@ public class ADLSOperations
         
         var response = directory.Create();
 
-        if(response.GetRawResponse().Status != 200 || response.GetRawResponse().Status != 201)
+        if(response.GetRawResponse().Status != 201)
         {
             return false;
         }
@@ -81,9 +81,59 @@ public class ADLSOperations
         }
     }
 
-    public static bool AssignsRWXToFolderOwner(string folderOwner, string folder)
+    public static bool AssignsRWXToFolderOwner(string folderOwner, string storageRootContainer, string folder)
     {
-        return true;
+        var storageClient = CreatesDataLakeConnection();
+
+        var directoryClient = GetsReferenceToContainer(storageClient, storageRootContainer, folder);
+
+        PathAccessControl directoryAccessControl = directoryClient.GetAccessControl();
+
+        List<PathAccessControlItem> accessControlListUpdate = (List<PathAccessControlItem>)directoryAccessControl.AccessControlList;
+
+        int index = -1;
+
+        foreach (var item in accessControlListUpdate)
+        {
+            if (item.EntityId == folderOwner)
+            {
+                index = accessControlListUpdate.IndexOf(item);
+                break;
+            }
+        }
+
+        if (index > -1)
+        {
+            switch (accessControlListUpdate[index].AccessControlType)
+            {
+                case AccessControlType.User:
+                    accessControlListUpdate[index] = new PathAccessControlItem(AccessControlType.User, RolePermissions.Read | RolePermissions.Write | RolePermissions.Execute, entityId: folderOwner);
+                break;
+
+                case AccessControlType.Group:
+                    accessControlListUpdate[index] = new PathAccessControlItem(AccessControlType.Group, RolePermissions.Read | RolePermissions.Write | RolePermissions.Execute, entityId: folderOwner);
+                break;
+
+                case AccessControlType.Other:
+                    accessControlListUpdate[index] = new PathAccessControlItem(AccessControlType.Other, RolePermissions.Read | RolePermissions.Write | RolePermissions.Execute, entityId: folderOwner);
+                break;
+                
+                case AccessControlType.Mask:
+                    accessControlListUpdate[index] = new PathAccessControlItem(AccessControlType.Mask, RolePermissions.Read | RolePermissions.Write | RolePermissions.Execute, entityId: folderOwner);
+                break;
+            }
+        }
+
+        var result = directoryClient.SetAccessControlList(accessControlListUpdate);
+
+        if(result.GetRawResponse().Status != 200)
+        {
+            return false;
+        }
+        else
+        {
+            return true;
+        }
     }
 
     public static bool SavesFundCodeIntoContainerMetadata(string fundCode, string container)
@@ -104,25 +154,5 @@ public class ADLSOperations
 
         directoryClient.SetAccessControlList(accessControlList);
 
-    }
-
-    private static string ReturnStorageAccountName()
-    {
-        return System.Environment.GetEnvironmentVariable("storageAccountName", EnvironmentVariableTarget.Process);
-    }
-
-    private static string ReturnStorageAccountKey()
-    {
-        return System.Environment.GetEnvironmentVariable("storageAccountKey", EnvironmentVariableTarget.Process);
-    }
-
-    private static string ReturnStorageAccountUri()
-    {
-        return System.Environment.GetEnvironmentVariable("serviceUri", EnvironmentVariableTarget.Process);
-    }
-
-    private static string ReturnStorageAccountContainer()
-    {
-        return System.Environment.GetEnvironmentVariable("container", EnvironmentVariableTarget.Process);
     }
 }
