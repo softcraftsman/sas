@@ -11,7 +11,7 @@ const Toaster = ({ message }) => {
         setMessages(previousState => {
             return { ...previousState, message }
         })
-    }, [])
+    }, [message])
 
     const handleClose = (event) => {
         setIsOpen(false)
