@@ -104,12 +104,16 @@ namespace sas.api
                             //Add Fund Code to metadata
                             log.LogInformation("Saving FundCode into container's metadata...");
 
-                            var resultSavingFundCode = ADLSOperations.SavesFundCodeIntoContainerMetadata(bodyDeserialized.FundCode, bodyDeserialized.Container);
+                            var resultSavingFundCode = ADLSOperations.SavesFundCodeIntoContainerMetadata(bodyDeserialized.FundCode, bodyDeserialized.Container, bodyDeserialized.Folder);
 
                             if(!resultSavingFundCode)
                             {
                                 log.LogInformation("Error trying to save de Fund Code into Container's metadata. Error 500.");
                                 return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+                            }
+                            else
+                            {
+                                log.LogInformation("Done.");
                             }
                         }
                     }
