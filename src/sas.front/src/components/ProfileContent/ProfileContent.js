@@ -1,6 +1,6 @@
 import React, { useState } from "react"
 import { useAuthentication } from "../../hooks/useAuthentication"
-import Button from '@material-ui/core/Button'
+import Button from '@mui/material/Button'
 import ProfileData from "../ProfileData";
 import { getMyProfile } from "../../services/profile";
 

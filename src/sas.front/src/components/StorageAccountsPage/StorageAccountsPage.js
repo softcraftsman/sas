@@ -34,7 +34,6 @@ const StorageAccountsPage = () => {
             const _fileSystems = []
 
             for await (const fs of iter) {
-                console.log(`File System: ${fs.name}`);
                 _fileSystems.push(fs.name)
             }
 

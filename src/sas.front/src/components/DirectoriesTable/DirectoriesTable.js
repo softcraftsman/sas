@@ -1,8 +1,9 @@
 import React, { useState } from 'react'
 import MaterialTable from 'material-table'
-import { Chip } from '@material-ui/core'
+import Alert from '@mui/material/Alert'
+import Chip from '@mui/material/Chip'
+import Snackbar from '@mui/material/Snackbar'
 import DirectoryEditor from '../DirectoryEditor'
-import Toaster from '../Toaster'
 import './DirectoriesTable.css'
 
 const columns = [
@@ -22,7 +23,7 @@ const columns = [
         title: 'Who Has Access',
         field: 'members',
         render: rowData => {
-            return rowData.members.map(item => (<Chip className='member-chip' label={`${item}`} />))
+            return rowData.members.map(item => (<Chip key={item} className='member-chip' label={`${item}`} />))
         }
     },
     {
@@ -31,9 +32,11 @@ const columns = [
     }
 ]
 
+
 export const DirectoriesTable = ({ data }) => {
     const [editor, setEditor] = useState({ show: false, data: {}, isNew: true })
     const [toastMessage, setToastMessage] = useState()
+    const [isToastOpen, setToastOpen] = useState(false)
 
 
     const handleAdd = () => {
@@ -53,7 +56,7 @@ export const DirectoriesTable = ({ data }) => {
         setEditor({ show: false, data: {}, isNew: true })
 
         // Display a toast
-        setToastMessage(`Directory ${data.name} Created!`)
+        displayToast(`Directory '${data.name}' Created!`)
     }
 
 
@@ -69,7 +72,13 @@ export const DirectoriesTable = ({ data }) => {
         setEditor({ show: false, data: {}, isNew: true })
 
         // Display a toast
-        setToastMessage(`Directory ${data.name} Updated!`)
+        displayToast(`Directory '${data.name}' Updated!`)
+    }
+
+
+    const displayToast = message => {
+        setToastMessage(message)
+        setToastOpen(true)
     }
 
 
@@ -106,7 +115,15 @@ export const DirectoriesTable = ({ data }) => {
                     open={editor.show}
                 />
             }
-            <Toaster message={toastMessage} />
+            <Snackbar
+                open={isToastOpen}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+                autoHideDuration={5000}
+                onClose={() => setToastOpen(false)}
+            >
+                <Alert severity="success">{toastMessage}</Alert>
+            </Snackbar>
+
         </div>
     )
 }

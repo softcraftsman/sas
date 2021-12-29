@@ -32,8 +32,6 @@ export const getDirectories = async (storageAccount, fileSystem) => {
     const iter = fileSystemClient.listPaths()
 
     for await (const fs of iter) {
-        console.log(`File System: ${fs.name}`);
-
         // Get additional information
         const directoryClient = fileSystemClient.getDirectoryClient(fs.name)
         const properties = await directoryClient.getProperties()
@@ -42,8 +40,6 @@ export const getDirectories = async (storageAccount, fileSystem) => {
         //const accessControl = await directoryClient.getAccessControl()
 
         _fileSystems.push({ ...fs, accessTier: properties.accessTier })
-
-        console.log('')
     }
 
     return _fileSystems
