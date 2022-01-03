@@ -1,4 +1,5 @@
 import React from "react"
+import CssBaseline from '@mui/material/CssBaseline';
 import Header from "../Header"
 import Footer from "../Footer"
 
@@ -8,6 +9,7 @@ import Footer from "../Footer"
 export const PageLayout = ({ children }) => {
     return (
         <>
+            <CssBaseline />
             <Header />
             <h5><center>Welcome to the Storage Account Manager</center></h5>
             <br />

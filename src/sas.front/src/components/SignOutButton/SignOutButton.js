@@ -1,6 +1,6 @@
 import React from 'react'
 import { useMsal } from '@azure/msal-react'
-import Button from '@mui/material/Button'
+import Button from 'react-bootstrap/Button'
 
 /**
  * Renders a button which, when selected, will open a popup for logout
@@ -17,6 +17,6 @@ export const SignOutButton = () => {
     }
     
     return (
-        <Button variant='contained' color='warning' onClick={() => handleLogout(instance)}>Sign out</Button>
+        <Button variant='secondary' className='ml-auto' onClick={() => handleLogout(instance)}>Sign out</Button>
     )
 }
