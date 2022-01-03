@@ -25,9 +25,27 @@ export const getStorageAccounts = async accessToken => {
     headers.append('Authorization', `Bearer ${accessToken}`)
 
     const options = {
-        method: 'GET',
+        method: method,
         //headers: headers
     }
 
     return options
 }
+
+
+/**
+ * Create a new folder in the storage account container
+ */
+ export const createFolder = async (accessToken, content) => {
+    const options = getOptions('POST', accessToken)
+    options.body = content
+    const endpoint = URLS.storageAccounts.endpoint
+
+    return fetch(endpoint, options)
+        .then(response => {
+            return response.json()
+        })
+        .catch(error => console.log(error))
+}
+
+

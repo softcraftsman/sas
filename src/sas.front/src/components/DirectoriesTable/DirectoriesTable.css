@@ -2,17 +2,6 @@
     vertical-align: middle;
 }
 
-.directoriesTable .actionsBar {
-    margin: 5px;
-    display: flex;
-    justify-content: flex-end;
-}
-
-.directoriesTable .btn svg {
-    margin-top: -3px;
-    margin-left: -3px;
-}
-
 .directoriesTable .action:hover {
     cursor: pointer;
 }

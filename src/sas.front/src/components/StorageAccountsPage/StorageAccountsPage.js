@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { useAuthentication } from '../../hooks/useAuthentication'
 import { getStorageAccounts } from '../../services/StorageManager.service'
 import { getFileSystems, getDirectories } from '../../services/DataLake.service'
 import Container from '@mui/material/Container'
 import Grid from '@mui/material/Grid'
-import DirectoriesTable from '../DirectoriesTable/DirectoriesTable'
+import DirectoriesManager from '../DirectoriesManager'
 import Selector from '../Selector'
 
 /**
@@ -45,6 +45,7 @@ const StorageAccountsPage = () => {
         selectedStorageAccount && retrieveFileSystems(selectedStorageAccount)
     }, [selectedStorageAccount])
 
+
     // Retrieve the list of Directories for the selected File System
     useEffect(() => {
         const retrieveDirectories = async (storageAccount, fileSystem) => {
@@ -67,19 +68,21 @@ const StorageAccountsPage = () => {
         selectedFileSystem && retrieveDirectories(selectedStorageAccount, selectedFileSystem)
     }, [selectedStorageAccount, selectedFileSystem])
 
-    const handleStorageAccountChange = id => {
-        setSelectedStorageAccount(id)
-    }
 
-    const handleFileSystemChange = id => {
+    const handleStorageAccountChange = useCallback(id => {
+        setSelectedStorageAccount(id)
+    }, [])
+
+
+    const handleFileSystemChange = useCallback(id => {
         setSelectedFileSystem(id)
-    }
+    }, [])
 
 
     return (
         <Container>
             <h3>Storage Account</h3>
-            <Grid container spacing={2} sx={{justifyContent: 'center', marginBottom: '10px'}}>
+            <Grid container spacing={2} sx={{ justifyContent: 'center', marginBottom: '10px' }}>
                 <Grid item md={6}>
                     <Selector id='storageAccountSelector' items={storageAccounts} label='Storage Account' onChange={handleStorageAccountChange} />
                 </Grid>
@@ -87,7 +90,7 @@ const StorageAccountsPage = () => {
                     <Selector id='fileSystemSelector' items={fileSystems} label='File System' onChange={handleFileSystemChange} />
                 </Grid>
                 <Grid item>
-                    <DirectoriesTable data={directories} />
+                    <DirectoriesManager data={directories} />
                 </Grid>
             </Grid>
         </Container>
