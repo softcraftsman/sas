@@ -1,7 +1,4 @@
 import { useIsAuthenticated } from "@azure/msal-react"
-import SignInButton from "../SignInButton"
-import SignOutButton from "../SignOutButton"
-import { Container, Navbar } from "react-bootstrap"
 
 const Header2 = () => {
     const isAuthenticated = useIsAuthenticated()

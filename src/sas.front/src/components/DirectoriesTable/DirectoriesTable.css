@@ -1,9 +1,23 @@
-.directoriesTable {
-    color: #fff;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    background-color: #283c34;
-    text-align: center;
+.directoriesTable th, .directoriesTable td {
+    vertical-align: middle;
 }
+
+.directoriesTable .actionsBar {
+    margin: 5px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.directoriesTable .btn svg {
+    margin-top: -3px;
+    margin-left: -3px;
+}
+
+.directoriesTable .action:hover {
+    cursor: pointer;
+}
+
+.member-chip {
+    margin: 3px;
+}
+
