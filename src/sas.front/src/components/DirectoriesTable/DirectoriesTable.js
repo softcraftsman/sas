@@ -1,37 +1,11 @@
 import React, { useState } from 'react'
-import MaterialTable from 'material-table'
+import Table from 'react-bootstrap/Table'
 import Alert from '@mui/material/Alert'
 import Chip from '@mui/material/Chip'
 import Snackbar from '@mui/material/Snackbar'
 import DirectoryEditor from '../DirectoryEditor'
+import { Pencil } from 'react-bootstrap-icons';
 import './DirectoriesTable.css'
-
-const columns = [
-    {
-        title: 'Space Name',
-        field: 'name'
-    },
-    {
-        title: 'Space Used',
-        field: 'spaceUsed'
-    },
-    {
-        title: 'Monthly Cost',
-        field: 'monthlyCost'
-    },
-    {
-        title: 'Who Has Access',
-        field: 'members',
-        render: rowData => {
-            return rowData.members.map(item => (<Chip key={item} className='member-chip' label={`${item}`} />))
-        }
-    },
-    {
-        title: 'Storage Type',
-        field: 'storageType'
-    }
-]
-
 
 export const DirectoriesTable = ({ data }) => {
     const [editor, setEditor] = useState({ show: false, data: {}, isNew: true })
@@ -97,14 +71,35 @@ export const DirectoriesTable = ({ data }) => {
     ]
 
     return (
-        <div className='directoriesTable'>
-            <MaterialTable
-                title='Your containers'
-                columns={columns}
-                data={data}
-                actions={actions}
-                options={{ actionsColumnIndex: -1, paging: false }}
-            />
+        <>
+            <Table striped bordered hover className='directoriesTable'>
+                <thead>
+                    <tr>
+                        <th>Space Name</th>
+                        <th>Space Used</th>
+                        <th>Monthly Cost</th>
+                        <th>Who Has Access</th>
+                        <th>Storage Type</th>
+                        <th>&nbsp;</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {data.map(row => {
+                        return (
+                            <tr key={row.name}>
+                                <td>{row.name}</td>
+                                <td>{row.spaceUsed}</td>
+                                <td>{row.monthlyCost}</td>
+                                <td>{row.members.map(item => (<Chip key={item} className='member-chip' label={`${item}`} />))}</td>
+                                <td>{row.storageType}</td>
+                                <td>
+                                    <Pencil onClick={() => handleEdit(null, row)} className='action' />
+                                </td>
+                            </tr>
+                        )
+                    })}
+                </tbody>
+            </Table>
             {editor.show &&
                 <DirectoryEditor
                     data={editor.data}
@@ -123,8 +118,7 @@ export const DirectoriesTable = ({ data }) => {
             >
                 <Alert severity="success">{toastMessage}</Alert>
             </Snackbar>
-
-        </div>
+        </>
     )
 }
 

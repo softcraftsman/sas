@@ -1,11 +1,9 @@
-.directoriesTable {
-    color: #fff;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    background-color: #283c34;
-    text-align: center;
+.directoriesTable th, .directoriesTable td {
+    vertical-align: middle;
+}
+
+.directoriesTable .action:hover {
+    cursor: pointer;
 }
 
 .member-chip {
