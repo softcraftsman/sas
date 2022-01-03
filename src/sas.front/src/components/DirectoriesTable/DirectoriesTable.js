@@ -1,10 +1,11 @@
 import React, { useState } from 'react'
 import Table from 'react-bootstrap/Table'
 import Alert from '@mui/material/Alert'
+import Button from 'react-bootstrap/Button'
 import Chip from '@mui/material/Chip'
 import Snackbar from '@mui/material/Snackbar'
+import { Pencil, Plus } from 'react-bootstrap-icons';
 import DirectoryEditor from '../DirectoryEditor'
-import { Pencil } from 'react-bootstrap-icons';
 import './DirectoriesTable.css'
 
 export const DirectoriesTable = ({ data }) => {
@@ -55,24 +56,15 @@ export const DirectoriesTable = ({ data }) => {
         setToastOpen(true)
     }
 
-
-    const actions = [
-        {
-            icon: 'addbox',
-            toolTip: 'New Space',
-            onClick: handleAdd,
-            isFreeAction: true,
-        },
-        {
-            icon: 'edit',
-            toolTip: 'Edit Space',
-            onClick: handleEdit
-        }
-    ]
-
     return (
-        <>
-            <Table striped bordered hover className='directoriesTable'>
+        <div className='directoriesTable'>
+            <div className='actionsBar'>
+                <Button onClick={handleAdd}>
+                    <Plus size={24} /> Add
+                </Button>
+            </div>
+
+            <Table striped bordered hover>
                 <thead>
                     <tr>
                         <th>Space Name</th>
@@ -80,7 +72,7 @@ export const DirectoriesTable = ({ data }) => {
                         <th>Monthly Cost</th>
                         <th>Who Has Access</th>
                         <th>Storage Type</th>
-                        <th>&nbsp;</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -118,7 +110,7 @@ export const DirectoriesTable = ({ data }) => {
             >
                 <Alert severity="success">{toastMessage}</Alert>
             </Snackbar>
-        </>
+        </div>
     )
 }
 
