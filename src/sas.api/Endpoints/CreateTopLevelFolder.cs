@@ -19,7 +19,8 @@ namespace sas.api
     public static class CreateTopLevelFolder
     {
         [FunctionName("CreateTopLevelFolder")]
-        public static async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)] HttpRequest req, ILogger log)
+        public static async Task<IActionResult> Run(
+            [HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)] HttpRequest req, ILogger log)
         {
             // GET - Send Instructions back to calling client
             if (req.Method == HttpMethods.Get) {
@@ -43,7 +44,7 @@ namespace sas.api
                 // Get object ID from UPN
                 if (tlfp.FolderOwner.Contains('@'))
                 {
-                    var apiAccessToken = await GetApiToken(req, log, tlfp.FolderOwner);
+                    var apiAccessToken = await UserOperations.GetApiToken(req);
                     tlfp.FolderOwner = await UserOperations.GetObjectIdFromUPN(apiAccessToken, tlfp.FolderOwner);
                 }
 
@@ -55,7 +56,7 @@ namespace sas.api
                 if (adlOps.AddsFolderOwnerToContainerACLAsExecute(tlfp.FolderOwner, tlfp.Container, true, tlfp.Container, out error)
                     && adlOps.CreatesNewFolder(tlfp.Folder, tlfp.Container, out error)
                     && adlOps.AssignsRWXToFolderOwner(tlfp.FolderOwner, tlfp.Container, tlfp.Folder, out error)
-                    && adlOps.SavesFundCodeIntoContainerMetadata(tlfp.FundCode, tlfp.Container, out error))
+                    && adlOps.SavesFundCodeIntoContainerMetadata(tlfp.FundCode, tlfp.Container, tlfp.Folder, out error))
                 {
                     log.LogInformation("success");
                 }
@@ -103,26 +104,5 @@ namespace sas.api
             return bodyDeserialized;
         }
 
-        private static async Task<string> GetApiToken(HttpRequest req, ILogger log, string folderOwner)
-        {
-            var accessToken = UserOperations.GetAccessTokenFromRequest(req);
-            var userAssertion = new UserAssertion(accessToken);
-            var upn = UserOperations.GetObjectIdFromUPN(accessToken, folderOwner);
-            ConfidentialClientApplicationOptions options = new()
-            {
-                TenantId = Environment.GetEnvironmentVariable("TENANT_ID"),
-                ClientId = Environment.GetEnvironmentVariable("APP_REGISTRATION_CLIENT_ID"),
-                ClientSecret = Environment.GetEnvironmentVariable("CLIENT_SECRET"),
-            };
-            var app = ConfidentialClientApplicationBuilder.CreateWithApplicationOptions(options)
-                .Build();
-            var scopes = new string[] {
-                        "https://management.azure.com/user_impersonation",
-                        "https://storage.azure.com/user_impersonation"};
-
-            var authResult = await app.AcquireTokenOnBehalfOf(scopes, userAssertion)
-                .ExecuteAsync();
-            return authResult.AccessToken;
-        }
     }
 }

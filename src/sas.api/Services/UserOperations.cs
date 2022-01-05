@@ -6,9 +6,33 @@ using System.Threading.Tasks;
 using Microsoft.Identity;
 using Microsoft.AspNetCore.Http;
 using System.Linq;
+using Azure.Identity;
+using Azure.Core;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.Identity.Client;
 
 public class UserOperations
 {
+    public static async Task<string> GetApiToken(HttpRequest req)
+    {
+        var accessToken = GetAccessTokenFromRequest(req);
+        var userAssertion = new UserAssertion(accessToken);
+
+        ConfidentialClientApplicationOptions options = new()
+        {
+            TenantId = Environment.GetEnvironmentVariable("TENANT_ID"),
+            ClientId = Environment.GetEnvironmentVariable("APP_REGISTRATION_CLIENT_ID"),
+            ClientSecret = Environment.GetEnvironmentVariable("CLIENT_SECRET"),
+        };
+        var app = ConfidentialClientApplicationBuilder.CreateWithApplicationOptions(options)
+            .Build();
+        var scopes = new string[] { "https://graph.microsoft.com" };
+
+        var authResult = await app.AcquireTokenOnBehalfOf(scopes, userAssertion)
+            .ExecuteAsync();
+        return authResult.AccessToken;
+    }
+
     public static string GetAccessTokenFromRequest(HttpRequest req)
     {
         // Get Caller Access Token
