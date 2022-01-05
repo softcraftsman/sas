@@ -65,140 +65,23 @@ public class ADLSOperations
         var tenantId = Environment.GetEnvironmentVariable("TENANT_ID");
         var clientId = Environment.GetEnvironmentVariable("APP_REGISTRATION_CLIENT_ID");
         var clientSecret = Environment.GetEnvironmentVariable("CLIENT_SECRET");
-        var tokenCred = new OnBehalfOfCredential(tenantId, clientId, clientSecret, clientToken);
+        var tokenCred = new ClientSecretCredential(tenantId, clientId, clientSecret);
         var dlsClient = new DataLakeServiceClient(containerUri, tokenCred);
         return dlsClient;
+    }
+
+    private BlobClient CreateBlobClientFromToken()
+    {
+        var tenantId = Environment.GetEnvironmentVariable("TENANT_ID");
+        var clientId = Environment.GetEnvironmentVariable("APP_REGISTRATION_CLIENT_ID");
+        var clientSecret = Environment.GetEnvironmentVariable("CLIENT_SECRET");
+        var tokenCred = new ClientSecretCredential(tenantId, clientId, clientSecret);
+        var blobClient = new BlobClient(containerUri, tokenCred);
+        return blobClient;
     }
     #endregion
 
     #region Public Static Methods
-    public static bool AddsFolderOwnerToContainerACLAsExecute(string folderOwner, string container, bool isDefaultScope, string storageRootContainer)
-    {
-        var serviceClient = CreatesDataLakeConnection();
-        
-        var directoryClient = GetsReferenceToContainer(serviceClient, storageRootContainer, "");
-
-        List<PathAccessControlItem> accessControlListUpdate = new List<PathAccessControlItem>()
-        {
-            new PathAccessControlItem(AccessControlType.User, RolePermissions.Execute, isDefaultScope, entityId: folderOwner)
-        };
-
-        //Update root container's ACL
-        var result = directoryClient.UpdateAccessControlRecursive(accessControlListUpdate, null);
- 
-        if(result.GetRawResponse().Status != 200)
-        {
-            return false;
-        }
-        else
-        {
-            return true;
-        }
-    }
-
-    public static bool CreatesNewFolder(string folder, string storageRootContainer)
-    {
-        var serviceClient = CreatesDataLakeConnection();
-
-        var directoryFileSystem = GetsReferenceToFileSystem(serviceClient, storageRootContainer);
-
-        DataLakeDirectoryClient directory = directoryFileSystem.CreateDirectory(folder);
-        
-        var response = directory.Create();
-
-        if(response.GetRawResponse().Status != 201)
-        {
-            return false;
-        }
-        else
-        {
-            return true;
-        }
-    }
-
-    public static bool AssignsRWXToFolderOwner(string folderOwner, string storageRootContainer, string folder)
-    {
-        var storageClient = CreatesDataLakeConnection();
-
-        var directoryClient = GetsReferenceToContainer(storageClient, storageRootContainer, folder);
-
-        PathAccessControl directoryAccessControl = directoryClient.GetAccessControl();
-
-        List<PathAccessControlItem> accessControlListUpdate = (List<PathAccessControlItem>)directoryAccessControl.AccessControlList;
-
-        int index = -1;
-
-        foreach (var item in accessControlListUpdate)
-        {
-            if (item.EntityId == folderOwner)
-            {
-                index = accessControlListUpdate.IndexOf(item);
-                break;
-            }
-        }
-
-        if (index > -1)
-        {
-            switch (accessControlListUpdate[index].AccessControlType)
-            {
-                case AccessControlType.User:
-                    accessControlListUpdate[index] = new PathAccessControlItem(AccessControlType.User, RolePermissions.Read | RolePermissions.Write | RolePermissions.Execute, entityId: folderOwner);
-                break;
-
-                case AccessControlType.Group:
-                    accessControlListUpdate[index] = new PathAccessControlItem(AccessControlType.Group, RolePermissions.Read | RolePermissions.Write | RolePermissions.Execute, entityId: folderOwner);
-                break;
-
-                case AccessControlType.Other:
-                    accessControlListUpdate[index] = new PathAccessControlItem(AccessControlType.Other, RolePermissions.Read | RolePermissions.Write | RolePermissions.Execute, entityId: folderOwner);
-                break;
-                
-                case AccessControlType.Mask:
-                    accessControlListUpdate[index] = new PathAccessControlItem(AccessControlType.Mask, RolePermissions.Read | RolePermissions.Write | RolePermissions.Execute, entityId: folderOwner);
-                break;
-            }
-        }
-
-        var result = directoryClient.SetAccessControlList(accessControlListUpdate);
-
-        if(result.GetRawResponse().Status != 200)
-        {
-            return false;
-        }
-        else
-        {
-            return true;
-        }
-    }
-
-    public static bool SavesFundCodeIntoContainerMetadata(string fundCode, string container, string folder)
-    {
-        var storageAccountConnectionString = System.Environment.GetEnvironmentVariable("storageConnectionString");
-
-        // Create a BlobServiceClient object which will be used to create a container client
-        BlobClient blob = new BlobClient(storageAccountConnectionString, container, folder);
-
-        try
-        {
-            IDictionary<string, string> metadata = new Dictionary<string, string>();
-
-            // Add metadata to the dictionary by calling the Add method
-            metadata.Add("FundCode", fundCode);
-
-            var result = blob.SetMetadata(metadata);
-
-            if (result.GetRawResponse().Status != 200)
-            {
-                return false;
-            }
-
-            return true;
-        }
-        catch (RequestFailedException e)
-        {
-            return false;
-        }
-    }
 
     public static async Task ManageDirectoryACLs(DataLakeFileSystemClient fileSystemClient)
     {
@@ -222,7 +105,7 @@ public class ADLSOperations
         log.LogTrace($"Adding '{folderOwner}' (Fold Owner) to the container '{container}' as 'Execute'...");
 
         var serviceClient = CreateDlsClientFromToken();
-        var directoryClient = GetsReferenceToContainer(serviceClient, storageRootContainer, "");
+        var directoryClient = GetsReferenceToContainer(serviceClient, storageRootContainer, String.Empty);
 
         var accessControlListUpdate = new List<PathAccessControlItem>()
         {
@@ -291,12 +174,36 @@ public class ADLSOperations
         return statusFlag;
     }
 
-    public bool SavesFundCodeIntoContainerMetadata(string fundCode, string container, out string error)
+    public bool SavesFundCodeIntoContainerMetadata(string fundCode, string container, string folder, out string error)
     {
         log.LogTrace($"Saving FundCode into container's metadata...");
-        var result = SavesFundCodeIntoContainerMetadata(fundCode, container, "");
-        error = result ? null : "Error trying to save de Fund Code into Container's metadata. Error 500.";
-        return result;
+
+        // Create a BlobServiceClient object which will be used to create a container client
+        var blobClient = this.CreateBlobClientFromToken();
+
+        try
+        {
+            IDictionary<string, string> metadata = new Dictionary<string, string>();
+
+            // Add metadata to the dictionary by calling the Add method
+            metadata.Add("FundCode", fundCode);
+
+            var result = blobClient.SetMetadata(metadata);
+
+            if (result.GetRawResponse().Status != 200)
+            {
+                error = "Error trying to save de Fund Code into Container's metadata. Error 500.";
+                return false;
+            }
+
+            error = null;
+            return true;
+        }
+        catch (RequestFailedException e)
+        {
+            error = e.Message;
+            return false;
+        }
     }
     #endregion
 }
