@@ -2,6 +2,10 @@
     vertical-align: middle;
 }
 
+.directoriesTable td.spaceused, .directoriesTable td.costs, .directoriesTable td.actions {
+    text-align: center;
+}
+
 .directoriesTable .action:hover {
     cursor: pointer;
 }

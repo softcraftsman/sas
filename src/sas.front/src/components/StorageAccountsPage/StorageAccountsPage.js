@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react'
+import PropTypes from 'prop-types'
 import { useAuthentication } from '../../hooks/useAuthentication'
 import { getStorageAccounts } from '../../services/StorageManager.service'
 import { getFileSystems, getDirectories } from '../../services/DataLake.service'
@@ -10,7 +11,7 @@ import Selector from '../Selector'
 /**
  * Renders list of Storage Accounts
  */
-const StorageAccountsPage = () => {
+const StorageAccountsPage = ({strings}) => {
     const { auth } = useAuthentication()
 
     const [selectedStorageAccount, setSelectedStorageAccount] = useState('')
@@ -52,13 +53,14 @@ const StorageAccountsPage = () => {
             const toSpace = kb => `${kb} KB`
             const list = await getDirectories(storageAccount, fileSystem)
             const _directories = list.map(item => ({
-                fundCode: '123456',
+                fundCode: item.fundCode,
                 members: ['John', 'Paul', 'George', 'Ringo'],
-                monthlyCost: 'free',
+                monthlyCost: '-',
                 name: item.name,
                 policy: '9',
                 region: 'WestUS',
-                spaceUsed: toSpace(item.contentLength),
+                spaceUsed: '-',
+                // spaceUsed: toSpace(item.contentLength),
                 storageType: item.accessTier
             }))
 
@@ -81,20 +83,45 @@ const StorageAccountsPage = () => {
 
     return (
         <Container>
-            <h3>Storage Account</h3>
             <Grid container spacing={2} sx={{ justifyContent: 'center', marginBottom: '10px' }}>
                 <Grid item md={6}>
-                    <Selector id='storageAccountSelector' items={storageAccounts} label='Storage Account' onChange={handleStorageAccountChange} />
+                    <Selector
+                        id='storageAccountSelector'
+                        items={storageAccounts}
+                        onChange={handleStorageAccountChange}
+                        selectedItem={selectedStorageAccount}
+                        strings={{ label: strings.storageAccountLabel }}
+                    />
                 </Grid>
                 <Grid item md={6}>
-                    <Selector id='fileSystemSelector' items={fileSystems} label='File System' onChange={handleFileSystemChange} />
+                    <Selector
+                        id='fileSystemSelector'
+                        items={fileSystems}
+                        onChange={handleFileSystemChange}
+                        selectedItem={selectedFileSystem}
+                        strings={{ label: strings.fileSystemLabel }}
+                    />
                 </Grid>
                 <Grid item>
-                    <DirectoriesManager data={directories} />
+                    <DirectoriesManager data={directories} storageAccount={selectedStorageAccount} fileSystem={selectedFileSystem} />
                 </Grid>
             </Grid>
         </Container>
     )
+}
+
+StorageAccountsPage.propTypes = {
+    strings: PropTypes.shape({
+        fileSystemLabel: PropTypes.string,
+        storageAccountLabel: PropTypes.string
+    })
+}
+
+StorageAccountsPage.defaultProps = {
+    strings: {
+        fileSystemLabel: 'File System',
+        storageAccountLabel: 'Storage Account'
+    }
 }
 
 export default StorageAccountsPage

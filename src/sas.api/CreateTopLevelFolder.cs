@@ -59,7 +59,7 @@ namespace sas.api
                     }
                 }
 
-                log.LogInformation("Parameters validation passed.");
+                log.LogInformation("Parameters validation passed.  Woo Hoo !!!");
 
                 //Add Folder Owner to Container ACL as Execute
                 log.LogInformation($"Adding '{bodyDeserialized.FolderOwner}' (Fold Owner) to the container '{bodyDeserialized.Container}' as 'Execute'...");

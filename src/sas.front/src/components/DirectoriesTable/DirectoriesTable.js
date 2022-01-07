@@ -2,33 +2,35 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import Chip from '@mui/material/Chip'
 import Table from 'react-bootstrap/Table'
-import { Pencil } from 'react-bootstrap-icons';
+import InfoIcon from '@mui/icons-material/InfoOutlined'
+import PencilIcon from '@mui/icons-material/EditOutlined'
 import './DirectoriesTable.css'
 
-export const DirectoriesTable = ({ data, onEdit }) => {
+export const DirectoriesTable = ({ data, onDetails, onEdit, strings }) => {
     return (
         <Table striped bordered hover className='directoriesTable'>
             <thead>
                 <tr>
-                    <th>Space Name</th>
-                    <th>Space Used</th>
-                    <th>Monthly Cost</th>
-                    <th>Who Has Access</th>
-                    <th>Storage Type</th>
-                    <th>Actions</th>
+                    <th>{strings.folderLabel}</th>
+                    <th>{strings.spaceUsedLabel}</th>
+                    <th>{strings.monthlyCostLabel}</th>
+                    <th>{strings.whoHasAccessLabel}</th>
+                    <th>{strings.fundCodeLabel}</th>
+                    <th>{strings.actionsLabel}</th>
                 </tr>
             </thead>
             <tbody>
                 {data.map(row => {
                     return (
                         <tr key={row.name}>
-                            <td>{row.name}</td>
-                            <td>{row.spaceUsed}</td>
-                            <td>{row.monthlyCost}</td>
-                            <td>{row.members.map(item => (<Chip key={item} className='member-chip' label={`${item}`} />))}</td>
-                            <td>{row.storageType}</td>
-                            <td>
-                                <Pencil onClick={() => onEdit(row)} className='action' />
+                            <td className='name'>{row.name}</td>
+                            <td className='spaceused'>{row.spaceUsed}</td>
+                            <td className='costs'>{row.monthlyCost}</td>
+                            <td className='owner'>{row.members.map(item => (<Chip key={item} className='member-chip' label={`${item}`} />))}</td>
+                            <td className='fundcode'>{row.fundCode}</td>
+                            <td className='actions'>
+                                {onEdit && <PencilIcon onClick={() => onEdit(row)} className='action' />}
+                                {onDetails && <InfoIcon onClick={() => onDetails(row)} className='action' />}
                             </td>
                         </tr>
                     )
@@ -40,14 +42,28 @@ export const DirectoriesTable = ({ data, onEdit }) => {
 
 DirectoriesTable.propTypes = {
     data: PropTypes.array,
-    onAdd: PropTypes.func,
+    onDetails: PropTypes.func,
     onEdit: PropTypes.func,
+    strings: PropTypes.shape({
+        folderLabel: PropTypes.string,
+        spaceUsedLabel: PropTypes.string,
+        monthlyCostLabel: PropTypes.string,
+        whoHasAccessLabel: PropTypes.string,
+        fundCodeLabel: PropTypes.string,
+        actionsLabel: PropTypes.string,
+    })
 }
 
 DirectoriesTable.defaultProps = {
     data: [],
-    onAdd: () => { },
-    onEdit: () => { }
+    strings: {
+        folderLabel: 'Folder',
+        spaceUsedLabel: 'Space Used',
+        monthlyCostLabel: 'Monthly Cost',
+        whoHasAccessLabel: 'Who Has Access?',
+        fundCodeLabel: 'Fund Code',
+        actionsLabel: 'Actions',
+    }
 }
 
 export default DirectoriesTable

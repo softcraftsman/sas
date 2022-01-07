@@ -1,6 +1,0 @@
-{
-    "Institution": "Duke University",
-    "Logo": "https://sasfront.blob.core.windows.net/public/duke-logo.svg.png",
-    "LogoFooter": "https://sasfront.blob.core.windows.net/public/duke-logo-white.svg.png",
-    "Instructions": "<p>In order to gain access to the system, users must open up a request through ServiceNow, available in <a href='#' target='_blank'>this link</a>. The system will give you proper permissions and provision a new storage space for you. Once you've done so, come back here and hit 'Log In'.</p> <p style='margin-top: 10px;'>If you have any trouble on doing so, please, get in touch through the <strong>Support</strong> section below.</p>"
-}

@@ -1,14 +1,18 @@
 import React, { useState } from 'react'
 import PropTypes from 'prop-types'
+import { useAuthentication } from '../../hooks/useAuthentication'
 import Alert from '@mui/material/Alert'
-import Button from 'react-bootstrap/Button'
-import { Plus } from 'react-bootstrap-icons'
+import Button from '@mui/material/Button'
+import AddIcon from '@mui/icons-material/AddOutlined'
 import Snackbar from '@mui/material/Snackbar'
 import DirectoriesTable from '../DirectoriesTable'
 import DirectoryEditor from '../DirectoryEditor'
+import { createFolder } from '../../services/StorageManager.service'
 import './DirectoriesManager.css'
 
-const DirectoriesManager = ({ data }) => {
+const DirectoriesManager = ({ data, storageAccount, fileSystem }) => {
+    const { auth } = useAuthentication()
+
     const [editor, setEditor] = useState({ show: false, data: {}, isNew: true })
     const [toastMessage, setToastMessage] = useState()
     const [isToastOpen, setToastOpen] = useState(false)
@@ -26,12 +30,20 @@ const DirectoriesManager = ({ data }) => {
 
     const handleCreateDirectory = (data) => {
         // Calls the API to save the directory
+        createFolder(auth.accessToken, data, storageAccount, fileSystem)
+            .then(() => { })
+            .catch(error => console.log(error))
 
         // Hide the editor modal
         setEditor({ show: false, data: {}, isNew: true })
 
         // Display a toast
         displayToast(`Directory '${data.name}' Created!`)
+    }
+
+
+    const handleDetails = (rowData) => {
+
     }
 
 
@@ -59,12 +71,12 @@ const DirectoriesManager = ({ data }) => {
     return (
         <div className='directoriesManager'>
             <div className='actionsBar'>
-                <Button onClick={handleAdd}>
-                    <Plus size={24} /> Add
+                <Button variant='contained' startIcon={<AddIcon />} onClick={handleAdd}>
+                    New Folder
                 </Button>
             </div>
 
-            <DirectoriesTable data={data} onAdd={handleAdd} onEdit={handleEdit} />
+            <DirectoriesTable data={data} onAdd={handleAdd} onDetails={handleDetails} onEdit={handleEdit} />
 
             {editor.show &&
                 <DirectoryEditor
@@ -90,7 +102,9 @@ const DirectoriesManager = ({ data }) => {
 
 
 DirectoriesManager.propTypes = {
-    data: PropTypes.array
+    data: PropTypes.array,
+    storageAccount: PropTypes.string,
+    fileSystem: PropTypes.string
 }
 
 
