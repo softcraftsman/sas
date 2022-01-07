@@ -28,19 +28,21 @@ namespace sas.api
             </example>
         **/
         [FunctionName("CalculateAllFolderSizes")]
-        public static void CalculateAllFolderSizes(
+        public static IActionResult CalculateAllFolderSizes(
             [HttpTrigger(AuthorizationLevel.Function, "post", Route = null)]
             HttpRequest req, ILogger log)
         {
             var configResult = SasConfiguration.GetConfiguration();
-
+            var sb = new System.Text.StringBuilder();
             foreach (var account in configResult.StorageAccounts)
             {
                 var serviceUri = new Uri($"https://{account}.dfs.core.windows.net");
                 var serviceCLient = CreateDlsClientForUri(serviceUri);
                 var fileSystems = serviceCLient.GetFileSystems();
 
-                log.LogInformation($"Analyzing {account}");
+                var msg = $"Analyzing {account}";
+                log.LogInformation(msg);
+                sb.AppendLine(msg);
 
                 foreach(var filesystem in fileSystems)
                 {
@@ -56,9 +58,14 @@ namespace sas.api
                     foreach( var folder in folders) {
                         size += adls.CalculateFolderSize(folder.Name);
                     }
-                    log.LogInformation($"  {filesystem} aggregate size {size} KB");
+                    
+                    msg = $"  {filesystem} aggregate size {size} KB";
+                    log.LogInformation(msg);
+                    sb.AppendLine(msg);
                 }
             }
+
+            return new OkObjectResult(sb.ToString());
         }
 
         private static DataLakeServiceClient CreateDlsClientForUri(Uri containerUri)
