@@ -13,8 +13,8 @@ namespace sas.api
 {
     public static class TestEndpoints
     {
-        [FunctionName("TestEndpoints")]
-        public static async Task<IActionResult> Run(
+        [FunctionName("ConvertUPNtoObject")]
+        public static async Task<IActionResult> ConvertUPNtoObject(
             [HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)] HttpRequest req,
             ILogger log)
         {
@@ -27,6 +27,26 @@ namespace sas.api
 
 
             return new OkObjectResult(objId);
+        }
+
+        [FunctionName("CalculateFolderSize")]
+        public static IActionResult CalculateFolderSize(
+            [HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)] HttpRequest req,
+            ILogger log)
+        {
+            //Extracting body object from the call and deserializing it.
+            var tlfp = CreateTopLevelFolder.GetTopLevelFolderParameters(req, out string error);
+            if (error != null)
+            {
+                log.LogInformation(error);
+                return new BadRequestObjectResult(error);
+            }
+
+            var containerUri = new Uri($"https://{tlfp.StorageAcount}.dfs.core.windows.net/{tlfp.Container}");
+            var adls = new ADLSOperations(containerUri, null, log);
+            var size = adls.CalculateFolderSize(tlfp.Folder);
+
+            return new OkObjectResult($" {containerUri}/{tlfp.Folder} size is {size} KB");
         }
     }
 }

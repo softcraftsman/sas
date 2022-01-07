@@ -74,7 +74,7 @@ namespace sas.api
             return new BadRequestResult();
         }
 
-        private static TopLevelFolderParameters GetTopLevelFolderParameters(HttpRequest req, out string error)
+        internal static TopLevelFolderParameters GetTopLevelFolderParameters(HttpRequest req, out string error)
         {
             string body = string.Empty;
             error = null;
