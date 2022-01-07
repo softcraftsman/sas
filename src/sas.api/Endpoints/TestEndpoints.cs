@@ -23,7 +23,7 @@ namespace sas.api
             var accessToken = req.Headers.First(x => x.Key == "Authorization").Value.First().Split(' ').LastOrDefault();
 
             // Get Object ID
-            var objId = await UserOperations.GetObjectIdFromUPN(accessToken, "jobrown4@microsoft.com");
+            var objId = await UserOperations.GetObjectIdFromUPN(accessToken, "fabricio.sanchez@americasuniversity.net");
 
 
             return new OkObjectResult(objId);

@@ -24,12 +24,12 @@ public class UserOperations
             ClientId = Environment.GetEnvironmentVariable("APP_REGISTRATION_CLIENT_ID"),
             ClientSecret = Environment.GetEnvironmentVariable("CLIENT_SECRET"),
         };
-        var app = ConfidentialClientApplicationBuilder.CreateWithApplicationOptions(options)
-            .Build();
+        var app = ConfidentialClientApplicationBuilder.CreateWithApplicationOptions(options).Build();
+
         var scopes = new string[] { "https://graph.microsoft.com" };
 
-        var authResult = await app.AcquireTokenOnBehalfOf(scopes, userAssertion)
-            .ExecuteAsync();
+        var authResult = await app.AcquireTokenOnBehalfOf(scopes, userAssertion).ExecuteAsync();
+
         return authResult.AccessToken;
     }
 
@@ -37,6 +37,7 @@ public class UserOperations
     {
         // Get Caller Access Token
         var accessToken = req.Headers.First(x => x.Key == "Authorization").Value.First().Split(' ').LastOrDefault();
+        
         return accessToken;
 
     }
