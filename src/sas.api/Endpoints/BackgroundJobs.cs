@@ -21,14 +21,16 @@ namespace sas.api
             </summary>
             <example>
                 Manually run by calling
-                  POST https://{host}/admin/functions/CalculateAllFolderSizes
-                  Header - x-functions-key = to the function master key
+                  POST https://{host}/api/CalculateAllFolderSizes
+                  Header - x-functions-key = to the function key
                   Content-Type = application/json
                   body set as raw = { }
             </example>
         **/
         [FunctionName("CalculateAllFolderSizes")]
-        public static void CalculateAllFolderSizes([TimerTrigger("0 0 * * 0")] TimerInfo myTimer, ILogger log)
+        public static void CalculateAllFolderSizes(
+            [HttpTrigger(AuthorizationLevel.Function, "post", Route = null)]
+            HttpRequest req, ILogger log)
         {
             var configResult = SasConfiguration.GetConfiguration();
 
