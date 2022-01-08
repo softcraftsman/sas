@@ -11,6 +11,7 @@ using System.Linq;
 using Azure.Storage.Files.DataLake;
 using Azure.Storage.Files.DataLake.Models;
 using Azure.Identity;
+using sas.api.Services;
 
 namespace sas.api
 {
@@ -29,7 +30,7 @@ namespace sas.api
         **/
         [FunctionName("CalculateAllFolderSizes")]
         public static IActionResult CalculateAllFolderSizes(
-            [HttpTrigger(AuthorizationLevel.Function, "post", Route = null)]
+            [HttpTrigger(AuthorizationLevel.Function, "post", Route = "Configuration/CalculateFolderSizes")]
             HttpRequest req, ILogger log)
         {
             var configResult = SasConfiguration.GetConfiguration();
@@ -51,15 +52,15 @@ namespace sas.api
                     var fileSystemClient = containerClient.GetFileSystemClient(filesystem.Name);
                     var folders = fileSystemClient.GetPaths().Where<PathItem>( 
                         pi => pi.IsDirectory == null ? false: (bool) pi.IsDirectory);
-                    
-                    var adls = new ADLSOperations(containerUri,null, log);
-                    
+
+                    var folderOperations = new FolderOperations(serviceUri, filesystem.Name, log);
+
                     long size = 0;
                     foreach( var folder in folders) {
-                        size += adls.CalculateFolderSize(folder.Name);
+                        size += folderOperations.CalculateFolderSize(folder.Name);
                     }
                     
-                    msg = $"  {filesystem} aggregate size {size} KB";
+                    msg = $"  {filesystem.Name} aggregate size {size} KB";
                     log.LogInformation(msg);
                     sb.AppendLine(msg);
                 }
