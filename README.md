@@ -26,6 +26,10 @@ Copy the Application (client) ID for use later.
 ## Prepare the storage accounts
 In order to allow this application to modify the storage accounts, it will require Storage Blob Data Owner permission for each of the storage accounts.
 
+Enable CORS on the storage accounts pointing to the Static Web App url.
+![image](https://user-images.githubusercontent.com/3756829/148672121-d1de3d3e-f026-42c9-bd1e-39eefbcfd3c3.png)
+
+
 ## Create a Static Web App
 Create a Static Web App in the Azure Portal. Name it anything you like. Choose whichever plan you like at this time, though you'll probably need the Standard plan when you wish to apply your own domain name. ***Important***, when choosing the GitHub repo, choose your repo instead of the source one.
 
