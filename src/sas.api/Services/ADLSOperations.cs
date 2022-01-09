@@ -27,21 +27,6 @@ public class ADLSOperations
     }
 
     #region Private Static Methods
-    private static DataLakeServiceClient CreatesDataLakeConnection()
-    {
-        //Retrieving environment variables
-        var storageAccountName = System.Environment.GetEnvironmentVariable("storageAccountName");
-        var storageAccountKey = System.Environment.GetEnvironmentVariable("storageAccountKey");
-        var storageServiceUri = System.Environment.GetEnvironmentVariable("storageServiceUri");
-
-        //Creates a shared key credential to access the storage account on behalf of the application
-        StorageSharedKeyCredential sharedKeyCredential = new StorageSharedKeyCredential(storageAccountName, storageAccountKey);
-
-        //Create DataLakeServiceClient using StorageSharedKeyCredentials
-        DataLakeServiceClient serviceClient = new DataLakeServiceClient(new Uri(storageServiceUri), sharedKeyCredential);
-
-        return serviceClient;
-    }
 
     private static DataLakeDirectoryClient GetsReferenceToContainer(DataLakeServiceClient serviceClient, string storageRootContainer, string folder)
     {
@@ -111,16 +96,23 @@ public class ADLSOperations
         {
             new PathAccessControlItem(AccessControlType.User, RolePermissions.Execute, isDefaultScope, entityId: folderOwner)
         };
+        try
+        {
+            // Update root container's ACL
+            var response = directoryClient.UpdateAccessControlRecursive(accessControlListUpdate, null);
+            var statusFlag = response.GetRawResponse().Status == ((int)HttpStatusCode.OK);
 
-        // Update root container's ACL
-        var response = directoryClient.UpdateAccessControlRecursive(accessControlListUpdate, null);
-        var statusFlag = response.GetRawResponse().Status == ((int)HttpStatusCode.OK);
-
-        if (statusFlag)
-            error = null;
-        else
-            error = "Error on trying to add Folder Owner as Execute on the root Container. Error 500.";
-        return statusFlag;
+            if (statusFlag)
+                error = null;
+            else
+                error = "Error on trying to add Folder Owner as Execute on the root Container. Error 500.";
+            return statusFlag;
+        }
+        catch (Exception ex)
+        {
+            error = ex.Message;
+            return false;
+        }
     }
     
     public bool CreatesNewFolder(string folder, string storageRootContainer, out string error)
@@ -204,6 +196,44 @@ public class ADLSOperations
             error = e.Message;
             return false;
         }
+    }
+
+    public long CalculateFolderSize(string folder)
+    {
+        const string sizeCalcDateKey = "SizeCalcDate";
+        const string sizeKey = "Size";
+        log.LogTrace($"Calculating size for ({this.containerUri})/({folder})");
+
+        var serviceClient = this.CreateDlsClientFromToken();
+        var directoryClient = serviceClient.GetFileSystemClient(containerUri.ToString())
+                                           .GetDirectoryClient(folder);
+
+        // Check the Last Calculated Date from the Metadata
+        var meta = directoryClient.GetProperties().Value.Metadata;
+        var sizeCalcDate = meta.ContainsKey(sizeCalcDateKey)
+            ?  DateTime.Parse(meta[sizeCalcDateKey])
+            :  DateTime.MinValue;
+
+        // If old calculate size again
+        if (DateTime.UtcNow.Subtract(sizeCalcDate).TotalDays > 7)
+        {
+            var paths = directoryClient.GetPaths(true,false);
+            long size = 0; 
+            foreach ( var path in paths)
+            {
+                    size += (path.ContentLength.HasValue)?(int) path.ContentLength:0;
+            }
+            meta[sizeCalcDateKey] = DateTime.UtcNow.ToString();
+            meta[sizeKey] = size.ToString();
+
+            // Strip off a readonly item
+            meta.Remove("hdi_isfolder");
+            
+            // Save back into the Directory Metadata
+            directoryClient.SetMetadata(meta);
+        }
+
+        return long.Parse(meta[sizeKey]);
     }
     #endregion
 }

@@ -1,0 +1,15 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "FUNCTIONS_WORKER_RUNTIME": "dotnet",
+    "DATALAKE_STORAGE_ACCOUNTS": "jsbdatalake3",
+    "TENANT_ID": "1894738b-c159-4144-abdd-9689882c7457",
+    "APP_REGISTRATION_CLIENT_ID": "26bb4d5a-8f37-4e6d-9022-6dc51280158a",
+    "CLIENT_SECRET": "wtn7Q~V8pntV7AQPi4HB0jhLI1ZeWK1I4yEF2"
+  },
+  "Host": {
+    "LocalHttpPort": 7071,
+    "CORS": "*",
+    "CORSCredentials": false
+  }
+}
