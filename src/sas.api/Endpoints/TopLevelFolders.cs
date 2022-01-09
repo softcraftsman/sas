@@ -14,6 +14,7 @@ using sas.api;
 using System.Text;
 using Microsoft.Identity.Client;
 using sas.api.Services;
+using System.Linq;
 
 namespace sas.api
 {
@@ -26,7 +27,14 @@ namespace sas.api
             // GET - Send Instructions back to calling client
             if (req.Method == HttpMethods.Get)
             {
-                return SendInstructions(log);
+                // Find out user who is calling
+                var tlfp = GetTopLevelFolderParameters(req, out string error);
+                var storageUri = new Uri($"https://{tlfp.StorageAcount}.dfs.core.windows.net");
+                var folderOperations = new FolderOperations(storageUri, tlfp.Container, log);
+                var folders = folderOperations.GetAccessibleFolders(tlfp.FolderOwner);
+
+                // Build a 
+                return new OkObjectResult(folders);
             }
 
             // POST - Method
@@ -70,7 +78,7 @@ namespace sas.api
             var fileSystemOperations = new FileSystemOperations(storageUri, log);
             var folderOperations = new FolderOperations(storageUri, tlfp.Container, log);
 
-            if (fileSystemOperations.AddsFolderOwnerToContainerACLAsExecute(tlfp.Container, tlfp.FolderOwner, true, out error)
+            if (fileSystemOperations.AddsFolderOwnerToContainerACLAsExecute(tlfp.Container, tlfp.FolderOwner, false, out error)
                 && folderOperations.CreateNewFolder(tlfp.Folder, out error)
                 && folderOperations.AddFundCodeToMetaData(tlfp.Folder, tlfp.FundCode, out error)
                 && folderOperations.AssignFullRwx(tlfp.Folder, tlfp.FolderOwner, out error)

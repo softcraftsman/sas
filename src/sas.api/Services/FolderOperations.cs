@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -17,9 +18,13 @@ namespace sas.api.Services
     {
         private readonly ILogger log;
         private readonly DataLakeFileSystemClient dlfsClient;
+        private readonly decimal costPerTB;
         public FolderOperations(Uri storageUri, string fileSystem, ILogger log)
         {
             this.log = log;
+            var costPerTB = Environment.GetEnvironmentVariable("COST_PER_TB");
+            if (costPerTB != null)
+                decimal.TryParse(costPerTB, out this.costPerTB);
 
             var tenantId = Environment.GetEnvironmentVariable("TENANT_ID");
             var clientId = Environment.GetEnvironmentVariable("APP_REGISTRATION_CLIENT_ID");
@@ -60,7 +65,12 @@ namespace sas.api.Services
                 new PathAccessControlItem(
                     accessControlType: AccessControlType.User,
                     permissions: RolePermissions.Read | RolePermissions.Write | RolePermissions.Execute,
-                    entityId: folderOwner)
+                    entityId: folderOwner),
+                new PathAccessControlItem(
+                    accessControlType: AccessControlType.User,
+                    permissions: RolePermissions.Read | RolePermissions.Write | RolePermissions.Execute,
+                    entityId: folderOwner,
+                    defaultScope: true)
             };
 
             // Send up changes
@@ -133,6 +143,67 @@ namespace sas.api.Services
             }
 
             return long.Parse(meta[sizeKey]);
+        }
+        private static string Simplify(string s)
+        {
+            return s.Replace('@', '_').ToLower();
+        }
+
+        internal IEnumerable<FolderDetail> GetAccessibleFolders(string upn)
+        {
+            // Get all Top Level Folders
+            var folders = dlfsClient.GetPaths().Where<PathItem>(
+                pi => pi.IsDirectory != null && (bool)pi.IsDirectory)
+                .ToList();
+
+            // Translate for guest accounts
+            upn = Simplify(upn);
+
+            // Find folders that have ACL entries for upn
+            foreach (var folder in folders)
+            { 
+                var rootClient = dlfsClient.GetDirectoryClient(folder.Name);  // container (root)
+                var acl = rootClient.GetAccessControl(userPrincipalName: true);
+                if (acl.Value.AccessControlList.Any(
+                        p => p.EntityId is not null 
+                        && Simplify(p.EntityId).StartsWith(upn)
+                        && p.Permissions.HasFlag(RolePermissions.Read)
+                    )
+                )
+                {
+                    // Get Metadata
+                    var meta = rootClient.GetProperties().Value.Metadata;
+                    long? size = meta.ContainsKey("Size") ? long.Parse(meta["Size"]) : null;
+                    decimal? cost = (size == null) ? null : size * costPerTB / 1000000000000;
+
+                    // Calculate UserAccess
+                    var userAccess = acl.Value.AccessControlList
+                        .Where(p => p.AccessControlType == AccessControlType.User && p.EntityId != null && !p.DefaultScope)
+                        .Select(p => p.EntityId)
+                        .ToList();
+
+                    // Create Folder Details
+                    var fd = new FolderDetail()
+                    {
+                        Name = folder.Name,
+                        Size = meta.ContainsKey("Size") ? meta["Size"] : null,
+                        Cost = cost.HasValue ? cost.Value.ToString() : null,
+                        FundCode = meta.ContainsKey("FundCode") ? meta["FundCode"] : null,
+                        UserAccess = userAccess
+                    };
+
+                    yield return fd;
+                }
+            }
+        }
+
+        internal class FolderDetail
+        {
+            public string Name { get; set; }
+            public string Size { get; set; }
+            public string Cost { get; set; }
+            public string FundCode { get; set; }
+            public IList<string> UserAccess { get; set; }
         }
     }
 }

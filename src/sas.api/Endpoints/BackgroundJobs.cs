@@ -60,7 +60,7 @@ namespace sas.api
                         size += folderOperations.CalculateFolderSize(folder.Name);
                     }
                     
-                    msg = $"  {filesystem.Name} aggregate size {size} KB";
+                    msg = $"  {filesystem.Name} aggregate size {size} bytes";
                     log.LogInformation(msg);
                     sb.AppendLine(msg);
                 }

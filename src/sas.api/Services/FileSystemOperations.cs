@@ -29,17 +29,26 @@ namespace sas.api.Services
         public bool AddsFolderOwnerToContainerACLAsExecute(string fileSystem, string folderOwner, bool isDefaultScope, out string error)
         {
             log.LogTrace($"Adding '{folderOwner}' (Folder Owner) to the container '{dlsClient}/{fileSystem}' as 'Execute'...");
+            error = null;
 
             // Get Root Directory Client
             var directoryClient = dlsClient.GetFileSystemClient(fileSystem).GetDirectoryClient(string.Empty);
-            var accessControlListUpdate = new List<PathAccessControlItem>()
+            var owner = folderOwner.Replace('@', '_').ToLower();
+            var acl = directoryClient.GetAccessControl(userPrincipalName: true).Value.AccessControlList.ToList();
+            var ownerAcl = acl.FirstOrDefault(p => p.EntityId != null && p.EntityId.Replace('@', '_').ToLower() == owner);
+            if (ownerAcl != null)
             {
-                new PathAccessControlItem(AccessControlType.User, RolePermissions.Execute, isDefaultScope, entityId: folderOwner)
-            };
+                if (ownerAcl.Permissions.HasFlag(RolePermissions.Execute))
+                    return true;    // Exit Early, no changes needed
+                ownerAcl.Permissions = RolePermissions.Execute;
+            }
+            else
+                acl.Add(new PathAccessControlItem(AccessControlType.User, RolePermissions.Execute, false, folderOwner));
+
             try
             {
                 // Update root container's ACL
-                var response = directoryClient.UpdateAccessControlRecursive(accessControlListUpdate);
+                var response = directoryClient.SetAccessControlList(acl);
                 var statusFlag = response.GetRawResponse().Status == ((int)HttpStatusCode.OK);
                 error = statusFlag ? null : "Error on trying to add Folder Owner as Execute on the root Container. Error 500.";
                 return statusFlag;

@@ -46,7 +46,7 @@ namespace sas.api
             var adls = new FolderOperations(new Uri($"https://{tlfp.StorageAcount}.dfs.core.windows.net"), tlfp.Container, log);
             var size = adls.CalculateFolderSize(tlfp.Folder);
 
-            return new OkObjectResult($" {tlfp.Container}/{tlfp.Folder} size is {size} KB");
+            return new OkObjectResult($" {tlfp.Container}/{tlfp.Folder} size is {size} bytes");
         }
     }
 }
