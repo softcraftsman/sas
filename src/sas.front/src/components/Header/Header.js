@@ -1,14 +1,12 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import { useIsAuthenticated } from '@azure/msal-react'
-import { useAuthentication } from '../../hooks/useAuthentication'
+import useAuthentication from '../../hooks/useAuthentication'
 import Avatar from '@mui/material/Avatar'
 import LogOutButton from '../LogOutButton'
 import './Header.css'
 
-const Header = ({strings}) => {
-    const isAuthenticated = useIsAuthenticated()
-    const { account } = useAuthentication()
+const Header = ({ strings }) => {
+    const { account, isAuthenticated } = useAuthentication()
 
     return (
         <div className='header'>
@@ -26,10 +24,10 @@ const Header = ({strings}) => {
                 {isAuthenticated &&
                     <>
                         <div className='header-profile-image'>
-                            <Avatar alt={account.name} />
+                            <Avatar alt={account.userDetails} />
                         </div>
                         <div className='header-profile-greeting'>
-                            {strings.welcome}, {account.name}<br />
+                            {strings.welcome}, {account.userDetails}<br />
                             <LogOutButton strings={strings} />
                         </div>
                     </>

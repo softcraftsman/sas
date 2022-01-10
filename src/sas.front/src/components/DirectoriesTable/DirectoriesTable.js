@@ -24,9 +24,9 @@ export const DirectoriesTable = ({ data, onDetails, onEdit, strings }) => {
                     return (
                         <tr key={row.name}>
                             <td className='name'>{row.name}</td>
-                            <td className='spaceused'>{row.spaceUsed}</td>
-                            <td className='costs'>{row.monthlyCost}</td>
-                            <td className='owner'>{row.members.map(item => (<Chip key={item} className='member-chip' label={`${item}`} />))}</td>
+                            <td className='spaceused'>{row.size}</td>
+                            <td className='costs'>{row.cost}</td>
+                            <td className='owner'>{row.userAccess.map(item => (<Chip key={item} className='member-chip' label={`${item}`} />))}</td>
                             <td className='fundcode'>{row.fundCode}</td>
                             <td className='actions'>
                                 {onEdit && <PencilIcon onClick={() => onEdit(row)} className='action' />}

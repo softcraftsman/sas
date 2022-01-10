@@ -6,6 +6,10 @@
     text-align: center;
 }
 
+.directoriesTable .action {
+    margin: 3px;
+}
+
 .directoriesTable .action:hover {
     cursor: pointer;
 }

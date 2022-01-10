@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import PropTypes from 'prop-types'
-import { useAuthentication } from '../../hooks/useAuthentication'
+import useAuthentication from '../../hooks/useAuthentication'
 import Alert from '@mui/material/Alert'
 import Button from '@mui/material/Button'
 import AddIcon from '@mui/icons-material/AddOutlined'
@@ -76,7 +76,11 @@ const DirectoriesManager = ({ data, storageAccount, fileSystem }) => {
                 </Button>
             </div>
 
-            <DirectoriesTable data={data} onAdd={handleAdd} onDetails={handleDetails} onEdit={handleEdit} />
+            <DirectoriesTable
+                data={data}
+                onAdd={handleAdd}
+                onDetails={handleDetails}
+                onEdit={handleEdit} />
 
             {editor.show &&
                 <DirectoryEditor

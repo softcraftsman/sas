@@ -37,7 +37,7 @@ export const getDirectories = async (storageAccount, fileSystem) => {
         const properties = await directoryClient.getProperties()
 
         // Nothing really useful is returned by getAccessControl
-        const accessControl = await directoryClient.getAccessControl()
+        //const accessControl = await directoryClient.getAccessControl()
 
         _fileSystems.push({ ...fs, accessTier: properties.accessTier, fundCode: properties.metadata.fundcode })
     }
