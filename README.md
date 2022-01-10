@@ -49,6 +49,10 @@ WEB_URL|https://happy-desert-01a9eac0f.azurestaticapps.net|Url to the website
 
 ![App Settings](./assets/aad-settings.png)
 
+## Storage Account Permissions
+
+TODO: Add instructions for allowing app registration Storage Blob Owner RBAC role on storage accounts
+
 ## Build
 Now that all of the pieces are present, go to Actions in GitHub and run the Azure SWA Deploy workflow (It should automatically run when code is committed as well).
 
