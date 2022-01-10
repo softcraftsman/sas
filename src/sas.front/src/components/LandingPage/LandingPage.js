@@ -1,10 +1,10 @@
 import React from "react"
-import Button from '@mui/material/Button'
+import PropTypes from 'prop-types'
 import Link from "@mui/material/Link"
 import LogInButton from "../LogInButton"
 import './LandingPage.css'
 
-const LandingPage = () => {
+const LandingPage = ({strings}) => {
     return (
         <div className='landingpage'>
             <div className='access'>
@@ -14,7 +14,7 @@ const LandingPage = () => {
                     the "How to gain access" link below.
                 </div>
                 <div className='login'>
-                    <LogInButton text='Log in' />
+                    <LogInButton strings={strings} />
                 </div>
                 <div className='link'>
                     <Link href=''>How to gain access</Link>
@@ -35,6 +35,18 @@ const LandingPage = () => {
             </div>
         </div>
     )
+}
+
+LandingPage.propTypes = {
+    strings: PropTypes.shape({
+        LogIn: PropTypes.string
+    })
+}
+
+LandingPage.defaultProps = {
+    strings: {
+        LogIn: 'Log In'
+    }
 }
 
 export default LandingPage

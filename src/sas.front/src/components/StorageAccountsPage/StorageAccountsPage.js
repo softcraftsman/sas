@@ -1,8 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import PropTypes from 'prop-types'
-import { useAuthentication } from '../../hooks/useAuthentication'
-import { getStorageAccounts } from '../../services/StorageManager.service'
-import { getFileSystems, getDirectories } from '../../services/DataLake.service'
+import useAuthentication from '../../hooks/useAuthentication'
+import { getFileSystems, getDirectories } from '../../services/StorageManager.service'
 import Container from '@mui/material/Container'
 import Grid from '@mui/material/Grid'
 import DirectoriesManager from '../DirectoriesManager'
@@ -11,60 +10,44 @@ import Selector from '../Selector'
 /**
  * Renders list of Storage Accounts
  */
-const StorageAccountsPage = ({strings}) => {
-    const { auth } = useAuthentication()
+const StorageAccountsPage = ({ strings }) => {
+    const { isAuthenticated } = useAuthentication()
 
     const [selectedStorageAccount, setSelectedStorageAccount] = useState('')
     const [selectedFileSystem, setSelectedFileSystem] = useState('')
 
     const [storageAccounts, setStorageAccounts] = useState([])
-    const [fileSystems, setFileSystems] = useState()
     const [directories, setDirectories] = useState()
-
-    // Retrieve the list of Storage Accounts
-    useEffect(() => {
-        auth && auth.accessToken && getStorageAccounts(auth.accessToken)
-            .then(response => {
-                setStorageAccounts(response)
-            })
-    }, [auth])
 
 
     // Retrieve the list of File Systems for the selected Azure Data Lake Storage Account
     useEffect(() => {
-        const retrieveFileSystems = async storageAccount => {
-            let iter = await getFileSystems(storageAccount)
-            const _fileSystems = []
-
-            for await (const fs of iter) {
-                _fileSystems.push(fs.name)
+        const retrieveStorageAccounts = async () => {
+            try {
+                const results = await getFileSystems()
+                setStorageAccounts(results)
             }
-
-            setFileSystems(_fileSystems)
+            catch (error) {
+                console.log(error)
+            }
         }
 
-        selectedStorageAccount && retrieveFileSystems(selectedStorageAccount)
-    }, [selectedStorageAccount])
+        isAuthenticated && retrieveStorageAccounts()
+    }, [isAuthenticated])
 
 
     // Retrieve the list of Directories for the selected File System
     useEffect(() => {
         const retrieveDirectories = async (storageAccount, fileSystem) => {
-            const toSpace = kb => `${kb} KB`
-            const list = await getDirectories(storageAccount, fileSystem)
-            const _directories = list.map(item => ({
-                fundCode: item.fundCode,
-                members: ['John', 'Paul', 'George', 'Ringo'],
-                monthlyCost: '-',
-                name: item.name,
-                policy: '9',
-                region: 'WestUS',
-                spaceUsed: '-',
-                // spaceUsed: toSpace(item.contentLength),
-                storageType: item.accessTier
-            }))
+            //const toSpace = kb => `${kb} KB`
 
-            setDirectories(_directories)
+            try {
+                const _directories = await getDirectories(storageAccount, fileSystem)
+                setDirectories(_directories)
+            }
+            catch (error) {
+                console.log(error)
+            }
         }
 
         selectedFileSystem && retrieveDirectories(selectedStorageAccount, selectedFileSystem)
@@ -81,13 +64,17 @@ const StorageAccountsPage = ({strings}) => {
     }, [])
 
 
+    const storageAccountItems = storageAccounts.map(account => account.name)
+    const fileSystemItems = selectedStorageAccount ? storageAccounts.find(account => account.name === selectedStorageAccount).items.map(item => item.name) : []
+
+
     return (
         <Container>
             <Grid container spacing={2} sx={{ justifyContent: 'center', marginBottom: '10px' }}>
                 <Grid item md={6}>
                     <Selector
                         id='storageAccountSelector'
-                        items={storageAccounts}
+                        items={storageAccountItems}
                         onChange={handleStorageAccountChange}
                         selectedItem={selectedStorageAccount}
                         strings={{ label: strings.storageAccountLabel }}
@@ -96,14 +83,17 @@ const StorageAccountsPage = ({strings}) => {
                 <Grid item md={6}>
                     <Selector
                         id='fileSystemSelector'
-                        items={fileSystems}
+                        items={fileSystemItems}
                         onChange={handleFileSystemChange}
                         selectedItem={selectedFileSystem}
                         strings={{ label: strings.fileSystemLabel }}
                     />
                 </Grid>
                 <Grid item>
-                    <DirectoriesManager data={directories} storageAccount={selectedStorageAccount} fileSystem={selectedFileSystem} />
+                    <DirectoriesManager
+                        data={directories}
+                        storageAccount={selectedStorageAccount}
+                        fileSystem={selectedFileSystem} />
                 </Grid>
             </Grid>
         </Container>
