@@ -20,9 +20,12 @@ Create a Static Web App in the Azure Portal. Name it anything you like. Choose w
 TODO: Provide Build details guidance
 
 Copy the Static Web App URL for use later.
+
 Copy the deployment token (Click on Manage deployment token) for use later.
 
 Add the App Settings under the Static Web App using Settings -> Configuration. Add a new application setting called DATALAKE_STORAGE_ACCOUNTS. List the name of the storage accounts to use, just the name of the storage account is adequate. Separate the accounts by comma or semicolon.
+
+TODO: Add storage cost per TB
 
 ![App Settings](./assets/app-settings.png)
 
