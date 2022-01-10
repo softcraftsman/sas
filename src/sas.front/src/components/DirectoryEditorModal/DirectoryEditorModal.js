@@ -9,9 +9,9 @@ import Grid from '@mui/material/Grid'
 import TextField from '@mui/material/TextField'
 import CancelIcon from '@mui/icons-material/CancelOutlined'
 import SaveIcon from '@mui/icons-material/SaveOutlined'
-import './DirectoryEditor.css'
+import './DirectoryEditorModal.css'
 
-const DirectoryEditor = ({ data, onCancel, onCreate, open, title }) => {
+const DirectoryEditorModal = ({ data, onCancel, onCreate, open, strings }) => {
     const [formData, setFormData] = useState({})
 
     // Set the default form values
@@ -49,7 +49,7 @@ const DirectoryEditor = ({ data, onCancel, onCreate, open, title }) => {
 
     return (
         <Dialog onClose={handleClose} open={open} >
-            <DialogTitle>{title}</DialogTitle>
+            <DialogTitle>{strings.title}</DialogTitle>
 
             <DialogContent>
                 <Grid container spacing={2}>
@@ -69,7 +69,7 @@ const DirectoryEditor = ({ data, onCancel, onCreate, open, title }) => {
                         <TextField
                             id='fundCode'
                             name='fundCode'
-                            label='Fund code'
+                            label={strings.fundCodeLabel}
                             fullWidth
                             variant='standard'
                             defaultValue={data.fundCode}
@@ -80,26 +80,38 @@ const DirectoryEditor = ({ data, onCancel, onCreate, open, title }) => {
             </DialogContent>
 
             <DialogActions>
-                <Button variant='outlined' startIcon={<CancelIcon />} onClick={handleClose}>Cancel</Button>
-                <Button variant='contained' startIcon={<SaveIcon />} onClick={handleCreateClick}>Create</Button>
+                <Button variant='outlined' startIcon={<CancelIcon />} onClick={handleClose}>{strings.cancel}</Button>
+                <Button variant='contained' startIcon={<SaveIcon />} onClick={handleCreateClick}>{strings.save}</Button>
             </DialogActions>
         </Dialog>
     )
 }
 
-DirectoryEditor.propTypes = {
+DirectoryEditorModal.propTypes = {
     data: PropTypes.object,
     onCancel: PropTypes.func,
     onCreate: PropTypes.func,
     onUpdate: PropTypes.func,
     open: PropTypes.bool,
-    title: PropTypes.string
+    strings: PropTypes.shape({
+        cancel: PropTypes.string,
+        fundCodeLabel: PropTypes.string,
+        nameLabel: PropTypes.string,
+        save: PropTypes.string,
+        title: PropTypes.string,
+    }),
 }
 
-DirectoryEditor.defaultProps = {
+DirectoryEditorModal.defaultProps = {
     data: {},
     open: false,
-    title: 'Creating a new folder'
+    strings: {
+        cancel: 'Cancel',
+        fundCodeLabel: 'Fund code',
+        nameLabel: 'Space\'s name',
+        save: 'Save',
+        title: 'Creating a new folder',
+    },
 }
 
-export default DirectoryEditor
+export default DirectoryEditorModal

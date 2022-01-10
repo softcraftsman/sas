@@ -18,3 +18,11 @@
     margin: 3px;
 }
 
+.members-popover {
+    padding: 5px 10px;
+}
+
+.member-text {
+    font-size: small;
+    padding: 2px 0;
+}

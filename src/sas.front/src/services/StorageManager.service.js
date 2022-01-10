@@ -23,7 +23,7 @@ export const getFileSystems = async () => {
     const { endpoint, method } = URLS.fileSystems
     const options = getOptions(method)
 
-    //return new Promise(resolve => resolve([{ name: 'adlfredgohsman', items: [{ name: 'numberuno' }, { name: 'files' }] }]))
+    return new Promise(resolve => resolve([{ name: 'adlfredgohsman', items: [{ name: 'numberuno' }, { name: 'files' }] }]))
 
     return fetch(endpoint, options)
         .then(response => {

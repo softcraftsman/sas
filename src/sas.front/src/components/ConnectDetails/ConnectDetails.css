@@ -1,0 +1,28 @@
+.connectDetails {
+    margin-top: 25px;
+}
+
+.connectDetails .title {
+    font-size: larger;
+    font-weight: 600;
+}
+
+.connectDetails .storageExplorer-title, .connectDetails .cli-title {
+    font-size: 0.9em;
+    font-weight: 600;
+    display: inline-block;
+    margin-top: 8px;
+    margin-bottom: 8px;
+}
+
+.connectDetails .storageExplorer-steps {
+    display: flex;
+}
+
+.step-divider {
+    margin: 5px 30px;
+    padding: 1px;
+    min-width: 2px;
+    background-color: #666;
+    border-radius: 2px;
+}
