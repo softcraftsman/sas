@@ -6,21 +6,18 @@ import PageLayout from '../PageLayout'
 import LandingPage from '../LandingPage'
 import StorageAccountsPage from '../StorageAccountsPage'
 
-import './App.css'
-
 function App() {
   return (
     <PageLayout>
       <AuthenticatedTemplate>
         <BrowserRouter>
           <Routes>
-            <Route path='/' element={<LandingPage />} />
-            <Route path='/storage' element={<StorageAccountsPage />} />
+            <Route path='/' element={<StorageAccountsPage />} />
           </Routes>
         </BrowserRouter>
       </AuthenticatedTemplate>
       <UnauthenticatedTemplate>
-        <p>You are not signed in!  Please sign in.</p>
+        <LandingPage />
       </UnauthenticatedTemplate>
     </PageLayout>
   )
