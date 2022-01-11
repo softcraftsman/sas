@@ -40,10 +40,10 @@ export const getDirectories = async () => {
     const { endpoint, method } = URLS.directories
     const options = getOptions(method)
 
-    return new Promise(resolve => resolve([
-        { name: 'folder one', size: '1', cost: '0.01', fundCode: 'abcdefg', userAccess: ['fredgohsman@microsoft.com', 'johnbrown@microsoft.com', 'fabriciosanchez@microsoft.com'] },
-        { name: 'directory two', size: '2', cost: '0.2', fundCode: 'cdefghi', userAccess: ['fredgohsman@microsoft.com'] }
-    ]))
+    // return new Promise(resolve => resolve([
+    //     { name: 'folder one', size: '1', cost: '0.01', fundCode: 'abcdefg', userAccess: ['fredgohsman@microsoft.com', 'johnbrown@microsoft.com', 'fabriciosanchez@microsoft.com'] },
+    //     { name: 'directory two', size: '2', cost: '0.2', fundCode: 'cdefghi', userAccess: ['fredgohsman@microsoft.com'] }
+    // ]))
 
     return fetch(endpoint, options)
         .then(response => {
