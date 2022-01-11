@@ -115,12 +115,13 @@ namespace sas.api
         internal static async Task<TopLevelFolderParameters> GetTopLevelFolderParameters(HttpRequest req)
         {
             string body = string.Empty;
+            if (req is null)
+                throw new Exception("Request is null");
             using (StreamReader reader = new(req.Body, Encoding.UTF8))
             {
-                body = await reader.ReadToEndAsync();
+                body = await reader.ReadToEndAsync().ConfigureAwait(true);
                 if (string.IsNullOrEmpty(body))
                     throw new Exception("Body was empty coming from ReadToEndAsync");
-
             }
             var bodyDeserialized = JsonConvert.DeserializeObject<TopLevelFolderParameters>(body);
             return bodyDeserialized;
