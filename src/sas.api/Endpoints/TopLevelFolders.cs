@@ -29,7 +29,7 @@ namespace sas.api
             // GET - Send Instructions back to calling client
             if (req.Method == HttpMethods.Get)
             {
-                return GetTopLevelFolders(req, log);
+                return await GetTopLevelFolders(req, log);
             }
 
             // POST - Method
@@ -42,7 +42,7 @@ namespace sas.api
             return new BadRequestResult();
         }
 
-        private static IActionResult GetTopLevelFolders(HttpRequest req, ILogger log)
+        private static async Task<IActionResult> GetTopLevelFolders(HttpRequest req, ILogger log)
         {
             // Check for logged in user
             ClaimsPrincipal claimsPrincipal;
@@ -59,7 +59,9 @@ namespace sas.api
             }
 
             // Find out user who is calling
-            var tlfp = GetTopLevelFolderParameters(req, out string error);
+            var tlfp = await GetTopLevelFolderParameters(req);
+            if (tlfp == null)
+                return new BadRequestErrorMessageResult($"{nameof(TopLevelFolderParameters)} is missing.");
             var storageUri = new Uri($"https://{tlfp.StorageAcount}.dfs.core.windows.net");
             var folderOperations = new FolderOperations(storageUri, tlfp.Container, log);
             var folders = folderOperations.GetAccessibleFolders(tlfp.FolderOwner);
@@ -76,14 +78,12 @@ namespace sas.api
         private static async Task<IActionResult> CreateFolder(HttpRequest req, ILogger log)
         {
             //Extracting body object from the call and deserializing it.
-            var tlfp = GetTopLevelFolderParameters(req, out string error);
-            if (error != null)
-            {
-                log.LogError(error);
-                return new BadRequestObjectResult(error);
-            }
+            var tlfp = await GetTopLevelFolderParameters(req);
+            if (tlfp == null)
+                return new BadRequestErrorMessageResult($"{nameof(TopLevelFolderParameters)} is missing.");
 
             // Check Parameters
+            string error = null;
             if (Extensions.AnyNull(tlfp.Container, tlfp.Folder, tlfp.FolderOwner, tlfp.FundCode, tlfp.StorageAcount))
                 error = $"{nameof(TopLevelFolderParameters)} is malformed.";
 
@@ -111,24 +111,14 @@ namespace sas.api
             return new OkResult();
         }
 
-        internal static TopLevelFolderParameters GetTopLevelFolderParameters(HttpRequest req, out string error)
+        internal static async Task<TopLevelFolderParameters> GetTopLevelFolderParameters(HttpRequest req)
         {
             string body = string.Empty;
-            error = null;
-
-            using (StreamReader reader = new StreamReader(req.Body, Encoding.UTF8))
+            using (StreamReader reader = new(req.Body, Encoding.UTF8))
             {
-                body = reader.ReadToEnd();
+                body = await reader.ReadToEndAsync();
             }
-
             var bodyDeserialized = JsonConvert.DeserializeObject<TopLevelFolderParameters>(body);
-
-            //Performs call's body validation
-            if (bodyDeserialized is null)
-            {
-                error = $"{nameof(TopLevelFolderParameters)} is missing.";
-            }
-
             return bodyDeserialized;
         }
 
