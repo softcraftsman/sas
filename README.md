@@ -1,5 +1,13 @@
 # SAS for EDU
-SAS is a storage as a Service platform designed to automate storage allocation in EDU institutions. Its main goal is to provide agility to stakeholders on having access to object storage infrastructure.
+SAS is a storage as a Service platform designed to automate storage allocation in EDU institutions. Its main goal is to provide agility to stakeholders on having access to object storage infrastructure in Microsoft Azure.
+
+Some of the capabilities currently provided by the system are:
+
+* Dynamic creation of top level folder and file systems in Azure Data Lake Storage (ADLS).
+* Dynamic addition of object owner as "Execute" in File System's ACL.
+* Automatic creation of initial folder under the File System.
+* Dynamic addition of folder's onwer under initial folder.
+* Exposure of "how to use" the storage infrastructure through Web UI.
 
 # Deploy SAS for EDU
 In order to deploy this solution to your environment, you'll need to setup some variables in the build process and create a static web app in Azure. To accomplish this, do the following:
