@@ -34,6 +34,8 @@ Copy the Application (client) ID for use later.
 ## Prepare the storage accounts
 In order to allow this application to modify the storage accounts, it will require Storage Blob Data Owner permission for each of the storage accounts.
 
+Considering our App was registered as "sas" under Azure Active Directory, the access control addition would look like the image below.
+
 ![image](https://raw.githubusercontent.com/fabriciosanchez/sas/main/assets/blog-owner-contributor.png)
 
 Enable CORS on the storage accounts pointing to the Static Web App url.
