@@ -19,6 +19,7 @@ using System.Security.Claims;
 using System.Web.Http;
 using System.Diagnostics;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.Http.Features;
 
 namespace sas.api
 {
@@ -28,10 +29,6 @@ namespace sas.api
         public static async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)] HttpRequest req, ILogger log)
         {
-
-            log.LogInformation($" req.Body.CanSeek: {req.Body.CanSeek} req.Body.Position: {req.Body.Position} req.ContentLength: {req.ContentLength}");
-
-
             // GET - Send Instructions back to calling client
             if (req.Method == HttpMethods.Get)
             {
@@ -131,17 +128,12 @@ namespace sas.api
             internal async Task<TopLevelFolderParameters> GetTopLevelFolderParameters(HttpRequest req)
             {
                 string body = string.Empty;
-
-                log.LogInformation($" req.Body.CanSeek: {req.Body.CanSeek} req.Body.Position: {req.Body.Position} req.ContentLength: {req.ContentLength}");
-                if (req.Body.CanSeek)
-                    req.Body.Position = 0;
-
                 using (var reader = new StreamReader(req.Body, Encoding.UTF8))
                 {
                     body = await reader.ReadToEndAsync();
                     if (string.IsNullOrEmpty(body))
                     {
-                        throw new Exception("Body was empty coming from ReadToEndAsync");
+                        log.LogError("Body was empty coming from ReadToEndAsync");
                     }
                 }
                 var bodyDeserialized = JsonConvert.DeserializeObject<TopLevelFolderParameters>(body);
