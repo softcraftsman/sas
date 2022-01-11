@@ -2,15 +2,12 @@
     vertical-align: middle;
 }
 
-.directoriesTable .actionsBar {
-    margin: 5px;
-    display: flex;
-    justify-content: flex-end;
+.directoriesTable td.spaceused, .directoriesTable td.costs, .directoriesTable td.actions {
+    text-align: center;
 }
 
-.directoriesTable .btn svg {
-    margin-top: -3px;
-    margin-left: -3px;
+.directoriesTable .action {
+    margin: 3px;
 }
 
 .directoriesTable .action:hover {
@@ -21,3 +18,11 @@
     margin: 3px;
 }
 
+.members-popover {
+    padding: 5px 10px;
+}
+
+.member-text {
+    font-size: small;
+    padding: 2px 0;
+}

@@ -47,11 +47,13 @@ public class ADLSOperations
 
     private DataLakeServiceClient CreateDlsClientFromToken()
     {
+        log.LogInformation($"Retrieve Environment Variables");
         var tenantId = Environment.GetEnvironmentVariable("TENANT_ID");
         var clientId = Environment.GetEnvironmentVariable("APP_REGISTRATION_CLIENT_ID");
         var clientSecret = Environment.GetEnvironmentVariable("CLIENT_SECRET");
         var tokenCred = new ClientSecretCredential(tenantId, clientId, clientSecret);
         var dlsClient = new DataLakeServiceClient(containerUri, tokenCred);
+        log.LogInformation($"Service Client Created");
         return dlsClient;
     }
 
@@ -121,10 +123,14 @@ public class ADLSOperations
         log.LogTrace($"Creating the folder '{folder}' within the container '{storageRootContainer}'...");
 
         var serviceClient = this.CreateDlsClientFromToken();
+        log.LogTrace("DlsClient created");
         var directoryFileSystem = GetsReferenceToFileSystem(serviceClient, storageRootContainer);
+        log.LogTrace("Reference to file system obtained.");
         DataLakeDirectoryClient directory = directoryFileSystem.CreateDirectory(folder);
+        log.LogTrace("Directory Client created.");
 
         var response = directory.Create();
+        log.LogTrace("Directory created.");
         var statusFlag = response.GetRawResponse().Status == 201;
         if (!statusFlag)
             error = "Error trying to create the new folder. Error 500.";

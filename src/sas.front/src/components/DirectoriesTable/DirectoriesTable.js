@@ -1,121 +1,114 @@
 import React, { useState } from 'react'
-import Table from 'react-bootstrap/Table'
-import Alert from '@mui/material/Alert'
-import Button from 'react-bootstrap/Button'
+import PropTypes from 'prop-types'
 import Chip from '@mui/material/Chip'
-import Snackbar from '@mui/material/Snackbar'
-import { Pencil, Plus } from 'react-bootstrap-icons';
-import DirectoryEditor from '../DirectoryEditor'
+import Table from 'react-bootstrap/Table'
+import InfoIcon from '@mui/icons-material/InfoOutlined'
+import PencilIcon from '@mui/icons-material/EditOutlined'
 import './DirectoriesTable.css'
+import { Popover } from '@mui/material'
 
-export const DirectoriesTable = ({ data }) => {
-    const [editor, setEditor] = useState({ show: false, data: {}, isNew: true })
-    const [toastMessage, setToastMessage] = useState()
-    const [isToastOpen, setToastOpen] = useState(false)
+export const DirectoriesTable = ({ data, onDetails, onEdit, strings }) => {
+    const [anchorEl, setAnchorEl] = useState(null)
 
-
-    const handleAdd = () => {
-        setEditor({ show: true, data: {}, isNew: true })
+    const handlePopoverClose = () => {
+        setAnchorEl(null)
     }
 
-
-    const handleCancelEdit = () => {
-        setEditor({ show: false, data: {}, isNew: true })
+    const handlePopoverOpen = event => {
+        setAnchorEl(event.currentTarget)
     }
 
+    const open = Boolean(anchorEl)
 
-    const handleCreateDirectory = (data) => {
-        // Calls the API to save the directory
-
-        // Hide the editor modal
-        setEditor({ show: false, data: {}, isNew: true })
-
-        // Display a toast
-        displayToast(`Directory '${data.name}' Created!`)
-    }
-
-
-    const handleEdit = (event, rowData) => {
-        setEditor({ show: true, data: rowData, isNew: false })
-    }
-
-
-    const handleUpdateDirectory = (data) => {
-        // Calls the API to save the directory
-
-        // Hide the editor modal
-        setEditor({ show: false, data: {}, isNew: true })
-
-        // Display a toast
-        displayToast(`Directory '${data.name}' Updated!`)
-    }
-
-
-    const displayToast = message => {
-        setToastMessage(message)
-        setToastOpen(true)
+    const renderMembers = members => {
+        if (members.length > 2) {
+            return (
+                <>
+                    <div onMouseEnter={handlePopoverOpen} onMouseLeave={handlePopoverClose}>
+                        <Chip className='member-chip' label={`${members.length} ${strings.members}`} />
+                    </div>
+                    <Popover
+                        anchorEl={anchorEl}
+                        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+                        disableRestoreFocus
+                        onClose={handlePopoverClose}
+                        open={open}
+                        sx={{ pointerEvents: 'none' }}
+                        transformOrigin={{
+                            vertical: 'top',
+                            horizontal: 'left',
+                        }}
+                    >
+                        <div className='members-popover'>
+                            {members.map(item => (<div key={item} className='member-text'>{item}</div>))}
+                        </div>
+                    </Popover>
+                </>
+            )
+        } else {
+            return members.map(item => (<Chip key={item} className='member-chip' label={`${item}`} />))
+        }
     }
 
     return (
-        <div className='directoriesTable'>
-            <div className='actionsBar'>
-                <Button onClick={handleAdd}>
-                    <Plus size={24} /> Add
-                </Button>
-            </div>
-
-            <Table striped bordered hover>
-                <thead>
-                    <tr>
-                        <th>Space Name</th>
-                        <th>Space Used</th>
-                        <th>Monthly Cost</th>
-                        <th>Who Has Access</th>
-                        <th>Storage Type</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {data.map(row => {
-                        return (
-                            <tr key={row.name}>
-                                <td>{row.name}</td>
-                                <td>{row.spaceUsed}</td>
-                                <td>{row.monthlyCost}</td>
-                                <td>{row.members.map(item => (<Chip key={item} className='member-chip' label={`${item}`} />))}</td>
-                                <td>{row.storageType}</td>
-                                <td>
-                                    <Pencil onClick={() => handleEdit(null, row)} className='action' />
-                                </td>
-                            </tr>
-                        )
-                    })}
-                </tbody>
-            </Table>
-            {editor.show &&
-                <DirectoryEditor
-                    data={editor.data}
-                    isNew={editor.isNew}
-                    onCancel={handleCancelEdit}
-                    onCreate={handleCreateDirectory}
-                    onUpdate={handleUpdateDirectory}
-                    open={editor.show}
-                />
-            }
-            <Snackbar
-                open={isToastOpen}
-                anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
-                autoHideDuration={5000}
-                onClose={() => setToastOpen(false)}
-            >
-                <Alert severity="success">{toastMessage}</Alert>
-            </Snackbar>
-        </div>
+        <Table striped bordered hover className='directoriesTable'>
+            <thead>
+                <tr>
+                    <th>{strings.folderLabel}</th>
+                    <th>{strings.spaceUsedLabel}</th>
+                    <th>{strings.monthlyCostLabel}</th>
+                    <th>{strings.whoHasAccessLabel}</th>
+                    <th>{strings.fundCodeLabel}</th>
+                    <th>{strings.actionsLabel}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {data.map(row => {
+                    return (
+                        <tr key={row.name}>
+                            <td className='name'>{row.name}</td>
+                            <td className='spaceused'>{row.size}</td>
+                            <td className='costs'>{row.cost}</td>
+                            <td className='owner'>{renderMembers(row.userAccess)}</td>
+                            <td className='fundcode'>{row.fundCode}</td>
+                            <td className='actions'>
+                                {onEdit && <PencilIcon onClick={() => onEdit(row)} className='action' />}
+                                {onDetails && <InfoIcon onClick={() => onDetails(row)} className='action' />}
+                            </td>
+                        </tr>
+                    )
+                })}
+            </tbody>
+        </Table>
     )
 }
 
+DirectoriesTable.propTypes = {
+    data: PropTypes.array,
+    onDetails: PropTypes.func,
+    onEdit: PropTypes.func,
+    strings: PropTypes.shape({
+        actionsLabel: PropTypes.string,
+        folderLabel: PropTypes.string,
+        fundCodeLabel: PropTypes.string,
+        members: PropTypes.string,
+        monthlyCostLabel: PropTypes.string,
+        spaceUsedLabel: PropTypes.string,
+        whoHasAccessLabel: PropTypes.string,
+    })
+}
+
 DirectoriesTable.defaultProps = {
-    data: []
+    data: [],
+    strings: {
+        actionsLabel: 'Actions',
+        folderLabel: 'Folder',
+        fundCodeLabel: 'Fund Code',
+        members: 'members',
+        monthlyCostLabel: 'Monthly Cost',
+        spaceUsedLabel: 'Space Used',
+        whoHasAccessLabel: 'Who Has Access?',
+    }
 }
 
 export default DirectoriesTable

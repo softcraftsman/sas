@@ -14,7 +14,15 @@ const URLS = {
     },
     fileSystems: {
         method: 'GET',
-        endpoint: 'https://{name}.dfs.core.windows.net'
+        endpoint: '/api/filesystems'
+    },
+    directories: {
+        method: 'GET',
+        endpoint: '/api/toplevelfolders'
+    },
+    createFolder: {
+        method: 'POST',
+        endpoint: '/api/CreateTopLevelFolder'
     }
 }
 
