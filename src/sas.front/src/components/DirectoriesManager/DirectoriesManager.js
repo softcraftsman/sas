@@ -6,7 +6,8 @@ import Button from '@mui/material/Button'
 import AddIcon from '@mui/icons-material/AddOutlined'
 import Snackbar from '@mui/material/Snackbar'
 import DirectoriesTable from '../DirectoriesTable'
-import DirectoryEditor from '../DirectoryEditor'
+import DirectoryEditorModal from '../DirectoryEditorModal'
+import DirectoryDetailsModal from '../DirectoryDetailsModal'
 import { createFolder } from '../../services/StorageManager.service'
 import './DirectoriesManager.css'
 
@@ -14,6 +15,8 @@ const DirectoriesManager = ({ data, storageAccount, fileSystem }) => {
     const { auth } = useAuthentication()
 
     const [editor, setEditor] = useState({ show: false, data: {}, isNew: true })
+    const [details, setDetails] = useState({ show: false, data: {} })
+
     const [toastMessage, setToastMessage] = useState()
     const [isToastOpen, setToastOpen] = useState(false)
 
@@ -23,10 +26,15 @@ const DirectoriesManager = ({ data, storageAccount, fileSystem }) => {
     }
 
 
+    const handleCancelDetails = () => {
+        setDetails({ show: false, data: {} })
+    }
+
+
     const handleCancelEdit = () => {
         setEditor({ show: false, data: {}, isNew: true })
     }
-
+    
 
     const handleCreateDirectory = (data) => {
         // Calls the API to save the directory
@@ -43,7 +51,7 @@ const DirectoriesManager = ({ data, storageAccount, fileSystem }) => {
 
 
     const handleDetails = (rowData) => {
-
+        setDetails({ show: true, data: rowData })
     }
 
 
@@ -83,7 +91,7 @@ const DirectoriesManager = ({ data, storageAccount, fileSystem }) => {
                 onEdit={handleEdit} />
 
             {editor.show &&
-                <DirectoryEditor
+                <DirectoryEditorModal
                     data={editor.data}
                     isNew={editor.isNew}
                     onCancel={handleCancelEdit}
@@ -92,6 +100,15 @@ const DirectoriesManager = ({ data, storageAccount, fileSystem }) => {
                     open={editor.show}
                 />
             }
+
+            {details.show &&
+                <DirectoryDetailsModal
+                    data={details.data}
+                    onCancel={handleCancelDetails}
+                    open={details.show}
+                />
+            }
+
             <Snackbar
                 open={isToastOpen}
                 anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
