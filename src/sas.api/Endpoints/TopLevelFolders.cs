@@ -17,6 +17,7 @@ using sas.api.Services;
 using System.Linq;
 using System.Security.Claims;
 using System.Web.Http;
+using System.Diagnostics;
 
 namespace sas.api
 {
@@ -117,6 +118,9 @@ namespace sas.api
             using (StreamReader reader = new(req.Body, Encoding.UTF8))
             {
                 body = await reader.ReadToEndAsync();
+                if (string.IsNullOrEmpty(body))
+                    throw new Exception("Body was empty coming from ReadToEndAsync");
+
             }
             var bodyDeserialized = JsonConvert.DeserializeObject<TopLevelFolderParameters>(body);
             return bodyDeserialized;
