@@ -4,6 +4,7 @@ using Azure.Storage.Files.DataLake.Models;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Text;
@@ -63,8 +64,17 @@ namespace sas.api.Services
         public IEnumerable<string> GetContainersForUpn(string upn)
         {
             upn = upn.Replace('@', '_').ToLower();     // Translate for guest accounts
+            List<FileSystemItem> fileSystems;
+            try
+            {
+                fileSystems = dlsClient.GetFileSystems().ToList();
 
-            var fileSystems = dlsClient.GetFileSystems();
+            }
+            catch( Exception ex)
+            {
+                Debug.WriteLine(ex.Message);
+                yield break;
+            }
 
             foreach (var filesystem in fileSystems)
             {
@@ -77,7 +87,7 @@ namespace sas.api.Services
                 }
 
                 if (acl.Value.AccessControlList.Any(
-                    p => p.EntityId is not null && p.EntityId.ToLower().StartsWith(upn)))
+                    p => p.EntityId is not null && p.EntityId.Replace('@', '_').ToLower().StartsWith(upn)))
                 {
                     log.LogInformation(filesystem.Name);
                     yield return filesystem.Name;
