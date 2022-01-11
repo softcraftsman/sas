@@ -20,6 +20,8 @@ In order to deploy this solution to your environment, you'll need to setup some 
 ## Fork the code
 Fork the code into your github repository. You can name the repo whatever you like.
 
+![image]()
+
 ## Create an application
 In the Azure portal, go to the Azure Active Directory. Add a new App Registration.
 * Provide an Application Name
