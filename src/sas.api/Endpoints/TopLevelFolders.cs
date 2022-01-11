@@ -28,10 +28,6 @@ namespace sas.api
         public static async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)] HttpRequest req, ILogger log)
         {
-
-            log.LogInformation($" req.Body.CanSeek: {req.Body.CanSeek} req.Body.Position: {req.Body.Position} req.ContentLength: {req.ContentLength}");
-
-
             // GET - Send Instructions back to calling client
             if (req.Method == HttpMethods.Get)
             {
@@ -50,6 +46,12 @@ namespace sas.api
 
         private static async Task<IActionResult> GetTopLevelFolders(HttpRequest req, ILogger log)
         {
+            // Find out user who is calling
+            var parameters = new Parameters(log);
+            var tlfp = await parameters.GetTopLevelFolderParameters(req);
+            if (tlfp == null)
+                return new BadRequestErrorMessageResult($"{nameof(TopLevelFolderParameters)} is missing.");
+
             // Check for logged in user
             ClaimsPrincipal claimsPrincipal;
             try
@@ -64,11 +66,6 @@ namespace sas.api
                 return new BadRequestErrorMessageResult("Unable to authenticate user.");
             }
 
-            // Find out user who is calling
-            var parameters = new Parameters(log);
-            var tlfp = await parameters.GetTopLevelFolderParameters(req);
-            if (tlfp == null)
-                return new BadRequestErrorMessageResult($"{nameof(TopLevelFolderParameters)} is missing.");
             var storageUri = new Uri($"https://{tlfp.StorageAcount}.dfs.core.windows.net");
             var folderOperations = new FolderOperations(storageUri, tlfp.Container, log);
             var folders = folderOperations.GetAccessibleFolders(tlfp.FolderOwner);
@@ -131,11 +128,6 @@ namespace sas.api
             internal async Task<TopLevelFolderParameters> GetTopLevelFolderParameters(HttpRequest req)
             {
                 string body = string.Empty;
-
-                log.LogInformation($" req.Body.CanSeek: {req.Body.CanSeek} req.Body.Position: {req.Body.Position} req.ContentLength: {req.ContentLength}");
-                if (req.Body.CanSeek)
-                    req.Body.Position = 0;
-
                 using (var reader = new StreamReader(req.Body, Encoding.UTF8))
                 {
                     body = await reader.ReadToEndAsync();
