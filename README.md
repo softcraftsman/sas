@@ -62,6 +62,7 @@ APP_REGISTRATION_CLIENT_ID|00000000-0000-0000-0000-000000000000|ID of the App Re
 SAS_DEPLOYMENT_TOKEN||
 TENANT_ID|00000000-0000-0000-0000-000000000000|ID of the Azure Active Directory Tenant, refered to as the Tenant ID in the Azure Portal
 WEB_URL|https://happy-desert-01a9eac0f.azurestaticapps.net|Url to the website
+CLIENT_SECRET|Random code format|Secret used to authenticate access with app registration.
 
 ![App Settings](./assets/aad-settings.png)
 
