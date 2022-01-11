@@ -20,12 +20,12 @@ export const getStorageAccounts = async () => {
  * Returns the list of storage accounts and their file systems
  */
 export const getFileSystems = async () => {
-    //const { endpoint, method } = URLS.fileSystems
-    //const options = getOptions(method)
-
     return new Promise(resolve => resolve([{ name: 'adlfredgohsman', items: [{ name: 'numberuno' }, { name: 'files' }] }]))
 
     /*
+    const { endpoint, method } = URLS.fileSystems
+    const options = getOptions(method)
+
     return fetch(endpoint, options)
         .then(response => {
             return response.json()
@@ -39,15 +39,15 @@ export const getFileSystems = async () => {
  * Returns the list of directories
  */
 export const getDirectories = async () => {
-    //const { endpoint, method } = URLS.directories
-    //const options = getOptions(method)
-
     return new Promise(resolve => resolve([
         { name: 'folder one', size: '1', cost: '0.01', fundCode: 'abcdefg', userAccess: ['fredgohsman@microsoft.com', 'johnbrown@microsoft.com', 'fabriciosanchez@microsoft.com'] },
         { name: 'directory two', size: '2', cost: '0.2', fundCode: 'cdefghi', userAccess: ['fredgohsman@microsoft.com'] }
     ]))
 
     /*
+    const { endpoint, method } = URLS.directories
+    const options = getOptions(method)
+
     return fetch(endpoint, options)
         .then(response => {
             return response.json()
