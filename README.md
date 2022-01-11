@@ -67,7 +67,7 @@ CLIENT_SECRET|Random code format|Secret used to authenticate access with app reg
 ![App Settings](./assets/aad-settings.png)
 
 ## Build
-Now that all of the pieces are present, go to Actions in GitHub and run the Azure SWA Deploy workflow (It should automatically run when code is committed as well).
+Now that all of the pieces are present, go to Actions in GitHub and run the Azure SWA Deploy workflow (It should automatically run when code is committed as well). 
 
 [![Azure Static Web Apps CI/CD](../../actions/workflows/azure-swa-deploy.yml/badge.svg)](../../actions/workflows/azure-swa-deploy.yml)
 
