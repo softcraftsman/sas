@@ -29,10 +29,6 @@ namespace sas.api
         public static async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)] HttpRequest req, ILogger log)
         {
-            // TODO: Figure out how to remove this
-            var syncFeat = req.HttpContext.Features.Get<IHttpBodyControlFeature>();
-            syncFeat.AllowSynchronousIO = true;
-
             // GET - Send Instructions back to calling client
             if (req.Method == HttpMethods.Get)
             {
@@ -51,12 +47,6 @@ namespace sas.api
 
         private static async Task<IActionResult> GetTopLevelFolders(HttpRequest req, ILogger log)
         {
-            // Find out user who is calling
-            var parameters = new Parameters(log);
-            var tlfp = parameters.GetTopLevelFolderParameters(req);
-            if (tlfp == null)
-                return new BadRequestErrorMessageResult($"{nameof(TopLevelFolderParameters)} is missing.");
-
             // Check for logged in user
             ClaimsPrincipal claimsPrincipal;
             try
@@ -71,6 +61,11 @@ namespace sas.api
                 return new BadRequestErrorMessageResult("Unable to authenticate user.");
             }
 
+            // Find out user who is calling
+            var parameters = new Parameters(log);
+            var tlfp = await parameters.GetTopLevelFolderParameters(req);
+            if (tlfp == null)
+                return new BadRequestErrorMessageResult($"{nameof(TopLevelFolderParameters)} is missing.");
             var storageUri = new Uri($"https://{tlfp.StorageAcount}.dfs.core.windows.net");
             var folderOperations = new FolderOperations(storageUri, tlfp.Container, log);
             var folders = folderOperations.GetAccessibleFolders(tlfp.FolderOwner);
@@ -88,7 +83,7 @@ namespace sas.api
         {
             //Extracting body object from the call and deserializing it.
             var parameters = new Parameters(log);
-            var tlfp = parameters.GetTopLevelFolderParameters(req);
+            var tlfp = await parameters.GetTopLevelFolderParameters(req);
             if (tlfp == null)
                 return new BadRequestErrorMessageResult($"{nameof(TopLevelFolderParameters)} is missing.");
 
@@ -130,15 +125,15 @@ namespace sas.api
                 this.log = log;
             }
 
-            internal TopLevelFolderParameters GetTopLevelFolderParameters(HttpRequest req)
+            internal async Task<TopLevelFolderParameters> GetTopLevelFolderParameters(HttpRequest req)
             {
                 string body = string.Empty;
                 using (var reader = new StreamReader(req.Body, Encoding.UTF8))
                 {
-                    body = reader.ReadToEnd();
+                    body = await reader.ReadToEndAsync();
                     if (string.IsNullOrEmpty(body))
                     {
-                        throw new Exception("Body was empty coming from ReadToEndAsync");
+                        log.LogError("Body was empty coming from ReadToEndAsync");
                     }
                 }
                 var bodyDeserialized = JsonConvert.DeserializeObject<TopLevelFolderParameters>(body);
