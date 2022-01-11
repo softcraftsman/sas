@@ -18,6 +18,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Web.Http;
 using System.Diagnostics;
+using Microsoft.IdentityModel.Tokens;
 
 namespace sas.api
 {
@@ -27,6 +28,10 @@ namespace sas.api
         public static async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)] HttpRequest req, ILogger log)
         {
+
+            log.LogInformation($" req.Body.CanSeek: {req.Body.CanSeek} req.Body.Position: {req.Body.Position} req.ContentLength: {req.ContentLength}");
+
+
             // GET - Send Instructions back to calling client
             if (req.Method == HttpMethods.Get)
             {
@@ -60,7 +65,8 @@ namespace sas.api
             }
 
             // Find out user who is calling
-            var tlfp = await GetTopLevelFolderParameters(req).ConfigureAwait(true);
+            var parameters = new Parameters(log);
+            var tlfp = await parameters.GetTopLevelFolderParameters(req);
             if (tlfp == null)
                 return new BadRequestErrorMessageResult($"{nameof(TopLevelFolderParameters)} is missing.");
             var storageUri = new Uri($"https://{tlfp.StorageAcount}.dfs.core.windows.net");
@@ -79,7 +85,8 @@ namespace sas.api
         private static async Task<IActionResult> CreateFolder(HttpRequest req, ILogger log)
         {
             //Extracting body object from the call and deserializing it.
-            var tlfp = await GetTopLevelFolderParameters(req);
+            var parameters = new Parameters(log);
+            var tlfp = await parameters.GetTopLevelFolderParameters(req);
             if (tlfp == null)
                 return new BadRequestErrorMessageResult($"{nameof(TopLevelFolderParameters)} is missing.");
 
@@ -112,19 +119,34 @@ namespace sas.api
             return new OkResult();
         }
 
-        internal static async Task<TopLevelFolderParameters> GetTopLevelFolderParameters(HttpRequest req)
+        internal class Parameters
         {
-            string body = string.Empty;
-            if (req is null)
-                throw new Exception("Request is null");
-            using (StreamReader reader = new(req.Body, Encoding.UTF8))
+            readonly ILogger log;
+
+            public Parameters(ILogger log)
             {
-                body = await reader.ReadToEndAsync().ConfigureAwait(true);
-                if (string.IsNullOrEmpty(body))
-                    throw new Exception("Body was empty coming from ReadToEndAsync");
+                this.log = log;
             }
-            var bodyDeserialized = JsonConvert.DeserializeObject<TopLevelFolderParameters>(body);
-            return bodyDeserialized;
+
+            internal async Task<TopLevelFolderParameters> GetTopLevelFolderParameters(HttpRequest req)
+            {
+                string body = string.Empty;
+
+                log.LogInformation($" req.Body.CanSeek: {req.Body.CanSeek} req.Body.Position: {req.Body.Position} req.ContentLength: {req.ContentLength}");
+                if (req.Body.CanSeek)
+                    req.Body.Position = 0;
+
+                using (var reader = new StreamReader(req.Body, Encoding.UTF8))
+                {
+                    body = await reader.ReadToEndAsync();
+                    if (string.IsNullOrEmpty(body))
+                    {
+                        throw new Exception("Body was empty coming from ReadToEndAsync");
+                    }
+                }
+                var bodyDeserialized = JsonConvert.DeserializeObject<TopLevelFolderParameters>(body);
+                return bodyDeserialized;
+            }
         }
 
         internal class TopLevelFolderParameters
