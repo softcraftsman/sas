@@ -1,5 +1,16 @@
 # SAS for EDU
-SAS is a storage as a Service platform designed to automate storage allocation in EDU institutions. Its main goal is to provide agility to stakeholders on having access to object storage infrastructure.
+
+![image](https://raw.githubusercontent.com/fabriciosanchez/sas/main/assets/sas-welcome-page.png)
+
+SAS is a storage as a Service platform designed to automate storage allocation in EDU institutions. Its main goal is to provide agility to stakeholders on having access to object storage infrastructure in Microsoft Azure.
+
+Some of the capabilities currently provided by the system are:
+
+* Dynamic creation of top level folder and file systems in Azure Data Lake Storage (ADLS).
+* Dynamic addition of object owner as "Execute" in File System's ACL.
+* Automatic creation of initial folder under the File System.
+* Dynamic addition of folder's onwer under initial folder.
+* Exposure of "how to use" the storage infrastructure through Web UI.
 
 # Deploy SAS for EDU
 In order to deploy this solution to your environment, you'll need to setup some variables in the build process and create a static web app in Azure. To accomplish this, do the following:
@@ -26,7 +37,12 @@ Copy the Application (client) ID for use later.
 ## Prepare the storage accounts
 In order to allow this application to modify the storage accounts, it will require Storage Blob Data Owner permission for each of the storage accounts.
 
+Considering our App was registered as "sas" under Azure Active Directory, the access control addition would look like the image below.
+
+![image](https://raw.githubusercontent.com/fabriciosanchez/sas/main/assets/blog-owner-contributor.png)
+
 Enable CORS on the storage accounts pointing to the Static Web App url.
+
 ![image](https://user-images.githubusercontent.com/3756829/148672121-d1de3d3e-f026-42c9-bd1e-39eefbcfd3c3.png)
 
 
@@ -49,11 +65,12 @@ APP_REGISTRATION_CLIENT_ID|00000000-0000-0000-0000-000000000000|ID of the App Re
 SAS_DEPLOYMENT_TOKEN||
 TENANT_ID|00000000-0000-0000-0000-000000000000|ID of the Azure Active Directory Tenant, refered to as the Tenant ID in the Azure Portal
 WEB_URL|https://happy-desert-01a9eac0f.azurestaticapps.net|Url to the website
+CLIENT_SECRET|Random code format|Secret used to authenticate access with app registration.
 
 ![App Settings](./assets/aad-settings.png)
 
 ## Build
-Now that all of the pieces are present, go to Actions in GitHub and run the Azure SWA Deploy workflow (It should automatically run when code is committed as well).
+Now that all of the pieces are present, go to Actions in GitHub and run the Azure SWA Deploy workflow (It should automatically run when code is committed as well). 
 
 [![Azure Static Web Apps CI/CD](../../actions/workflows/azure-swa-deploy.yml/badge.svg)](../../actions/workflows/azure-swa-deploy.yml)
 
