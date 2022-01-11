@@ -20,8 +20,6 @@ In order to deploy this solution to your environment, you'll need to setup some 
 ## Fork the code
 Fork the code into your github repository. You can name the repo whatever you like.
 
-![image]()
-
 ## Create an application
 In the Azure portal, go to the Azure Active Directory. Add a new App Registration.
 * Provide an Application Name
@@ -36,7 +34,10 @@ Copy the Application (client) ID for use later.
 ## Prepare the storage accounts
 In order to allow this application to modify the storage accounts, it will require Storage Blob Data Owner permission for each of the storage accounts.
 
+![image](https://raw.githubusercontent.com/fabriciosanchez/sas/main/assets/blog-owner-contributor.png)
+
 Enable CORS on the storage accounts pointing to the Static Web App url.
+
 ![image](https://user-images.githubusercontent.com/3756829/148672121-d1de3d3e-f026-42c9-bd1e-39eefbcfd3c3.png)
 
 
