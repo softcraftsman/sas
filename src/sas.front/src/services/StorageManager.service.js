@@ -25,11 +25,13 @@ export const getFileSystems = async () => {
 
     return new Promise(resolve => resolve([{ name: 'adlfredgohsman', items: [{ name: 'numberuno' }, { name: 'files' }] }]))
 
+    /*
     return fetch(endpoint, options)
         .then(response => {
             return response.json()
         })
         .catch(error => console.log(error))
+        */
 }
 
 
@@ -45,11 +47,13 @@ export const getDirectories = async () => {
         { name: 'directory two', size: '2', cost: '0.2', fundCode: 'cdefghi', userAccess: ['fredgohsman@microsoft.com'] }
     ]))
 
+    /*
     return fetch(endpoint, options)
         .then(response => {
             return response.json()
         })
         .catch(error => console.log(error))
+        */
 }
 
 
