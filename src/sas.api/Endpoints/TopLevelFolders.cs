@@ -59,7 +59,7 @@ namespace sas.api
             }
 
             // Find out user who is calling
-            var tlfp = await GetTopLevelFolderParameters(req);
+            var tlfp = await GetTopLevelFolderParameters(req).ConfigureAwait(true);
             if (tlfp == null)
                 return new BadRequestErrorMessageResult($"{nameof(TopLevelFolderParameters)} is missing.");
             var storageUri = new Uri($"https://{tlfp.StorageAcount}.dfs.core.windows.net");
