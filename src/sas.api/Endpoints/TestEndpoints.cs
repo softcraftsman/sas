@@ -39,7 +39,7 @@ namespace sas.api
             var tlfp = TopLevelFolders.GetTopLevelFolderParameters(req, out string error);
             if (error != null)
             {
-                log.LogInformation(error);
+                log.LogError(error);
                 return new BadRequestObjectResult(error);
             }
 

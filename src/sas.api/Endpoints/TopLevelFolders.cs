@@ -15,6 +15,8 @@ using System.Text;
 using Microsoft.Identity.Client;
 using sas.api.Services;
 using System.Linq;
+using System.Security.Claims;
+using System.Web.Http;
 
 namespace sas.api
 {
@@ -27,14 +29,7 @@ namespace sas.api
             // GET - Send Instructions back to calling client
             if (req.Method == HttpMethods.Get)
             {
-                // Find out user who is calling
-                var tlfp = GetTopLevelFolderParameters(req, out string error);
-                var storageUri = new Uri($"https://{tlfp.StorageAcount}.dfs.core.windows.net");
-                var folderOperations = new FolderOperations(storageUri, tlfp.Container, log);
-                var folders = folderOperations.GetAccessibleFolders(tlfp.FolderOwner);
-
-                // Build a 
-                return new OkObjectResult(folders);
+                return GetTopLevelFolders(req, log);
             }
 
             // POST - Method
@@ -43,13 +38,36 @@ namespace sas.api
                 return await CreateFolder(req, log);
             }
 
-            log.LogInformation("Internal Server Error - 500. Only GET and POST are acceptable.");
+            log.LogError("Internal Server Error - 500. Only GET and POST are acceptable.");
             return new BadRequestResult();
+        }
+
+        private static IActionResult GetTopLevelFolders(HttpRequest req, ILogger log)
+        {
+            // Check for logged in user
+            ClaimsPrincipal claimsPrincipal;
+            try
+            {
+                claimsPrincipal = UserOperations.GetClaimsPrincipal(req);
+                if (Extensions.AnyNull(claimsPrincipal, claimsPrincipal.Identity))
+                    return new BadRequestErrorMessageResult("Call requires an authenticated user.");
+            }
+            catch (Exception ex)
+            {
+                log.LogError(ex.Message);
+                return new BadRequestErrorMessageResult("Unable to authenticate user.");
+            }
+
+            // Find out user who is calling
+            var tlfp = GetTopLevelFolderParameters(req, out string error);
+            var storageUri = new Uri($"https://{tlfp.StorageAcount}.dfs.core.windows.net");
+            var folderOperations = new FolderOperations(storageUri, tlfp.Container, log);
+            var folders = folderOperations.GetAccessibleFolders(tlfp.FolderOwner);
+            return new OkObjectResult(folders);
         }
 
         private static IActionResult SendInstructions(ILogger log)
         {
-            log.LogInformation("CreateTopLevelFolder GET method called.");
             var tlfp = JsonConvert.SerializeObject(new TopLevelFolderParameters());
             var help = $"Use a POST method with the body containing the properties of {nameof(TopLevelFolderParameters)}\n{tlfp}";
             return new OkObjectResult(help);
@@ -61,38 +79,35 @@ namespace sas.api
             var tlfp = GetTopLevelFolderParameters(req, out string error);
             if (error != null)
             {
-                log.LogInformation(error);
+                log.LogError(error);
                 return new BadRequestObjectResult(error);
             }
 
-            // Get object ID from UPN
-            if (tlfp.FolderOwner.Contains('@'))
-            {
-                var apiAccessToken = await UserOperations.GetApiToken(req, log);
-                if (apiAccessToken != null)
-                    tlfp.FolderOwner = await UserOperations.GetObjectIdFromUPN(apiAccessToken, tlfp.FolderOwner);
-            }
+            // Check Parameters
+            if (Extensions.AnyNull(tlfp.Container, tlfp.Folder, tlfp.FolderOwner, tlfp.FundCode, tlfp.StorageAcount))
+                error = $"{nameof(TopLevelFolderParameters)} is malformed.";
 
             // Call each of the steps in order and error out if anytyhing fails
             var storageUri = new Uri($"https://{tlfp.StorageAcount}.dfs.core.windows.net");
             var fileSystemOperations = new FileSystemOperations(storageUri, log);
             var folderOperations = new FolderOperations(storageUri, tlfp.Container, log);
 
-            if (fileSystemOperations.AddsFolderOwnerToContainerACLAsExecute(tlfp.Container, tlfp.FolderOwner, false, out error)
-                && folderOperations.CreateNewFolder(tlfp.Folder, out error)
-                && folderOperations.AddFundCodeToMetaData(tlfp.Folder, tlfp.FundCode, out error)
-                && folderOperations.AssignFullRwx(tlfp.Folder, tlfp.FolderOwner, out error)
-               )
-            {
-                log.LogInformation("success");
-            }
-            else
-            {
-                log.LogError("Error: " + error);
-                return new StatusCodeResult(StatusCodes.Status500InternalServerError);
-            }
+            Result result = null;
+            result = await fileSystemOperations.AddsFolderOwnerToContainerACLAsExecute(tlfp.Container, tlfp.FolderOwner);
+            if (!result.Success)
+                return new BadRequestErrorMessageResult(result.Message);
 
-            log.LogInformation("Workflow completed successfully.");
+            result = await folderOperations.CreateNewFolder(tlfp.Folder);
+            if (!result.Success)
+                return new BadRequestErrorMessageResult(result.Message);
+            result = await folderOperations.AddFundCodeToMetaData(tlfp.Folder, tlfp.FundCode);
+            if (!result.Success)
+                return new BadRequestErrorMessageResult(result.Message);
+
+            result = await folderOperations.AssignFullRwx(tlfp.Folder, tlfp.FolderOwner);
+            if (!result.Success)
+                return new BadRequestErrorMessageResult(result.Message);
+
             return new OkResult();
         }
 
@@ -112,15 +127,6 @@ namespace sas.api
             if (bodyDeserialized is null)
             {
                 error = $"{nameof(TopLevelFolderParameters)} is missing.";
-            }
-            else
-            {
-                if (bodyDeserialized.Container == null || bodyDeserialized.Folder == null ||
-                    bodyDeserialized.FolderOwner == null || bodyDeserialized.FundCode == null ||
-                    bodyDeserialized.StorageAcount == null)
-                {
-                    error = $"{nameof(TopLevelFolderParameters)} is malformed.";
-                }
             }
 
             return bodyDeserialized;
