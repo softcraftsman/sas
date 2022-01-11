@@ -33,33 +33,36 @@ namespace sas.api.Services
             dlfsClient = new DataLakeServiceClient(storageUri, tokenCred).GetFileSystemClient(fileSystem);
         }
 
-        public bool CreateNewFolder(string folder, out string error)
+        internal async Task<Result> CreateNewFolder(string folder)
         {
-            error = null;
+            var result = new Result();
             log.LogTrace($"Creating the folder '{folder}' within the container '{dlfsClient.Uri}'...");
 
             try
             {
                 var directoryClient = dlfsClient.GetDirectoryClient(folder);
-                var response = directoryClient.Create();
-                var statusFlag = response.GetRawResponse().Status == 201;
-                if (!statusFlag)
-                    error = "Error trying to create the new folder. Error 500.";
-                return statusFlag;
+                var response = await directoryClient.CreateAsync();
+                result.Success = response.GetRawResponse().Status == 201;
+                if (!result.Success)
+                {
+                    result.Message = "Error trying to create the new folder. Error 500.";
+                    log.LogError(result.Message);
+                }
             }
             catch (Exception ex)
             {
-                error = ex.Message;
-                return false;
+                result.Message = ex.Message;
+                log.LogError(result.Message);
             }
+            return result;
         }
 
-        internal bool AssignFullRwx(string folder, string folderOwner, out string error)
+        internal async Task<Result> AssignFullRwx(string folder, string folderOwner)
         {
             log.LogTrace($"Assigning RWX permission to Folder Owner ({folderOwner}) at folder's ({folder}) level...");
 
+            var result = new Result();
             var directoryClient = dlfsClient.GetDirectoryClient(folder);
-
             var accessControlListUpdate = new List<PathAccessControlItem>
             {
                 new PathAccessControlItem(
@@ -74,14 +77,13 @@ namespace sas.api.Services
             };
 
             // Send up changes
-            var result = directoryClient.UpdateAccessControlRecursive(accessControlListUpdate);
-            var statusFlag = result.GetRawResponse().Status == (int)HttpStatusCode.OK;
-
-            error = statusFlag ? null : "Error trying to assign the RWX permission to the folder. Error 500.";
-            return statusFlag;
+            var resultACL = await directoryClient.UpdateAccessControlRecursiveAsync(accessControlListUpdate);
+            result.Success = resultACL.GetRawResponse().Status == (int)HttpStatusCode.OK;
+            result.Message = result.Success ? null : "Error trying to assign the RWX permission to the folder. Error 500.";
+            return result;
         }
 
-        internal bool AddFundCodeToMetaData(string folder, string fundCode, out string error)
+        internal async Task<Result> AddFundCodeToMetaData(string folder, string fundCode)
         {
             log.LogTrace($"Saving FundCode into container's metadata...");
             try
@@ -89,7 +91,7 @@ namespace sas.api.Services
                 var directoryClient = dlfsClient.GetDirectoryClient(folder);
 
                 // Check the Last Calculated Date from the Metadata
-                var meta = directoryClient.GetProperties().Value.Metadata;
+                var meta = (await directoryClient.GetPropertiesAsync()).Value.Metadata;
 
                 // Add Fund Code
                 meta.Add("FundCode", fundCode);
@@ -99,17 +101,14 @@ namespace sas.api.Services
 
                 // Save back into the Directory Metadata
                 directoryClient.SetMetadata(meta);
-
-                error = null;
             }catch (Exception ex)
             {
-                error = ex.Message;
-                return false;
+                return new Result { Success = false, Message = ex.Message };
             }
-            return true;
+            return new Result() { Success = true };
         }
 
-        internal long CalculateFolderSize(string folder)
+        internal async Task<long> CalculateFolderSize(string folder)
         {
             const string sizeCalcDateKey = "SizeCalcDate";
             const string sizeKey = "Size";
@@ -118,7 +117,7 @@ namespace sas.api.Services
             var directoryClient = dlfsClient.GetDirectoryClient(folder);
 
             // Check the Last Calculated Date from the Metadata
-            var meta = directoryClient.GetProperties().Value.Metadata;
+            var meta = (await directoryClient.GetPropertiesAsync()).Value.Metadata;
             var sizeCalcDate = meta.ContainsKey(sizeCalcDateKey)
                 ? DateTime.Parse(meta[sizeCalcDateKey])
                 : DateTime.MinValue;
