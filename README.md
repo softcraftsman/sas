@@ -1,4 +1,7 @@
 # SAS for EDU
+
+![image](https://raw.githubusercontent.com/fabriciosanchez/sas/main/assets/sas-welcome-page.png)
+
 SAS is a storage as a Service platform designed to automate storage allocation in EDU institutions. Its main goal is to provide agility to stakeholders on having access to object storage infrastructure in Microsoft Azure.
 
 Some of the capabilities currently provided by the system are:
