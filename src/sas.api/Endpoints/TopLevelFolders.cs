@@ -18,8 +18,8 @@ namespace sas.api
     {
         [FunctionName("TopLevelFoldersGET")]
         public static IActionResult TopLevelFoldersGET(
-            [HttpTrigger(AuthorizationLevel.Function, "GET", Route = "TopLevelFolders/{account}/{filesystem}")] 
-            HttpRequest req, string account, string filesystem, ILogger log)
+            [HttpTrigger(AuthorizationLevel.Function, "GET", Route = "TopLevelFolders/{account}/{filesystem}/{user?}")] 
+            HttpRequest req, string account, string filesystem, string user, ILogger log)
         {
             // Check for logged in user
             ClaimsPrincipal claimsPrincipal;
@@ -34,7 +34,10 @@ namespace sas.api
                 log.LogError(ex.Message);
                 return new BadRequestErrorMessageResult("Unable to authenticate user.");
             }
-            var user = claimsPrincipal.Identity.Name;
+            var authenticatedUser = claimsPrincipal.Identity.Name;
+
+            if (user == null)
+                user = authenticatedUser;
 
             // Find out user who is calling
             var storageUri = new Uri($"https://{account}.dfs.core.windows.net");
@@ -56,7 +59,6 @@ namespace sas.api
             // Add Route Parameters
             tlfp.StorageAcount ??= account;
             tlfp.FileSystem ??= filesystem;
-
 
             // Check Parameters
             string error = null;
@@ -84,7 +86,9 @@ namespace sas.api
             if (!result.Success)
                 return new BadRequestErrorMessageResult(result.Message);
 
-            return new OkResult();
+            var folderDetail = folderOperations.GetFolderDetail(tlfp.Folder);
+
+            return new OkObjectResult(folderDetail);
         }
 
         internal static async Task<TopLevelFolderParameters> GetTopLevelFolderParameters(HttpRequest req, ILogger log)
