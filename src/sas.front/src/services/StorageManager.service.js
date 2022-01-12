@@ -12,7 +12,11 @@ export const getFileSystems = async () => {
         .then(response => {
             return response.json()
         })
-        .catch(error => console.log(error))
+        .catch(error => {
+            console.log(`Call to API (${endpoint}) failed with the following details:`)
+            console.log(error)
+            return []
+        })
 }
 
 
@@ -27,7 +31,11 @@ export const getDirectories = async (storageAccount, fileSystem) => {
         .then(response => {
             return response.json()
         })
-        .catch(error => console.log(error))
+        .catch(error => {
+            console.log(`Call to API (${endpoint}) failed with the following details:`)
+            console.log(error)
+            return []
+        })
 }
 
 
