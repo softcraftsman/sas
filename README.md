@@ -24,11 +24,17 @@ In order to deploy this solution to your environment, you'll need to setup some 
 Fork the code into your github repository. You can name the repo whatever you like.
 
 ## Create a Static Web App
-Create a Static Web App in the Azure Portal. Name it anything you like. Choose whichever plan you like at this time, though you'll probably need the Standard plan when you wish to apply your own domain name. 
+Create a Static Web App in the Azure Portal. Name it anything you like. Choose the Standard plan, which is required to enable custom authentication. 
 
-> ***Important***, when choosing the GitHub repo, choose your repo instead of the source one.
+> ***Important***
+> When choosing the GitHub repo, choose your repo instead of the source one.
 
-TODO: Provide Build details guidance
+Choose the following Build Details:
+
+- Build Presets: React
+- App location: `/src/sas.front`
+- Api location: `/src/sas.api`
+- Output location: leave to default (`build`)
 
 Copy the Static Web App URL for use later.
 
