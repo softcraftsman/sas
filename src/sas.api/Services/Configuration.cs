@@ -10,24 +10,6 @@ namespace sas.api
 {
     public static class SasConfiguration
     {
-        [FunctionName("Configuration")]
-        public static IActionResult Run(
-            [HttpTrigger(AuthorizationLevel.Function, "get", Route = null)]
-            HttpRequest req, ILogger log)
-        {
-            var dlsa = Environment.GetEnvironmentVariable("DATALAKE_STORAGE_ACCOUNTS");
-            log.LogInformation($"Storage accounts from configuration: {dlsa}");
-            if (dlsa is null)
-            {
-                dlsa = "Error: DATALAKE_STORAGE_ACCOUNTS is not set in application config. For local development use: local.settings.json\nSample: mydatalake,yourdatalake";
-                return new BadRequestObjectResult(dlsa);
-            }
-
-            var result = GetConfiguration();
-
-            return new OkObjectResult(result);
-        }
-
         internal static ConfigurationResult GetConfiguration()
         {
             var dlsa = Environment.GetEnvironmentVariable("DATALAKE_STORAGE_ACCOUNTS");
@@ -50,7 +32,6 @@ namespace sas.api
             public string[] StorageAccounts { get; set; }
             public string TenantId { get; set; }
             public string ClientId { get; set; }
-
         }
     }
 }

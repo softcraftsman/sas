@@ -148,6 +148,15 @@ namespace sas.api.Services
             return s.Replace('@', '_').ToLower();
         }
 
+        internal FolderDetail GetFolderDetail(string folder)
+        {
+            var rootClient = dlfsClient.GetDirectoryClient(folder);  // container (root)
+            var meta = rootClient.GetProperties().Value.Metadata;
+            var acl = rootClient.GetAccessControl(userPrincipalName: true).Value.AccessControlList;
+            FolderDetail fd = BuildFolderDetail(folder, meta, acl);
+            return fd;
+        }
+
         internal IEnumerable<FolderDetail> GetAccessibleFolders(string upn)
         {
             // Get all Top Level Folders
@@ -162,38 +171,39 @@ namespace sas.api.Services
             foreach (var folder in folders)
             { 
                 var rootClient = dlfsClient.GetDirectoryClient(folder.Name);  // container (root)
-                var acl = rootClient.GetAccessControl(userPrincipalName: true);
-                if (acl.Value.AccessControlList.Any(
-                        p => p.EntityId is not null 
-                        && Simplify(p.EntityId).StartsWith(upn)
-                        && p.Permissions.HasFlag(RolePermissions.Read)
-                    )
-                )
+                var meta = rootClient.GetProperties().Value.Metadata;
+                var acl = rootClient.GetAccessControl(userPrincipalName: true).Value.AccessControlList;
+                if (acl.Any( p => p.EntityId is not null && Simplify(p.EntityId).StartsWith(upn)
+                        && p.Permissions.HasFlag(RolePermissions.Read)    ))
                 {
-                    // Get Metadata
-                    var meta = rootClient.GetProperties().Value.Metadata;
-                    long? size = meta.ContainsKey("Size") ? long.Parse(meta["Size"]) : null;
-                    decimal? cost = (size == null) ? null : size * costPerTB / 1000000000000;
-
-                    // Calculate UserAccess
-                    var userAccess = acl.Value.AccessControlList
-                        .Where(p => p.AccessControlType == AccessControlType.User && p.EntityId != null && !p.DefaultScope)
-                        .Select(p => p.EntityId)
-                        .ToList();
-
-                    // Create Folder Details
-                    var fd = new FolderDetail()
-                    {
-                        Name = folder.Name,
-                        Size = meta.ContainsKey("Size") ? meta["Size"] : null,
-                        Cost = cost.HasValue ? cost.Value.ToString() : null,
-                        FundCode = meta.ContainsKey("FundCode") ? meta["FundCode"] : null,
-                        UserAccess = userAccess
-                    };
-
+                    FolderDetail fd = BuildFolderDetail(folder.Name, meta, acl);
                     yield return fd;
                 }
             }
+        }
+
+        private FolderDetail BuildFolderDetail(string folder, IDictionary<string, string> meta, IEnumerable<PathAccessControlItem> acl)
+        {
+            // Get Metadata
+            long? size = meta.ContainsKey("Size") ? long.Parse(meta["Size"]) : null;
+            decimal? cost = (size == null) ? null : size * costPerTB / 1000000000000;
+
+            // Calculate UserAccess
+            var userAccess = acl
+                .Where(p => p.AccessControlType == AccessControlType.User && p.EntityId != null && !p.DefaultScope)
+                .Select(p => p.EntityId)
+                .ToList();
+
+            // Create Folder Details
+            var fd = new FolderDetail()
+            {
+                Name = folder,
+                Size = meta.ContainsKey("Size") ? meta["Size"] : null,
+                Cost = cost.HasValue ? cost.Value.ToString() : null,
+                FundCode = meta.ContainsKey("FundCode") ? meta["FundCode"] : null,
+                UserAccess = userAccess
+            };
+            return fd;
         }
 
         internal class FolderDetail
