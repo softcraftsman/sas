@@ -29,7 +29,7 @@ namespace sas.api
             </example>
         **/
         [FunctionName("CalculateAllFolderSizes")]
-        public static IActionResult CalculateAllFolderSizes(
+        public static async Task<IActionResult> CalculateAllFolderSizes(
             [HttpTrigger(AuthorizationLevel.Function, "post", Route = "Configuration/CalculateFolderSizes")]
             HttpRequest req, ILogger log)
         {
@@ -57,7 +57,7 @@ namespace sas.api
 
                     long size = 0;
                     foreach( var folder in folders) {
-                        size += folderOperations.CalculateFolderSize(folder.Name);
+                        size += await folderOperations.CalculateFolderSize(folder.Name);
                     }
                     
                     msg = $"  {filesystem.Name} aggregate size {size} bytes";
