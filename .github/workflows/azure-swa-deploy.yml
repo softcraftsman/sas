@@ -23,22 +23,6 @@ jobs:
         with:
           submodules: true
 
-      - name: Display contents of original .env file
-        run: cat ${{ env.ENV_FILE }}
-
-      # Replace Environment variables
-      - name: Replace Environment variables
-        uses: falnyr/replace-env-vars-action@master
-        with:
-          filename: ${{ env.ENV_FILE }}
-        env:
-          BASE_URL: ${{ secrets.WEB_URL }}
-          TENANT_ID: ${{ secrets.TENANT_ID }}
-          CLIENT_ID: ${{ secrets.APP_REGISTRATION_CLIENT_ID }}
-
-      - name: Display contents of updated .env file
-        run: cat ${{ env.ENV_FILE }}
-
       - name: Build And Deploy
         id: builddeploy
         uses: Azure/static-web-apps-deploy@v1

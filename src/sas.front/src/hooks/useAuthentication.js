@@ -11,7 +11,6 @@ const useAuthentication = () => {
         }
 
         getUserInfo().then(u => {
-            console.log(u)
             setAuth(u)
         }
         )
