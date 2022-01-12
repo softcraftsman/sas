@@ -15,7 +15,7 @@ namespace sas.api
     public static class FileSystems
     {
         [FunctionName("FileSystems")]
-        public static IActionResult Run([HttpTrigger(AuthorizationLevel.Function, "get", Route = null)]
+        public static IActionResult Run([HttpTrigger(AuthorizationLevel.Function, "GET", Route = null)]
             HttpRequest req, ILogger log)
         {
             // Check for logged in user

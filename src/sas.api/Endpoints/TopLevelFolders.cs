@@ -1,51 +1,25 @@
-using System;
-using System.IO;
-using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-
-using Azure.Storage.Files.DataLake;
-using Azure.Storage.Files.DataLake.Models;
-using sas.api;
-using System.Text;
-using Microsoft.Identity.Client;
 using sas.api.Services;
-using System.Linq;
+using System;
+using System.IO;
 using System.Security.Claims;
+using System.Text;
+using System.Threading.Tasks;
 using System.Web.Http;
-using System.Diagnostics;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.AspNetCore.Http.Features;
 
 namespace sas.api
 {
     public static class TopLevelFolders
     {
-        [FunctionName("TopLevelFolders")]
-        public static async Task<IActionResult> Run(
-            [HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)] HttpRequest req, ILogger log)
-        {
-            // GET - Send Instructions back to calling client
-            if (req.Method == HttpMethods.Get)
-            {
-                return await GetTopLevelFolders(req, log);
-            }
-
-            // POST - Method
-            if (req.Method == HttpMethods.Post)
-            {
-                return await CreateFolder(req, log);
-            }
-
-            log.LogError("Internal Server Error - 500. Only GET and POST are acceptable.");
-            return new BadRequestResult();
-        }
-
-        private static async Task<IActionResult> GetTopLevelFolders(HttpRequest req, ILogger log)
+        [FunctionName("TopLevelFoldersGET")]
+        public static IActionResult TopLevelFoldersGET(
+            [HttpTrigger(AuthorizationLevel.Function, "GET", Route = "TopLevelFolders/{account}/{filesystem}")] 
+            HttpRequest req, string account, string filesystem, ILogger log)
         {
             // Check for logged in user
             ClaimsPrincipal claimsPrincipal;
@@ -60,45 +34,42 @@ namespace sas.api
                 log.LogError(ex.Message);
                 return new BadRequestErrorMessageResult("Unable to authenticate user.");
             }
+            var user = claimsPrincipal.Identity.Name;
 
             // Find out user who is calling
-            var parameters = new Parameters(log);
-            var tlfp = await parameters.GetTopLevelFolderParameters(req);
-            if (tlfp == null)
-                return new BadRequestErrorMessageResult($"{nameof(TopLevelFolderParameters)} is missing.");
-            var storageUri = new Uri($"https://{tlfp.StorageAcount}.dfs.core.windows.net");
-            var folderOperations = new FolderOperations(storageUri, tlfp.Container, log);
-            var folders = folderOperations.GetAccessibleFolders(tlfp.FolderOwner);
+            var storageUri = new Uri($"https://{account}.dfs.core.windows.net");
+            var folderOperations = new FolderOperations(storageUri, filesystem, log);
+            var folders = folderOperations.GetAccessibleFolders(user);
             return new OkObjectResult(folders);
         }
 
-        private static IActionResult SendInstructions(ILogger log)
-        {
-            var tlfp = JsonConvert.SerializeObject(new TopLevelFolderParameters());
-            var help = $"Use a POST method with the body containing the properties of {nameof(TopLevelFolderParameters)}\n{tlfp}";
-            return new OkObjectResult(help);
-        }
-
-        private static async Task<IActionResult> CreateFolder(HttpRequest req, ILogger log)
+        [FunctionName("TopLevelFoldersPOST")]
+        public static async Task<IActionResult> TopLevelFoldersPOST(
+                [HttpTrigger(AuthorizationLevel.Function, "POST", Route = "TopLevelFolders/{account}/{filesystem}")]
+                HttpRequest req, string account, string filesystem, ILogger log)
         {
             //Extracting body object from the call and deserializing it.
-            var parameters = new Parameters(log);
-            var tlfp = await parameters.GetTopLevelFolderParameters(req);
+            var tlfp = await GetTopLevelFolderParameters(req, log);
             if (tlfp == null)
                 return new BadRequestErrorMessageResult($"{nameof(TopLevelFolderParameters)} is missing.");
 
+            // Add Route Parameters
+            tlfp.StorageAcount ??= account;
+            tlfp.FileSystem ??= filesystem;
+
+
             // Check Parameters
             string error = null;
-            if (Extensions.AnyNull(tlfp.Container, tlfp.Folder, tlfp.FolderOwner, tlfp.FundCode, tlfp.StorageAcount))
+            if (Extensions.AnyNull(tlfp.FileSystem, tlfp.Folder, tlfp.FolderOwner, tlfp.FundCode, tlfp.StorageAcount))
                 error = $"{nameof(TopLevelFolderParameters)} is malformed.";
 
             // Call each of the steps in order and error out if anytyhing fails
             var storageUri = new Uri($"https://{tlfp.StorageAcount}.dfs.core.windows.net");
             var fileSystemOperations = new FileSystemOperations(storageUri, log);
-            var folderOperations = new FolderOperations(storageUri, tlfp.Container, log);
+            var folderOperations = new FolderOperations(storageUri, tlfp.FileSystem, log);
 
             Result result = null;
-            result = await fileSystemOperations.AddsFolderOwnerToContainerACLAsExecute(tlfp.Container, tlfp.FolderOwner);
+            result = await fileSystemOperations.AddsFolderOwnerToContainerACLAsExecute(tlfp.FileSystem, tlfp.FolderOwner);
             if (!result.Success)
                 return new BadRequestErrorMessageResult(result.Message);
 
@@ -116,36 +87,26 @@ namespace sas.api
             return new OkResult();
         }
 
-        internal class Parameters
+        internal static async Task<TopLevelFolderParameters> GetTopLevelFolderParameters(HttpRequest req, ILogger log)
         {
-            readonly ILogger log;
-
-            public Parameters(ILogger log)
+            string body = string.Empty;
+            using (var reader = new StreamReader(req.Body, Encoding.UTF8))
             {
-                this.log = log;
-            }
-
-            internal async Task<TopLevelFolderParameters> GetTopLevelFolderParameters(HttpRequest req)
-            {
-                string body = string.Empty;
-                using (var reader = new StreamReader(req.Body, Encoding.UTF8))
+                body = await reader.ReadToEndAsync();
+                if (string.IsNullOrEmpty(body))
                 {
-                    body = await reader.ReadToEndAsync();
-                    if (string.IsNullOrEmpty(body))
-                    {
-                        log.LogError("Body was empty coming from ReadToEndAsync");
-                    }
+                    log.LogError("Body was empty coming from ReadToEndAsync");
                 }
-                var bodyDeserialized = JsonConvert.DeserializeObject<TopLevelFolderParameters>(body);
-                return bodyDeserialized;
             }
+            var bodyDeserialized = JsonConvert.DeserializeObject<TopLevelFolderParameters>(body);
+            return bodyDeserialized;
         }
 
         internal class TopLevelFolderParameters
         {
             public string StorageAcount { get; set; }
 
-            public string Container { get; set; }
+            public string FileSystem { get; set; }
 
             public string Folder { get; set; }
 
