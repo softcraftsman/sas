@@ -352,3 +352,6 @@ MigrationBackup/
 # Azurite
 __azurite_db_*.json
 __blobstorage__/*
+
+# Exclude Workflow files (automatically created when deploying to SWA)
+/.github/workflows/*.yml
