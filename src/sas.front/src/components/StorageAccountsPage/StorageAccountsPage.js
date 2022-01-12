@@ -33,7 +33,7 @@ const StorageAccountsPage = ({ strings }) => {
                 setStorageAccounts(_storageAccounts)
             }
             catch (error) {
-                console.log(error)
+                // console.log(error)
             }
         }
 
@@ -51,7 +51,7 @@ const StorageAccountsPage = ({ strings }) => {
                 setDirectories(_directories)
             }
             catch (error) {
-                console.log(error)
+                // console.log(error)
             }
         }
 
@@ -75,7 +75,9 @@ const StorageAccountsPage = ({ strings }) => {
                 // Display a toast
                 displayToast(`Directory '${newDirectory.name}' Created!`)
             })
-            .catch(error => console.log(error))
+            .catch(error => {
+                console.log(error)
+            })
     }
 
 
