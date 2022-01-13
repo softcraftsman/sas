@@ -119,7 +119,6 @@
 			"type": "shell",
 			"label": "Start SWA for Launch Edge",
 			// TODO: Enable SSL
-			//"command": "swa start http://localhost:3000 --run 'npm start' --api-location http://localhost:7071",
 			"command": "swa start app",
 			"isBackground": false,
 			"problemMatcher": [],
