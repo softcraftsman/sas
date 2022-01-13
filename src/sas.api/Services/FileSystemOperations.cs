@@ -72,6 +72,7 @@ namespace sas.api.Services
 			}
 			catch (Exception ex)
 			{
+				log.LogError(ex, ex.Message);
 				Debug.WriteLine(ex.Message);
 				yield break;
 			}
