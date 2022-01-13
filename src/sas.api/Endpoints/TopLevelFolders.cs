@@ -78,7 +78,7 @@ namespace sas.api
             result = await folderOperations.CreateNewFolder(tlfp.Folder);
             if (!result.Success)
                 return new BadRequestErrorMessageResult(result.Message);
-            result = await folderOperations.AddFundCodeToMetaData(tlfp.Folder, tlfp.FundCode);
+            result = await folderOperations.AddMetaData(tlfp.Folder, tlfp.FundCode, tlfp.FolderOwner);
             if (!result.Success)
                 return new BadRequestErrorMessageResult(result.Message);
 
