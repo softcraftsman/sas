@@ -1,19 +1,19 @@
 {
-  "version": "0.2.0",
-  "configurations": [
-    {
-      "name": "Launch Edge",
-      "request": "launch",
-      "type": "pwa-msedge",
-      "url": "http://localhost:4280",
-      "webRoot": "${workspaceFolder}",
-      "preLaunchTask": "swa start"
-    },
-    {
-      "name": "Attach to .NET Functions",
-      "type": "coreclr",
-      "request": "attach",
-      "processId": "${command:azureFunctions.pickProcess}"
-    }
-  ]
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"name": "Edge - Launch GUI + API",
+			"request": "launch",
+			"type": "pwa-msedge",
+			"url": "http://localhost:4280",
+			"webRoot": "${workspaceFolder}",
+			"preLaunchTask": "Start SWA for Launch Edge"
+		},
+		{
+			"name": "Attach to .NET Functions",
+			"type": "coreclr",
+			"request": "attach",
+			"processId": "${command:azureFunctions.pickProcess}"
+		}
+	]
 }
