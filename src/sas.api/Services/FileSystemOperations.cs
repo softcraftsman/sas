@@ -20,12 +20,7 @@ namespace sas.api.Services
 		{
 			this.log = log;
 
-			//var tenantId = Environment.GetEnvironmentVariable("TENANT_ID");
-			//var clientId = Environment.GetEnvironmentVariable("APP_REGISTRATION_CLIENT_ID");
-			//var clientSecret = Environment.GetEnvironmentVariable("CLIENT_SECRET");
-			//var tokenCred = new ClientSecretCredential(tenantId, clientId, clientSecret);
-
-			// Use system assigned managed identity (for runtime) or Visual Studio creds (during debugging)
+			// TODO: Consider modifying DefaultAzureCredential options to limit which credentials are supported?
 			dlsClient = new DataLakeServiceClient(storageUri, new DefaultAzureCredential());
 		}
 
@@ -70,10 +65,10 @@ namespace sas.api.Services
 		{
 			upn = upn.Replace('@', '_').ToLower();     // Translate for guest accounts
 			List<FileSystemItem> fileSystems;
+
 			try
 			{
 				fileSystems = dlsClient.GetFileSystems().ToList();
-
 			}
 			catch (Exception ex)
 			{
@@ -88,8 +83,7 @@ namespace sas.api.Services
 				var acl = rootClient.GetAccessControl(userPrincipalName: true);
 
 				if (acl.Value.AccessControlList.Any(
-					p => p.EntityId is not null
-					&& p.EntityId.Replace('@', '_').ToLower().StartsWith(upn)))
+					p => p.EntityId?.Replace('@', '_').ToLower().StartsWith(upn) == true))
 				{
 					yield return filesystem.Name;
 				}
