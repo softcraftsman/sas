@@ -36,17 +36,18 @@ namespace sas.api
 			var upn = claimsPrincipal.Identity.Name;
 
 			// Dictionary for
-			var accountContainers = new Dictionary<string, IList<string>>();
+			//var accountContainers = new Dictionary<string, IList<string>>();
 
 			// Get the Containers for a upn from each storage account
 			var config = SasConfiguration.GetConfiguration();
 			var result = new List<FileSystemResult>();
 			foreach (var account in config.StorageAccounts)
 			{
+				// TODO: Centralize this to account for other clouds
 				var serviceUri = new Uri($"https://{account}.dfs.core.windows.net");
 				var adls = new FileSystemOperations(serviceUri, log);
 				var containers = adls.GetContainersForUpn(upn).ToList();
-				accountContainers.Add(account, containers);
+				//accountContainers.Add(account, containers);
 
 				result.Add(new FileSystemResult() { Name = account, FileSystems = containers });
 			}
@@ -55,6 +56,7 @@ namespace sas.api
 			return new OkObjectResult(result);
 		}
 
+		// TODO: Move to separate file
 		private class FileSystemResult
 		{
 			//[{name: 'adlstorageaccountname', fileSystems: [{name: 'file system name'}]]
