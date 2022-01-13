@@ -73,7 +73,7 @@ Copy the Static Web App URL for use later.
 
 Copy the deployment token (Click on Manage deployment token) for use later.
 
-Add the following Application Settings under the Static Web App using the Configuration pane. 
+Add the following Application Settings under the Static Web App using the Configuration pane.
 
 | Name | Value |
 | --- | --- |
@@ -93,7 +93,7 @@ Secret|Value|Notes
 ---|---|---
 SAS_DEPLOYMENT_TOKEN||The deployment token of your Static Web App.
 
-TODO: You can delete the default secret containing your app's deployment token. It will have a name like `AZURE_STATIC_WEB_APPS_API_TOKEN_<unique>` where `<unique>` is the unique part of your web app's URL.
+You can delete the default secret containing your app's deployment token. It will have a name like `AZURE_STATIC_WEB_APPS_API_TOKEN_<unique>` where `<unique>` is the unique part of your web app's URL.
 
 ### Clean up the repo
 
@@ -110,3 +110,33 @@ TODO: Can't manually trigger due to "if" statements in workflow file?
 ### Application Insights
 
 Optional, but recommended.
+
+## Enable Custom Authentication
+
+Modify staticwebapp.config.json to include:
+
+```json
+{
+  "auth": {
+    "identityProviders": {
+      "azureActiveDirectory": {
+        "registration": {
+          "openIdIssuer": "https://login.microsoftonline.com/<TENANT_ID>/v2.0",
+          "clientIdSettingName": "AAD_CLIENT_ID",
+          "clientSecretSettingName": "AAD_CLIENT_SECRET"
+        }
+      }
+    }
+  }
+}
+```
+
+Replace <TENANT_ID> with your Azure AD tenant ID.
+
+Modify the Application Registration to include callbacks for login and logout.
+
+Login: https://<YOUR_SITE>/.auth/login/aad/callback
+
+Logout: https://<YOUR_SITE>/.auth/logout/aad/callback
+
+Replace <YOUR_SITE> with the URL to your Static Web App.
