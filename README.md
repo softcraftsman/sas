@@ -93,7 +93,7 @@ Secret|Value|Notes
 ---|---|---
 SAS_DEPLOYMENT_TOKEN||The deployment token of your Static Web App.
 
-TODO: You can delete the default secret containing your app's deployment token.
+TODO: You can delete the default secret containing your app's deployment token. It will have a name like `AZURE_STATIC_WEB_APPS_API_TOKEN_<unique>` where `<unique>` is the unique part of your web app's URL.
 
 ### Clean up the repo
 
