@@ -1,18 +1,19 @@
 # SAS for EDU
 
-![image](https://raw.githubusercontent.com/fabriciosanchez/sas/main/assets/sas-welcome-page.png)
+![image](assets/sas-welcome-page.png)
 
-SAS is a storage as a Service platform designed to automate storage allocation in EDU institutions. Its main goal is to provide agility to stakeholders on having access to object storage infrastructure in Microsoft Azure.
+SAS is a Storage-as-a-Service platform designed to automate storage allocation in EDU institutions. Its main goal is to provide agility to stakeholders on having access to object storage infrastructure in Microsoft Azure.
 
 Some of the capabilities currently provided by the system are:
 
-* Dynamic creation of top level folder and file systems in Azure Data Lake Storage (ADLS).
+* Dynamic creation of top level folder and file systems in Azure Data Lake Storage (ADLS) Gen 2.
 * Dynamic addition of object owner as "Execute" in File System's ACL.
 * Automatic creation of initial folder under the File System.
-* Dynamic addition of folder's onwer under initial folder.
+* Dynamic addition of folder's owner under initial folder.
 * Exposure of "how to use" the storage infrastructure through Web UI.
 
-# Deploy SAS for EDU
+## Deploy SAS for EDU
+
 In order to deploy this solution to your environment, you'll need to setup some variables in the build process and create a static web app in Azure. To accomplish this, do the following:
 
 * [Fork the code](#fork-the-code)
@@ -20,10 +21,12 @@ In order to deploy this solution to your environment, you'll need to setup some 
 * [Create an application](#create-an-application)
 * [Add secrets](#add-secrets)
 
-## Fork the code
+### Fork the code
+
 Fork the code into your github repository. You can name the repo whatever you like.
 
-## Create a Static Web App
+### Create a Static Web App
+
 Create a Static Web App in the Azure Portal. Name it anything you like. Choose the Standard plan, which is required to enable custom authentication. 
 
 > ***Important***
@@ -31,10 +34,10 @@ Create a Static Web App in the Azure Portal. Name it anything you like. Choose t
 
 Choose the following Build Details:
 
-- Build Presets: React
-- App location: `/src/sas.front`
-- Api location: `/src/sas.api`
-- Output location: leave to default (`build`)
+* Build Presets: React
+* App location: `/src/sas.front`
+* Api location: `/src/sas.api`
+* Output location: leave to default (`build`)
 
 Copy the Static Web App URL for use later.
 
@@ -46,7 +49,7 @@ TODO: Add storage cost per TB
 
 ![App Settings](./assets/app-settings.png)
 
-## Create a Static Web App
+### Create a Static Web App 2
 
 Create a Static Web App in the Azure Portal. Name it anything you like. Choose whichever plan you like at this time, though you'll probably need the Standard plan when you wish to apply your own domain name. ***Important***, when choosing the GitHub repo, choose your repo instead of the source one.
 
@@ -57,26 +60,26 @@ Add the App Settings under the Static Web App using Settings -> Configuration. A
 
 ![image](https://user-images.githubusercontent.com/3756829/148671319-622ec5b8-6c4e-4d77-a2b5-7e368b02b5d2.png)
 
-## Create a System Assigned Managed Identity for the Static Web App
+### Create a System Assigned Managed Identity for the Static Web App
 
 Pending
-   
+
 Copy the Directory (tenant) ID for use later.
 Copy the Application (client) ID for use later.
 
-## Prepare the storage accounts
+### Prepare the storage accounts
 
 In order to allow this application to modify the storage accounts, it will require Storage Blob Data Owner permission for each of the storage accounts.
 
 Pending Update
 
-![image](https://raw.githubusercontent.com/fabriciosanchez/sas/main/assets/blog-owner-contributor.png)
+![image](assets/blog-owner-contributor.png)
 
 Enable CORS on the storage accounts pointing to the Static Web App url.
 
 ![image](https://user-images.githubusercontent.com/3756829/148672121-d1de3d3e-f026-42c9-bd1e-39eefbcfd3c3.png)
 
-## Add secrets
+### Add secrets
 
 The GitHub workflow has a few required secrets that need to be created to enable it properly. Create the following repository secrets by going to Settings -> Secrets.
 
@@ -90,14 +93,10 @@ CLIENT_SECRET|Random code format|Secret used to authenticate access with app reg
 
 ![App Settings](./assets/aad-settings.png)
 
-## Storage Account Permissions
+### Build
 
-TODO: Add instructions for allowing app registration Storage Blob Owner RBAC role on storage accounts
-
-## Build
 Now that all of the pieces are present, go to Actions in GitHub and run the Azure SWA Deploy workflow (It should automatically run when code is committed as well). 
 
 TODO: Can't manually trigger due to "if" statements in workflow file?
 
 [![Azure Static Web Apps CI/CD](../../actions/workflows/azure-swa-deploy.yml/badge.svg)](../../actions/workflows/azure-swa-deploy.yml)
-
