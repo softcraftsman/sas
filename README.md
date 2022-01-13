@@ -20,6 +20,7 @@ In order to deploy this solution to your environment, you'll need to setup some 
 * [Create an application registration](#create-an-application-registration)
 * [Prepare the storage accounts](#prepare-the-storage-accounts)
 * [Create a Static Web App](#create-a-static-web-app)
+* [Add secret](#add-secret)
 
 ### Fork the code
 
@@ -70,7 +71,7 @@ Choose the following Build Details:
 
 Copy the Static Web App URL for use later.
 
-TODO: Probably not needed anymore. Copy the deployment token (Click on Manage deployment token) for use later.
+Copy the deployment token (Click on Manage deployment token) for use later.
 
 Add the following Application Settings under the Static Web App using the Configuration pane. 
 
@@ -84,9 +85,23 @@ Add the following Application Settings under the Static Web App using the Config
 
 ![App Settings](./assets/app-settings.png)
 
+### Add secret
+
+The GitHub workflow has a required secrets that needs to be created to enable it properly. Create the following repository secrets by going to Settings -> Secrets.
+
+Secret|Value|Notes
+---|---|---
+SAS_DEPLOYMENT_TOKEN||The deployment token of your Static Web App.
+
+TODO: You can delete the default secret containing your app's deployment token.
+
+### Clean up the repo
+
+After connecting your fork to the Static Web App, a new workflow YAML file has been created. You can safely delete that file. If you don't, you'll see two GitHub Actions run for every commit to the repo.
+
 ### Build
 
-Now that all of the pieces are present, go to Actions in GitHub and run the Azure SWA Deploy workflow (It should automatically run when code is committed as well). 
+Now that all of the pieces are present, go to Actions in GitHub and run the Azure SWA Deploy workflow (It should automatically run when code is committed as well).
 
 TODO: Can't manually trigger due to "if" statements in workflow file?
 
