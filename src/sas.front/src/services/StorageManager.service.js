@@ -2,27 +2,9 @@ import URLS from '../config/urls'
 
 
 /**
- * Returns the list of storage accounts
- */
-export const getStorageAccounts = async () => {
-    const { endpoint, method } = URLS.storageAccounts
-    const options = getOptions(method)
-
-    return fetch(endpoint, options)
-        .then(response => {
-            return response.json()
-        })
-        .catch(error => console.log(error))
-}
-
-
-/**
  * Returns the list of storage accounts and their file systems
  */
 export const getFileSystems = async () => {
-    return new Promise(resolve => resolve([{ name: 'adlfredgohsman', items: [{ name: 'numberuno' }, { name: 'files' }] }]))
-
-    /*
     const { endpoint, method } = URLS.fileSystems
     const options = getOptions(method)
 
@@ -30,30 +12,30 @@ export const getFileSystems = async () => {
         .then(response => {
             return response.json()
         })
-        .catch(error => console.log(error))
-        */
+        .catch(error => {
+            console.log(`Call to API (${endpoint}) failed with the following details:`)
+            console.log(error)
+            return []
+        })
 }
 
 
 /**
  * Returns the list of directories
  */
-export const getDirectories = async () => {
-    return new Promise(resolve => resolve([
-        { name: 'folder one', size: '1', cost: '0.01', fundCode: 'abcdefg', userAccess: ['fredgohsman@microsoft.com', 'johnbrown@microsoft.com', 'fabriciosanchez@microsoft.com'] },
-        { name: 'directory two', size: '2', cost: '0.2', fundCode: 'cdefghi', userAccess: ['fredgohsman@microsoft.com'] }
-    ]))
-
-    /*
-    const { endpoint, method } = URLS.directories
-    const options = getOptions(method)
+export const getDirectories = async (storageAccount, fileSystem) => {
+    const endpoint = URLS.listDirectories.endpoint.replace('{account}', storageAccount).replace('{filesystem}', fileSystem)
+    const options = getOptions(URLS.listDirectories.method)
 
     return fetch(endpoint, options)
         .then(response => {
             return response.json()
         })
-        .catch(error => console.log(error))
-        */
+        .catch(error => {
+            console.log(`Call to API (${endpoint}) failed with the following details:`)
+            console.log(error)
+            return []
+        })
 }
 
 
@@ -72,15 +54,13 @@ const getOptions = (method) => {
 /**
  * Create a new folder in the storage account container
  */
-export const createFolder = async (accessToken, content, storageAccount, fileSystem) => {
-    const { endpoint, method } = URLS.createFolder
-    const options = getOptions(method, accessToken)
+export const createFolder = async (storageAccount, fileSystem, owner, content) => {
+    const endpoint = URLS.listDirectories.endpoint.replace('{account}', storageAccount).replace('{filesystem}', fileSystem)
+    const options = getOptions(URLS.createFolder.method)
     options.body = JSON.stringify({
-        StorageAcount: storageAccount,
-        Container: fileSystem,
         Folder: content.name,
         FundCode: content.fundCode,
-        FolderOwner: 'fredgohsman@microsoft.com'
+        FolderOwner: owner
     })
 
     return fetch(endpoint, options)

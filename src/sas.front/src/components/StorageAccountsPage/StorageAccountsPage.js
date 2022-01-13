@@ -2,8 +2,11 @@ import React, { useCallback, useEffect, useState } from 'react'
 import PropTypes from 'prop-types'
 import useAuthentication from '../../hooks/useAuthentication'
 import { getFileSystems, getDirectories } from '../../services/StorageManager.service'
+import { createFolder } from '../../services/StorageManager.service'
+import Alert from '@mui/material/Alert'
 import Container from '@mui/material/Container'
 import Grid from '@mui/material/Grid'
+import Snackbar from '@mui/material/Snackbar'
 import DirectoriesManager from '../DirectoriesManager'
 import Selector from '../Selector'
 
@@ -11,21 +14,23 @@ import Selector from '../Selector'
  * Renders list of Storage Accounts
  */
 const StorageAccountsPage = ({ strings }) => {
-    const { isAuthenticated } = useAuthentication()
+    const { account, isAuthenticated } = useAuthentication()
 
     const [selectedStorageAccount, setSelectedStorageAccount] = useState('')
     const [selectedFileSystem, setSelectedFileSystem] = useState('')
 
     const [storageAccounts, setStorageAccounts] = useState([])
-    const [directories, setDirectories] = useState()
+    const [directories, setDirectories] = useState([])
 
+    const [toastMessage, setToastMessage] = useState()
+    const [isToastOpen, setToastOpen] = useState(false)
 
     // Retrieve the list of File Systems for the selected Azure Data Lake Storage Account
     useEffect(() => {
         const retrieveStorageAccounts = async () => {
             try {
-                const results = await getFileSystems()
-                setStorageAccounts(results)
+                const _storageAccounts = await getFileSystems()
+                setStorageAccounts(_storageAccounts)
             }
             catch (error) {
                 console.log(error)
@@ -54,6 +59,26 @@ const StorageAccountsPage = ({ strings }) => {
     }, [selectedStorageAccount, selectedFileSystem])
 
 
+    const displayToast = message => {
+        setToastMessage(message)
+        setToastOpen(true)
+    }
+
+
+    const handleCreateDirectory = (data) => {
+        // Calls the API to save the directory
+        createFolder(selectedStorageAccount, selectedFileSystem, account.userDetails, data)
+            .then((newDirectory) => {
+                const _directories = [...directories, newDirectory].sort((a, b) => a.name < b.name ? -1 : a.name > b.name ? 1 : 0)
+                setDirectories(_directories)
+
+                // Display a toast
+                displayToast(`Directory '${newDirectory.name}' Created!`)
+            })
+            .catch(error => console.log(error))
+    }
+
+
     const handleStorageAccountChange = useCallback(id => {
         setSelectedStorageAccount(id)
     }, [])
@@ -65,38 +90,49 @@ const StorageAccountsPage = ({ strings }) => {
 
 
     const storageAccountItems = storageAccounts.map(account => account.name)
-    const fileSystemItems = selectedStorageAccount ? storageAccounts.find(account => account.name === selectedStorageAccount).items.map(item => item.name) : []
+    const fileSystemItems = selectedStorageAccount ? storageAccounts.find(account => account.name === selectedStorageAccount).fileSystems : []
 
 
     return (
-        <Container>
-            <Grid container spacing={2} sx={{ justifyContent: 'center', marginBottom: '10px' }}>
-                <Grid item md={6}>
-                    <Selector
-                        id='storageAccountSelector'
-                        items={storageAccountItems}
-                        onChange={handleStorageAccountChange}
-                        selectedItem={selectedStorageAccount}
-                        strings={{ label: strings.storageAccountLabel }}
-                    />
+        <>
+            <Container>
+                <Grid container spacing={2} sx={{ justifyContent: 'center', marginBottom: '10px' }}>
+                    <Grid item md={6}>
+                        <Selector
+                            id='storageAccountSelector'
+                            items={storageAccountItems}
+                            onChange={handleStorageAccountChange}
+                            selectedItem={selectedStorageAccount}
+                            strings={{ label: strings.storageAccountLabel }}
+                        />
+                    </Grid>
+                    <Grid item md={6}>
+                        <Selector
+                            id='fileSystemSelector'
+                            items={fileSystemItems}
+                            onChange={handleFileSystemChange}
+                            selectedItem={selectedFileSystem}
+                            strings={{ label: strings.fileSystemLabel }}
+                        />
+                    </Grid>
+                    <Grid item>
+                        <DirectoriesManager
+                            data={directories}
+                            onCreateDirectory={handleCreateDirectory}
+                        />
+                    </Grid>
                 </Grid>
-                <Grid item md={6}>
-                    <Selector
-                        id='fileSystemSelector'
-                        items={fileSystemItems}
-                        onChange={handleFileSystemChange}
-                        selectedItem={selectedFileSystem}
-                        strings={{ label: strings.fileSystemLabel }}
-                    />
-                </Grid>
-                <Grid item>
-                    <DirectoriesManager
-                        data={directories}
-                        storageAccount={selectedStorageAccount}
-                        fileSystem={selectedFileSystem} />
-                </Grid>
-            </Grid>
-        </Container>
+            </Container>
+
+            <Snackbar
+                open={isToastOpen}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+                autoHideDuration={5000}
+                onClose={() => setToastOpen(false)}
+            >
+                <Alert severity="success">{toastMessage}</Alert>
+            </Snackbar>
+        </>
     )
 }
 

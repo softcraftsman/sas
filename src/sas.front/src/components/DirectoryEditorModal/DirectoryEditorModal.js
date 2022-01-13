@@ -25,7 +25,7 @@ const DirectoryEditorModal = ({ data, onCancel, onCreate, open, strings }) => {
 
 
     const handleCreateClick = () => {
-        onCreate && onCreate(formData)
+        submitForm()
     }
 
 
@@ -34,8 +34,19 @@ const DirectoryEditorModal = ({ data, onCancel, onCreate, open, strings }) => {
     }
 
 
-    const handleInputChange = (event) => {
+    const handleInputChange = event => {
         updateState(event.target.name, event.target.value)
+    }
+
+    const handleEnterInFundCode = event => {
+        if (event.key === 'Enter') {
+            submitForm()
+        }
+    }
+
+
+    const submitForm = () => {
+        onCreate && onCreate(formData)
     }
 
 
@@ -74,6 +85,7 @@ const DirectoryEditorModal = ({ data, onCancel, onCreate, open, strings }) => {
                             variant='standard'
                             defaultValue={data.fundCode}
                             onChange={handleInputChange}
+                            onKeyPress={handleEnterInFundCode}
                         />
                     </Grid>
                 </Grid>
