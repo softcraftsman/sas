@@ -23,6 +23,7 @@ namespace sas.api
 		{
 			// Check for logged in user
 			ClaimsPrincipal claimsPrincipal;
+
 			try
 			{
 				claimsPrincipal = UserOperations.GetClaimsPrincipal(req);
@@ -31,9 +32,10 @@ namespace sas.api
 			}
 			catch (Exception ex)
 			{
-				log.LogError(ex.Message);
+				log.LogError(ex, ex.Message);
 				return new BadRequestErrorMessageResult("Unable to authenticate user.");
 			}
+
 			var authenticatedUser = claimsPrincipal.Identity.Name;
 
 			// TODO: Review for security. This seems to allow any authenticated users to pass another user's UPN and retrieve the folders they have access to?
