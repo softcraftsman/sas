@@ -67,16 +67,17 @@
 				"cwd": "${workspaceFolder}/src/sas.api"
 			}
 		},
-		{
-			"type": "func",
-			"dependsOn": "build (functions)",
-			"options": {
-				"cwd": "${workspaceFolder}/src/sas.api"
-			},
-			"command": "host start",
-			"isBackground": true,
-			"problemMatcher": "$func-dotnet-watch"
-		},
+		// {
+		// 	"label": "Start Az Fx",
+		// 	"type": "func",
+		// 	"dependsOn": "build (functions)",
+		// 	"options": {
+		// 		"cwd": "${workspaceFolder}/src/sas.api"
+		// 	},
+		// 	"command": "func host start",
+		// 	"isBackground": true,
+		// 	"problemMatcher": "$func-dotnet-watch"
+		// },
 		{
 			"label": "build",
 			"command": "dotnet",
@@ -117,6 +118,20 @@
 		{
 			"type": "shell",
 			"label": "Start SWA for Launch Edge",
+			// TODO: Enable SSL
+			//"command": "swa start http://localhost:3000 --run 'npm start' --api-location http://localhost:7071",
+			"command": "swa start app",
+			"isBackground": false,
+			"problemMatcher": [],
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
+			"dependsOn": []
+		},
+		{
+			"type": "shell",
+			"label": "Launch Edge with Az Fx (non-debug)",
+			// TODO: Enable SSL
 			"command": "swa start http://localhost:3000 --api-location ../sas.api --run 'npm start' --swa-config-location ../..",
 			"isBackground": false,
 			"problemMatcher": [],
