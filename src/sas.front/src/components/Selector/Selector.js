@@ -39,16 +39,14 @@ Selector.propTypes = {
     items: PropTypes.array,
     label: PropTypes.string,
     onChange: PropTypes.func,
-    selectedItem: PropTypes.string,
-    label: PropTypes.string
+    selectedItem: PropTypes.string
 }
 
 Selector.defaultProps = {
     id: 'Selector',
     items: [],
     label: '',
-    selectedItem: '',
-    label: ''
+    selectedItem: ''
 }
 
 export default Selector
