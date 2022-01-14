@@ -83,6 +83,12 @@ Copy the value of the client secret for use later.
 1. In the *Implicit grant and hybrid flows* section, select **ID tokens (used for implicit and hybrid flows)**.
 1. Select **Save**.
 
+#### Add logout URL
+
+Required
+
+TODO: pending
+
 ### Prepare the storage accounts
 
 In order to allow this application to modify storage accounts, you need to assign the *Storage Blob Data Owner* role to the application registration for each of the storage accounts to be managed.
