@@ -11,7 +11,7 @@ namespace sas.api
 	public static class Roles
 	{
 		[FunctionName("RolesGET")]
-		public static async Task<IList<string>> RolesGET([HttpTrigger(AuthorizationLevel.Function, "GET", Route = "Roles")]
+		public static async Task<string[]> RolesGET([HttpTrigger(AuthorizationLevel.Function, "GET", Route = "Roles")]
 			HttpRequest req, ILogger log)
 		{
 			// Request body is supposed to contain the user's access token
@@ -19,7 +19,7 @@ namespace sas.api
 
 			log.LogInformation($"Looking for custom roles to assign to '{Body}'.");
 
-			return new List<string>() { "some-fake-role" };
+			return new List<string>() { "some-fake-role" }.ToArray();
 		}
 	}
 }
