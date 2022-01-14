@@ -35,9 +35,6 @@ namespace sas.api
 			// Calculate UPN
 			var upn = claimsPrincipal.Identity.Name;
 
-			// Dictionary for
-			//var accountContainers = new Dictionary<string, IList<string>>();
-
 			// Get the Containers for a upn from each storage account
 			var config = SasConfiguration.GetConfiguration();
 			var result = new List<FileSystemResult>();
@@ -46,9 +43,20 @@ namespace sas.api
 				// TODO: Centralize this to account for other clouds
 				var serviceUri = new Uri($"https://{account}.dfs.core.windows.net");
 				var adls = new FileSystemOperations(serviceUri, log);
-				var containers = adls.GetContainersForUpn(upn).ToList();
-				//accountContainers.Add(account, containers);
+				List<string> containers;
 
+				try
+				{
+					containers = adls.GetContainersForUpn(upn).ToList();
+				}
+				catch (Exception ex)
+				{
+					log.LogError(ex, ex.Message);
+
+					containers = new List<string>(){
+						ex.Message
+					};
+				}
 				result.Add(new FileSystemResult() { Name = account, FileSystems = containers });
 			}
 
