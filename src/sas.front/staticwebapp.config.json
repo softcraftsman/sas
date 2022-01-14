@@ -56,15 +56,6 @@
 			]
 		},
 		{
-			"route": "/api/Roles",
-			"methods": [
-				"GET"
-			],
-			"allowedRoles": [
-				"authenticated"
-			]
-		},
-		{
 			"route": "/api/TopLevelFolders",
 			"methods": [
 				"GET"
