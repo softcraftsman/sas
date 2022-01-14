@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
@@ -12,7 +11,7 @@ namespace sas.api
 	public static class Roles
 	{
 		[FunctionName("RolesGET")]
-		public static async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Function, "GET", Route = "Roles")]
+		public static async Task<IList<string>> RolesGET([HttpTrigger(AuthorizationLevel.Function, "GET", Route = "Roles")]
 			HttpRequest req, ILogger log)
 		{
 			// Request body is supposed to contain the user's access token
@@ -20,7 +19,7 @@ namespace sas.api
 
 			log.LogInformation($"Looking for custom roles to assign to '{Body}'.");
 
-			return new OkObjectResult(new List<string>());
+			return new List<string>() { "some-fake-role" };
 		}
 	}
 }
