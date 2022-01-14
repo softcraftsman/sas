@@ -7,12 +7,12 @@ import DirectoryEditorModal from '../DirectoryEditorModal'
 import DirectoryDetailsModal from '../DirectoryDetailsModal'
 import './DirectoriesManager.css'
 
-const DirectoriesManager = ({ data, onCreateDirectory }) => {
-    const [editor, setEditor] = useState({ show: false, data: {}, isNew: true })
+const DirectoriesManager = ({ data, onCreateDirectory, strings }) => {
+    const [editor, setEditor] = useState({ show: false, data: {} })
     const [details, setDetails] = useState({ show: false, data: {} })
 
     const handleAdd = () => {
-        setEditor({ show: true, data: {}, isNew: true })
+        setEditor({ show: true, data: {} })
     }
 
     const handleCancelDetails = () => {
@@ -20,14 +20,14 @@ const DirectoriesManager = ({ data, onCreateDirectory }) => {
     }
 
     const handleCancelEdit = () => {
-        setEditor({ show: false, data: {}, isNew: true })
+        setEditor({ show: false, data: {} })
     }
 
     const handleCreateDirectory = (data) => {
         onCreateDirectory && onCreateDirectory(data)
         
         // Hide the editor modal
-        setEditor({ show: false, data: {}, isNew: true })
+        setEditor({ show: false, data: {} })
     }
 
     const handleDetails = (rowData) => {
@@ -38,7 +38,7 @@ const DirectoriesManager = ({ data, onCreateDirectory }) => {
         <div className='directoriesManager'>
             <div className='actionsBar'>
                 <Button variant='contained' startIcon={<AddIcon />} onClick={handleAdd}>
-                    New Folder
+                    {strings.newFolder}
                 </Button>
             </div>
 
@@ -46,15 +46,16 @@ const DirectoriesManager = ({ data, onCreateDirectory }) => {
                 data={data}
                 onAdd={handleAdd}
                 onDetails={handleDetails}
-            />
+                strings={strings.directoriesTable}
+                />
 
             {editor.show &&
                 <DirectoryEditorModal
                     data={editor.data}
-                    isNew={editor.isNew}
                     onCancel={handleCancelEdit}
                     onCreate={handleCreateDirectory}
                     open={editor.show}
+                    strings={strings.directoryEditor}
                 />
             }
 
@@ -63,6 +64,7 @@ const DirectoriesManager = ({ data, onCreateDirectory }) => {
                     data={details.data}
                     onCancel={handleCancelDetails}
                     open={details.show}
+                    strings={strings.directoryDetails}
                 />
             }
         </div>
@@ -73,12 +75,14 @@ const DirectoriesManager = ({ data, onCreateDirectory }) => {
 DirectoriesManager.propTypes = {
     data: PropTypes.array,
     storageAccount: PropTypes.string,
-    fileSystem: PropTypes.string
+    fileSystem: PropTypes.string,
+    strings: PropTypes.object
 }
 
 
 DirectoriesManager.defaultProps = {
-    data: []
+    data: [],
+    strings: {}
 }
 
 export default DirectoriesManager

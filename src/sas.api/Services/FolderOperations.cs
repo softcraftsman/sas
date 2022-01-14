@@ -82,18 +82,19 @@ namespace sas.api.Services
 			return result;
 		}
 
-		internal async Task<Result> AddFundCodeToMetaData(string folder, string fundCode)
-		{
-			log.LogTrace($"Saving FundCode into container's metadata...");
-			try
-			{
-				var directoryClient = dlfsClient.GetDirectoryClient(folder);
+        internal async Task<Result> AddMetaData(string folder, string fundCode, string owner)
+        {
+            log.LogTrace($"Saving FundCode into container's metadata...");
+            try
+            {
+                var directoryClient = dlfsClient.GetDirectoryClient(folder);
 
 				// Check the Last Calculated Date from the Metadata
 				var meta = (await directoryClient.GetPropertiesAsync()).Value.Metadata;
 
-				// Add Fund Code
-				meta.Add("FundCode", fundCode);
+                // Add Fund Code
+                meta.Add("FundCode", fundCode);
+                meta.Add("Owner", owner);
 
 				// Strip off a readonly item
 				meta.Remove("hdi_isfolder");
@@ -151,14 +152,15 @@ namespace sas.api.Services
 			return s.Replace('@', '_').ToLower();
 		}
 
-		internal FolderDetail GetFolderDetail(string folder)
-		{
-			var rootClient = dlfsClient.GetDirectoryClient(folder);  // container (root)
-			var meta = rootClient.GetProperties().Value.Metadata;
-			var acl = rootClient.GetAccessControl(userPrincipalName: true).Value.AccessControlList;
-			FolderDetail fd = BuildFolderDetail(folder, meta, acl);
-			return fd;
-		}
+        internal FolderDetail GetFolderDetail(string folder)
+        {
+            var rootClient = dlfsClient.GetDirectoryClient(folder);  // container (root)
+            var prop = rootClient.GetProperties().Value;
+            var acl = rootClient.GetAccessControl(userPrincipalName: true).Value.AccessControlList;
+            var uri = rootClient.Uri;
+            FolderDetail fd = BuildFolderDetail(folder, prop, acl, uri);
+            return fd;
+        }
 
 		internal IEnumerable<FolderDetail> GetAccessibleFolders(string upn)
 		{
@@ -171,32 +173,27 @@ namespace sas.api.Services
 			// TODO: Do not re-define var, create a new one
 			upn = Simplify(upn);
 
-			// Find folders that have ACL entries for upn
-			foreach (var folder in folders)
-			{
-				var rootClient = dlfsClient.GetDirectoryClient(folder.Name);  // container (root)
+            // Find folders that have ACL entries for upn
+            foreach (var folder in folders)
+            { 
+                var rootClient = dlfsClient.GetDirectoryClient(folder.Name);  // container (root)
+                var uri = rootClient.Uri;
+                var prop = rootClient.GetProperties().Value;
+                var acl = rootClient.GetAccessControl(userPrincipalName: true).Value.AccessControlList;
+                if (acl.Any( p => p.EntityId is not null && Simplify(p.EntityId).StartsWith(upn)
+                        && p.Permissions.HasFlag(RolePermissions.Read)    ))
+                {
+                    FolderDetail fd = BuildFolderDetail(folder.Name, prop, acl, uri);
+                    yield return fd;
+                }
+            }
+        }
 
-				// Get the access control list for the current top-level folder
-				var acl = rootClient.GetAccessControl(userPrincipalName: true).Value.AccessControlList;
-
-				// TODO: Just use Simplify(p.EntityId)?.StartsWith(upn)
-				if (acl.Any(p => p.EntityId is not null && Simplify(p.EntityId).StartsWith(upn)
-					   // TODO: Use flag syntax
-					   && p.Permissions.HasFlag(RolePermissions.Read)))
-				{
-					var meta = rootClient.GetProperties().Value.Metadata;
-					FolderDetail fd = BuildFolderDetail(folder.Name, meta, acl);
-					yield return fd;
-				}
-			}
-		}
-
-		private FolderDetail BuildFolderDetail(string folder, IDictionary<string, string> meta,
-			IEnumerable<PathAccessControlItem> acl)
-		{
-			// Get Metadata
-			long? size = meta.ContainsKey("Size") ? long.Parse(meta["Size"]) : null;
-			decimal? cost = (size == null) ? null : size * costPerTB / 1000000000000;
+        private FolderDetail BuildFolderDetail(string folder, PathProperties prop, IEnumerable<PathAccessControlItem> acl, Uri uri)
+        {
+            // Get Metadata
+            long? size = prop.Metadata.ContainsKey("Size") ? long.Parse(prop.Metadata["Size"]) : null;
+            decimal? cost = (size == null) ? null : size * costPerTB / 1000000000000;
 
 			// Calculate UserAccess
 			var userAccess = acl
@@ -204,25 +201,33 @@ namespace sas.api.Services
 				.Select(p => p.EntityId)
 				.ToList();
 
-			// Create Folder Details
-			var fd = new FolderDetail()
-			{
-				Name = folder,
-				Size = meta.ContainsKey("Size") ? meta["Size"] : null,
-				Cost = cost.HasValue ? cost.Value.ToString() : null,
-				FundCode = meta.ContainsKey("FundCode") ? meta["FundCode"] : null,
-				UserAccess = userAccess
-			};
-			return fd;
-		}
+            // Create Folder Details
+            var fd = new FolderDetail()
+            {
+                Name = folder,
+                Size = prop.Metadata.ContainsKey("Size") ? prop.Metadata["Size"] : null,
+                Cost = cost.HasValue ? cost.Value.ToString() : null,
+                FundCode = prop.Metadata.ContainsKey("FundCode") ? prop.Metadata["FundCode"] : null,
+                CreatedOn = prop.CreatedOn.ToLocalTime().ToString(),
+                UserAccess = userAccess,
+                URI = uri.ToString(),
+                Owner = prop.Metadata.ContainsKey("Owner") ? prop.Metadata["Owner"] : null
+            };
+            return fd;
+        }
 
-		internal class FolderDetail
-		{
-			public string Name { get; set; }
-			public string Size { get; set; }
-			public string Cost { get; set; }
-			public string FundCode { get; set; }
-			public IList<string> UserAccess { get; set; }
-		}
-	}
+        internal class FolderDetail
+        {
+            public string Name { get; set; }
+            public string CreatedOn { get; set; }
+            public string AccessTier { get; set; }
+            public string Size { get; set; }
+            public string Cost { get; set; }
+            public string FundCode { get; set; }
+            public string Owner { get; set; }
+            public string Region { get; set; }
+            public string URI { get; set; }
+            public IList<string> UserAccess { get; set; }
+        }
+    }
 }

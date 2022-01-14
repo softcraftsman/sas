@@ -81,12 +81,12 @@ namespace sas.api
 			if (!result.Success)
 				return new BadRequestErrorMessageResult(result.Message);
 
-			result = await folderOperations.CreateNewFolder(tlfp.Folder);
-			if (!result.Success)
-				return new BadRequestErrorMessageResult(result.Message);
-			result = await folderOperations.AddFundCodeToMetaData(tlfp.Folder, tlfp.FundCode);
-			if (!result.Success)
-				return new BadRequestErrorMessageResult(result.Message);
+            result = await folderOperations.CreateNewFolder(tlfp.Folder);
+            if (!result.Success)
+                return new BadRequestErrorMessageResult(result.Message);
+            result = await folderOperations.AddMetaData(tlfp.Folder, tlfp.FundCode, tlfp.FolderOwner);
+            if (!result.Success)
+                return new BadRequestErrorMessageResult(result.Message);
 
 			result = await folderOperations.AssignFullRwx(tlfp.Folder, tlfp.FolderOwner);
 			if (!result.Success)

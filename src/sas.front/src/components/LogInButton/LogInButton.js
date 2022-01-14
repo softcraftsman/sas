@@ -7,7 +7,7 @@ import Person from '@mui/icons-material/PersonTwoTone'
  * Renders a button which, when selected, will open a popup for login
  */
 const LogInButton = ({ strings }) => {
-    return (<Button variant='outlined' startIcon={<Person />} href="/.auth/login/aad">{strings.LogIn}</Button>)
+    return (<Button variant='outlined' startIcon={<Person />} href="/.auth/login/aad">{strings.logIn}</Button>)
 }
 
 LogInButton.propTypes = {

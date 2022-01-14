@@ -33,7 +33,7 @@ const StorageAccountsPage = ({ strings }) => {
                 setStorageAccounts(_storageAccounts)
             }
             catch (error) {
-                console.log(error)
+                // console.log(error)
             }
         }
 
@@ -51,7 +51,7 @@ const StorageAccountsPage = ({ strings }) => {
                 setDirectories(_directories)
             }
             catch (error) {
-                console.log(error)
+                // console.log(error)
             }
         }
 
@@ -73,9 +73,11 @@ const StorageAccountsPage = ({ strings }) => {
                 setDirectories(_directories)
 
                 // Display a toast
-                displayToast(`Directory '${newDirectory.name}' Created!`)
+                displayToast(strings.directoryCreated(newDirectory))
             })
-            .catch(error => console.log(error))
+            .catch(error => {
+                console.log(error)
+            })
     }
 
 
@@ -101,24 +103,25 @@ const StorageAccountsPage = ({ strings }) => {
                         <Selector
                             id='storageAccountSelector'
                             items={storageAccountItems}
+                            label={strings.storageAccountLabel}
                             onChange={handleStorageAccountChange}
                             selectedItem={selectedStorageAccount}
-                            strings={{ label: strings.storageAccountLabel }}
                         />
                     </Grid>
                     <Grid item md={6}>
                         <Selector
                             id='fileSystemSelector'
                             items={fileSystemItems}
+                            label={strings.fileSystemLabel}
                             onChange={handleFileSystemChange}
                             selectedItem={selectedFileSystem}
-                            strings={{ label: strings.fileSystemLabel }}
                         />
                     </Grid>
                     <Grid item>
                         <DirectoriesManager
                             data={directories}
                             onCreateDirectory={handleCreateDirectory}
+                            strings={strings}
                         />
                     </Grid>
                 </Grid>
@@ -130,7 +133,7 @@ const StorageAccountsPage = ({ strings }) => {
                 autoHideDuration={5000}
                 onClose={() => setToastOpen(false)}
             >
-                <Alert severity="success">{toastMessage}</Alert>
+                <Alert severity='success'>{toastMessage}</Alert>
             </Snackbar>
         </>
     )
