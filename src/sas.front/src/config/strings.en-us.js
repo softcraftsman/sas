@@ -1,7 +1,7 @@
 const strings = {
     appTitle: 'Storage as a Service',
     companyName: 'Americas University',
-    directoryCreated: name => `Directory ${name} Created!`,
+    directoryCreated: name => `Folder '${name}' Created!`,
     fileSystemLabel: 'File System',
     logIn: 'Log In',
     logOut: 'Log out',
@@ -41,6 +41,7 @@ const strings = {
         storageExplorerLabel: 'Via Storage Explorer',
         storageExplorerUrl: 'https://aka.ms/storageexplorer',
         totalFilesLabel: 'Total files',
+        uriLabel: 'URL',
     },
     directoryEditor: {
         cancel: 'Cancel',

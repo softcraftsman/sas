@@ -49,14 +49,14 @@ const DirectoriesTableMembers = ({ members, strings }) => {
 DirectoriesTableMembers.propTypes = {
     members: PropTypes.array,
     strings: PropTypes.shape({
-        members: PropTypes.string,
+        members: PropTypes.func,
     })
 }
 
 DirectoriesTableMembers.defaultProps = {
     members: [],
     strings: {
-        members: 'members',
+        members: count => `${count} members`,
     }
 }
 
