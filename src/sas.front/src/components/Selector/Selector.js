@@ -8,7 +8,7 @@ import Select from "@mui/material/Select"
 /**  
  * Renders list of items in a drop down selector
  */
-const Selector = ({ items, id, onChange, selectedItem, strings }) => {
+const Selector = ({ items, id, label, onChange, selectedItem }) => {
     useEffect(() => {
         const selected = items[0]
         onChange && onChange(selected)
@@ -20,11 +20,11 @@ const Selector = ({ items, id, onChange, selectedItem, strings }) => {
 
     return (
         <FormControl fullWidth>
-            <InputLabel id={`${id}-select-label`}>{strings.label}</InputLabel>
+            <InputLabel id={`${id}-select-label`}>{label}</InputLabel>
             <Select
                 labelId={`${id}-select-label`}
                 id={id}
-                label={strings.label}
+                label={label}
                 value={selectedItem}
                 onChange={handleChange}
             >
@@ -40,9 +40,7 @@ Selector.propTypes = {
     label: PropTypes.string,
     onChange: PropTypes.func,
     selectedItem: PropTypes.string,
-    strings: PropTypes.shape({
-        label: PropTypes.string
-    })
+    label: PropTypes.string
 }
 
 Selector.defaultProps = {
@@ -50,9 +48,7 @@ Selector.defaultProps = {
     items: [],
     label: '',
     selectedItem: '',
-    strings: {
-        label: ''
-    }
+    label: ''
 }
 
 export default Selector
