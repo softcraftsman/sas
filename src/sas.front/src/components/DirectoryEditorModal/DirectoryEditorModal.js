@@ -7,7 +7,7 @@ import DialogContent from '@mui/material/DialogContent'
 import DialogTitle from '@mui/material/DialogTitle'
 import Grid from '@mui/material/Grid'
 import TextField from '@mui/material/TextField'
-import CancelIcon from '@mui/icons-material/CancelOutlined'
+import CancelIcon from '@mui/icons-material/Close'
 import SaveIcon from '@mui/icons-material/SaveOutlined'
 import './DirectoryEditorModal.css'
 
@@ -69,7 +69,7 @@ const DirectoryEditorModal = ({ data, onCancel, onCreate, open, strings }) => {
                             autoFocus
                             id='name'
                             name='name'
-                            label="Space's Name"
+                            label={strings.directoryNameLabel}
                             fullWidth
                             variant='standard'
                             defaultValue={data.name}
@@ -108,7 +108,7 @@ DirectoryEditorModal.propTypes = {
     strings: PropTypes.shape({
         cancel: PropTypes.string,
         fundCodeLabel: PropTypes.string,
-        nameLabel: PropTypes.string,
+        directoryNameLabel: PropTypes.string,
         save: PropTypes.string,
         title: PropTypes.string,
     }),
@@ -120,7 +120,7 @@ DirectoryEditorModal.defaultProps = {
     strings: {
         cancel: 'Cancel',
         fundCodeLabel: 'Fund code',
-        nameLabel: 'Space\'s name',
+        directoryNameLabel: 'Space\'s name',
         save: 'Save',
         title: 'Creating a new folder',
     },

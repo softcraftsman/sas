@@ -21,7 +21,7 @@ const DirectoriesTableMembers = ({ members, strings }) => {
         return (
             <>
                 <div onMouseEnter={handlePopoverOpen} onMouseLeave={handlePopoverClose}>
-                    <Chip className='member-chip' label={`${members.length} ${strings.members}`} />
+                    <Chip className='member-chip' label={strings.members(members.length)} />
                 </div>
                 <Popover
                     anchorEl={anchorEl}

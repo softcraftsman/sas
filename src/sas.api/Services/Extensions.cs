@@ -1,13 +1,12 @@
-﻿namespace sas.api.Services
+﻿using System.Linq;
+
+namespace sas.api.Services
 {
 	internal class Extensions
 	{
 		public static bool AnyNull(params object[] args)
 		{
-			// TODO: Use lambda?
-			foreach (var arg in args)
-				if (arg is null) return true;
-			return false;
+			return args.Any(x => x == null);
 		}
 	}
 

@@ -5,6 +5,7 @@ import useAuthentication from '../../hooks/useAuthentication'
 import PageLayout from '../PageLayout'
 import LandingPage from '../LandingPage'
 import StorageAccountsPage from '../StorageAccountsPage'
+import strings from '../../config/strings.en-us.js'
 
 function App() {
   const { isAuthenticated } = useAuthentication()
@@ -12,15 +13,15 @@ function App() {
   const content = isAuthenticated ? (
     <BrowserRouter>
       <Routes>
-        <Route path='/' element={<StorageAccountsPage />} />
+        <Route path='/' element={<StorageAccountsPage strings={strings} />} />
       </Routes>
     </BrowserRouter>
   ) : (
-    <LandingPage />
+    <LandingPage strings={strings} />
   )
 
   return (
-    <PageLayout>
+    <PageLayout strings={strings}>
       {content}
     </PageLayout>
   )
