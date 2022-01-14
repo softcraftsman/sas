@@ -1,4 +1,5 @@
 import URLS from '../config/urls'
+import HttpException from './HttpException'
 
 
 /**
@@ -10,12 +11,16 @@ export const getFileSystems = async () => {
 
     return fetch(endpoint, options)
         .then(response => {
-            return response.json()
+            if (response.status === 200) {
+                return response.json()
+            } else {
+                throw new HttpException(response.status, response.statusText)
+            }
         })
         .catch(error => {
             console.log(`Call to API (${endpoint}) failed with the following details:`)
             console.log(error)
-            return []
+            throw error
         })
 }
 
@@ -29,12 +34,16 @@ export const getDirectories = async (storageAccount, fileSystem) => {
 
     return fetch(endpoint, options)
         .then(response => {
-            return response.json()
+            if (response.status === 200) {
+                return response.json()
+            } else {
+                throw new HttpException(response.status, response.statusText)
+            }
         })
         .catch(error => {
             console.log(`Call to API (${endpoint}) failed with the following details:`)
             console.log(error)
-            return []
+            throw error
         })
 }
 

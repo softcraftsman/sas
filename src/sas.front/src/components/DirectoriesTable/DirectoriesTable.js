@@ -1,8 +1,8 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import Table from 'react-bootstrap/Table'
-import InfoIcon from '@mui/icons-material/InfoOutlined'
-import PencilIcon from '@mui/icons-material/EditOutlined'
+import DetailsIcon from '@mui/icons-material/InfoTwoTone'
+import EditIcon from '@mui/icons-material/EditOutlined'
 import DirectoriesTableMembers from './DirectoriesTableMembers'
 import './DirectoriesTable.css'
 
@@ -50,8 +50,8 @@ export const DirectoriesTable = ({ data, onDetails, onEdit, strings }) => {
                                 {row.fundCode}
                             </td>
                             <td className='actions'>
-                                {onEdit && <PencilIcon onClick={() => onEdit(row)} className='action' />}
-                                {onDetails && <InfoIcon onClick={() => onDetails(row)} className='action' />}
+                                {onEdit && <EditIcon onClick={() => onEdit(row)} className='action' />}
+                                {onDetails && <DetailsIcon onClick={() => onDetails(row)} className='action' />}
                             </td>
                         </tr>
                     )

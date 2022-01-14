@@ -8,17 +8,21 @@ import './Header.css'
 const Header = ({ strings }) => {
     const { account, isAuthenticated } = useAuthentication()
 
+    const logo = strings.logoImage ? 
+        (<img
+            alt={strings.logoText}
+            src={strings.logoImage}
+            width='100'
+            height='45'
+        />) : 
+        (<div className='logo-text'>{strings.logoText}</div>)
+
     return (
         <div className='header'>
             <div className='header-logo'>
-                <img
-                    alt='Logo'
-                    src='https://sasfront.blob.core.windows.net/public/duke-logo.svg.png'
-                    width='100'
-                    height='45'
-                />
+                {logo}
                 <div className='header-divider' />
-                <h3>{strings.title}</h3>
+                <h3>{strings.appTitle}</h3>
             </div>
             <div className='header-profile'>
                 {isAuthenticated &&
@@ -27,7 +31,7 @@ const Header = ({ strings }) => {
                             <Avatar alt={account.userDetails} />
                         </div>
                         <div className='header-profile-greeting'>
-                            {strings.welcome}, {account.userDetails}<br />
+                            {strings.welcome(account.userDetails)}<br />
                             <LogOutButton strings={strings} />
                         </div>
                     </>
