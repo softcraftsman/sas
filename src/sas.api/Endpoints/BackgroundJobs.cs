@@ -56,6 +56,9 @@ namespace sas.api
 				}
 			}
 
+			return new OkObjectResult(sb.ToString());
+		}
+
         private static DataLakeServiceClient CreateDlsClientForUri(Uri containerUri)
         {
          /*   var tenantId = Environment.GetEnvironmentVariable("TENANT_ID");
