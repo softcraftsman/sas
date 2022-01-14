@@ -41,8 +41,9 @@ export const DirectoriesTable = ({ data, onDetails, onEdit, strings }) => {
                             <td className='spaceused'>
                                 {row.size}
                             </td>
-                            <td className='costs'>{
-                                row.cost}</td>
+                            <td className='costs'>
+                                {row.cost}
+                            </td>
                             <td className='owner'>
                                 <DirectoriesTableMembers members={row.userAccess} strings={strings} />
                             </td>
@@ -69,7 +70,6 @@ DirectoriesTable.propTypes = {
         actionsLabel: PropTypes.string,
         folderLabel: PropTypes.string,
         fundCodeLabel: PropTypes.string,
-        members: PropTypes.string,
         monthlyCostLabel: PropTypes.string,
         spaceUsedLabel: PropTypes.string,
         whoHasAccessLabel: PropTypes.string,
@@ -82,7 +82,6 @@ DirectoriesTable.defaultProps = {
         actionsLabel: 'Actions',
         folderLabel: 'Folder',
         fundCodeLabel: 'Fund Code',
-        members: 'members',
         monthlyCostLabel: 'Monthly Cost',
         spaceUsedLabel: 'Space Used',
         whoHasAccessLabel: 'Who Has Access?',
