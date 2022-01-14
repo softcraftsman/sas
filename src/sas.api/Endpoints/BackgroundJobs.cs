@@ -55,6 +55,7 @@ namespace sas.api
 					sb.AppendLine(msg);
 				}
 			}
+		}
 
         private static DataLakeServiceClient CreateDlsClientForUri(Uri containerUri)
         {
