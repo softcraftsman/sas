@@ -1,99 +1,153 @@
 # SAS for EDU
 
-![image](https://raw.githubusercontent.com/fabriciosanchez/sas/main/assets/sas-welcome-page.png)
+![image](assets/sas-welcome-page.png)
 
-SAS is a storage as a Service platform designed to automate storage allocation in EDU institutions. Its main goal is to provide agility to stakeholders on having access to object storage infrastructure in Microsoft Azure.
+SAS is a Storage-as-a-Service platform designed to automate storage allocation in EDU institutions. Its main goal is to provide agility to stakeholders on having access to object storage infrastructure in Microsoft Azure.
 
 Some of the capabilities currently provided by the system are:
 
-* Dynamic creation of top level folder and file systems in Azure Data Lake Storage (ADLS).
+* Dynamic creation of top level folder and file systems in Azure Data Lake Storage (ADLS) Gen 2.
 * Dynamic addition of object owner as "Execute" in File System's ACL.
 * Automatic creation of initial folder under the File System.
-* Dynamic addition of folder's onwer under initial folder.
+* Dynamic addition of folder's owner under initial folder.
 * Exposure of "how to use" the storage infrastructure through Web UI.
 
-# Deploy SAS for EDU
+## Deploy SAS for EDU
+
 In order to deploy this solution to your environment, you'll need to setup some variables in the build process and create a static web app in Azure. To accomplish this, do the following:
 
-* [Fork the code](#fork-the-code)
-* [Create a Static Web App](#create-a-static-web-app)
-* [Create an application](#create-an-application)
-* [Add secrets](#add-secrets)
+1. [Fork the code](#fork-the-code)
+1. [Create a Static Web App](#create-a-static-web-app)
+1. [Create an application registration](#create-an-application-registration)
+1. [Prepare the storage accounts](#prepare-the-storage-accounts)
+1. [Add a GitHub secret](#add-a-github-secret)
+1. [Configure the Static Web App](#configure-the-static-web-app)
+1. [Configure Custom Authentication](#configure-custom-authentication)
+1. [Build](#build)
 
-## Fork the code
-Fork the code into your github repository. You can name the repo whatever you like.
+### Fork the code
 
-## Create a Static Web App
-Create a Static Web App in the Azure Portal. Name it anything you like. Choose whichever plan you like at this time, though you'll probably need the Standard plan when you wish to apply your own domain name. 
+Fork this repo into your GitHub account. You can name the repo whatever you like.
 
-> ***Important***, when choosing the GitHub repo, choose your repo instead of the source one.
+### Create a Static Web App
 
-TODO: Provide Build details guidance
+1. Navigate to the Azure Portal and create a new Static Web App.
+1. Name the app according to your organization's naming convention.
+1. Choose the **Standard** hosting plan, which is required to enable custom authentication.
+1. Select your preferred region.
+1. Select **Other** as the deployment source.
+1. Select **Review + create** and **Create**.
 
-Copy the Static Web App URL for use later.
+When the Static Web App is created, copy the Static Web App's *URL* for use later.
 
-Copy the deployment token (Click on Manage deployment token) for use later.
+Select **Manage deployment token** and copy the token for use later.
 
-Add the App Settings under the Static Web App using Settings -> Configuration. Add a new application setting called DATALAKE_STORAGE_ACCOUNTS. List the name of the storage accounts to use, just the name of the storage account is adequate. Separate the accounts by comma or semicolon.
+### Create an Application Registration
 
-TODO: Add storage cost per TB
+Follow these steps to create a new Application Registration in Azure Active Directory:
+
+1. In the [Azure Portal](https://portal.azure.com), navigate to *Azure Active Directory*.
+1. Select **App registrations**.
+1. Select **+ New registration**.
+1. Provide an application name of your choice. Your users might need to consent, so make the application name descriptive.
+
+    You can grant admin consent for the entire organization.
+
+1. Choose the single tenant option.
+1. For Redirect URI, select **Web** and paste the URL of your Static Web App followed by `/.auth/login/aad/callback`.
+
+    For example, the redirect URI might be `https://awesome-sauce-1234abcd.azurestaticapps.net/.auth/login/aad/callback`.
+
+1. Select **Register** to create the application registration.
+
+When the application registration is created, copy the Directory (tenant) ID and Application (client) ID for use later.
+
+#### Create a client secret
+
+1. Select **Certificates & secrets** in the menu bar of the application registration.
+1. In the *Client secrets* section, select **+ New client secret**.
+1. Enter a name for the client secret. For example, MyStaticWebApp.
+1. Choose an appropriate expiration timeframe for the secret.
+
+    > **Note**
+    >
+    >You must rotate the secret before the expiration date by generating a new secret and updating the application settings with the new value.
+
+1. Select **Add**.
+
+Copy the value of the client secret for use later.
+
+#### Enable ID tokens
+
+1. Select **Authentication** in the menu bar of the application registration.
+1. In the *Implicit grant and hybrid flows* section, select **ID tokens (used for implicit and hybrid flows)**.
+1. Select **Save**.
+
+### Prepare the storage accounts
+
+In order to allow this application to modify storage accounts, you need to assign the *Storage Blob Data Owner* role to the application registration for each of the storage accounts to be managed.
+
+If you named the application *Storage-as-a-Service*, the RBAC entry would look like this:
+
+![image](assets/rbac-blob-owner.png)
+
+### Add a GitHub secret
+
+The GitHub workflow has a required secret that enables it to deploy the code to the app in Azure. Create the following repository secrets by going to Settings -> Secrets.
+
+Secret | Value | Notes
+--- | --- | ---
+SAS_DEPLOYMENT_TOKEN | | The deployment token of your Static Web App.
+
+### Configure the Static Web App
+
+Add the following application settings to the Static Web App using the Configuration pane.
+
+| Name | Value |
+| --- | --- |
+| AZURE_CLIENT_ID | The application ID from the app registration. |
+| AZURE_CLIENT_SECRET | The application secret from the app registration. |
+| AZURE_TENANT_ID | The tenant ID of your Azure AD. |
+| COST_PER_TB | A numeric value for your monthly cost per terabyte of storage. |
+| DATALAKE_STORAGE_ACCOUNTS | A comma-separated list of one or more ADLS Gen2 storage account names that have been prepared following the instructions above. |
 
 ![App Settings](./assets/app-settings.png)
 
-## Create an application
-In the Azure portal, go to the Azure Active Directory. Add a new App Registration.
-* Provide an Application Name
-* Choose the single tenant
-* Redirect URI
-    * Choose the Single-page application
-    * Provide the Static Web App URL
+### Configure Custom Authentication
 
-Copy the Directory (tenant) ID for use later.
-Copy the Application (client) ID for use later.
+On GitHub, modify the fragment from *src/sas.front/staticwebapp.config.json* shown below:
 
-## Prepare the storage accounts
-In order to allow this application to modify the storage accounts, it will require Storage Blob Data Owner permission for each of the storage accounts.
+```json
+{
+  "auth": {
+    "rolesSource": "/api/Roles",
+    "identityProviders": {
+      "azureActiveDirectory": {
+        "registration": {
+          "openIdIssuer": "https://login.microsoftonline.com/<TENANT_ID>/v2.0",
+          "clientIdSettingName": "AZURE_CLIENT_ID",
+          "clientSecretSettingName": "AZURE_CLIENT_SECRET"
+        }
+      }
+    }
+  }
+}
+```
 
-Considering our App was registered as "sas" under Azure Active Directory, the access control addition would look like the image below.
+Replace <TENANT_ID> with your Azure AD tenant ID that you copied earlier.
 
-![image](https://raw.githubusercontent.com/fabriciosanchez/sas/main/assets/blog-owner-contributor.png)
+Commit the change directly to the *main* branch.
 
-Enable CORS on the storage accounts pointing to the Static Web App url.
+### Build
 
-![image](https://user-images.githubusercontent.com/3756829/148672121-d1de3d3e-f026-42c9-bd1e-39eefbcfd3c3.png)
+Go to **Actions** in GitHub and review the workflow. It should have run automatically when your configuration change above was committed.
 
-
-## Create a Static Web App
-Create a Static Web App in the Azure Portal. Name it anything you like. Choose whichever plan you like at this time, though you'll probably need the Standard plan when you wish to apply your own domain name. ***Important***, when choosing the GitHub repo, choose your repo instead of the source one.
-
-Copy the Static Web App URL for use later.
-Copy the deployment token (Click on Manage deployment token) for use later.
-
-Add the App Settings under the Static Web App using Settings -> Configuration. Add a new application setting called DATALAKE_STORAGE_ACCOUNTS. List the name of the storage accounts to use, just the name of the storage account is adequate. Separate the accounts by comma or semicolon.
-
-![image](https://user-images.githubusercontent.com/3756829/148671319-622ec5b8-6c4e-4d77-a2b5-7e368b02b5d2.png)
-
-## Add secrets
-The GitHub workflow has a few required secrets that need to be created to enable it properly. Create the following repository secrets by going to Settings -> Secrets.
-
-Secret|Value|Notes
----|---|---
-APP_REGISTRATION_CLIENT_ID|00000000-0000-0000-0000-000000000000|ID of the App Registration in AAD, refered to as the Application (client) ID in the Azure Portal
-SAS_DEPLOYMENT_TOKEN||The deployment token of your Static Web App
-TENANT_ID|00000000-0000-0000-0000-000000000000|ID of the Azure Active Directory Tenant, refered to as the Tenant ID in the Azure Portal
-WEB_URL|https://happy-desert-01a9eac0f.azurestaticapps.net|Url to the website
-CLIENT_SECRET|Random code format|Secret used to authenticate access with app registration.
-
-![App Settings](./assets/aad-settings.png)
-
-## Storage Account Permissions
-
-TODO: Add instructions for allowing app registration Storage Blob Owner RBAC role on storage accounts
-
-## Build
-Now that all of the pieces are present, go to Actions in GitHub and run the Azure SWA Deploy workflow (It should automatically run when code is committed as well). 
-
-TODO: Can't manually trigger due to "if" statements in workflow file?
+If it didn't, run the *Azure Static Web Apps CI/CD* workflow.
 
 [![Azure Static Web Apps CI/CD](../../actions/workflows/azure-swa-deploy.yml/badge.svg)](../../actions/workflows/azure-swa-deploy.yml)
 
+## Monitor the application with Application Insights
+
+Optional, but recommended.
+
+TODO: Provide instructions to create a Log Analytics Workspace and Application Insights instance.
