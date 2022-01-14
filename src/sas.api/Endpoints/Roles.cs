@@ -10,7 +10,7 @@ namespace sas.api
 	public static class Roles
 	{
 		[FunctionName("RolesGET")]
-		public static async Task<string[]> RolesGET([HttpTrigger(AuthorizationLevel.Anonymous, "GET", Route = "Roles")]
+		public static RolesResult RolesGET([HttpTrigger(AuthorizationLevel.Anonymous, "GET", Route = "Roles")]
 			HttpRequest req, ILogger log)
 		{
 			// Request body is supposed to contain the user's access token
@@ -18,7 +18,15 @@ namespace sas.api
 
 			log.LogInformation($"Looking for custom roles to assign to '...'.");
 
-			return new List<string>() { "some-fake-role" }.ToArray();
+			return new RolesResult()
+			{
+				Roles = new List<string>() { "some-fake-role" }.ToArray()
+			};
 		}
+	}
+
+	public class RolesResult
+	{
+		public string[] Roles { get; set; }
 	}
 }
