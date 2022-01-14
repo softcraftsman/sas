@@ -59,15 +59,15 @@ namespace sas.api
 			return new OkObjectResult(sb.ToString());
 		}
 
-        private static DataLakeServiceClient CreateDlsClientForUri(Uri containerUri)
-        {
-         /*   var tenantId = Environment.GetEnvironmentVariable("TENANT_ID");
-            var clientId = Environment.GetEnvironmentVariable("APP_REGISTRATION_CLIENT_ID");
-            var clientSecret = Environment.GetEnvironmentVariable("CLIENT_SECRET");
-            var tokenCred = new ClientSecretCredential(tenantId, clientId, clientSecret);
-            var dlsClient = new DataLakeServiceClient(containerUri, tokenCred);
-            return dlsClient; */
-            return new DataLakeServiceClient(containerUri, new DefaultAzureCredential());
-        }
-    }
+		private static DataLakeServiceClient CreateDlsClientForUri(Uri containerUri)
+		{
+			/*   var tenantId = Environment.GetEnvironmentVariable("TENANT_ID");
+			   var clientId = Environment.GetEnvironmentVariable("APP_REGISTRATION_CLIENT_ID");
+			   var clientSecret = Environment.GetEnvironmentVariable("CLIENT_SECRET");
+			   var tokenCred = new ClientSecretCredential(tenantId, clientId, clientSecret);
+			   var dlsClient = new DataLakeServiceClient(containerUri, tokenCred);
+			   return dlsClient; */
+			return new DataLakeServiceClient(containerUri, new DefaultAzureCredential());
+		}
+	}
 }
