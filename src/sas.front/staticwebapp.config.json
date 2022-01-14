@@ -72,15 +72,6 @@
 			"allowedRoles": [
 				"administrator"
 			]
-		},
-		{
-			"route": "/api/Configuration/CalculateFolderSizes",
-			"methods": [
-				"POST"
-			],
-			"allowedRoles": [
-				"administrator"
-			]
 		}
 	]
 }
