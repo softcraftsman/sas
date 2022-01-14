@@ -1,11 +1,12 @@
 import React from 'react'
 import PropTypes from 'prop-types'
+import CopyrightIcon from '@mui/icons-material/Copyright'
 import './Footer.css'
 
 const Footer = ({strings}) => {
     return (
         <section className='footer'>
-            {new Date().getFullYear()} - {strings.companyName} - All rights reserved
+            <CopyrightIcon />{new Date().getFullYear()} - {strings.companyName} - All rights reserved
         </section>
     )
 }
