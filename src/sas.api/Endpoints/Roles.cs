@@ -9,8 +9,8 @@ namespace sas.api
 {
 	public static class Roles
 	{
-		[FunctionName("RolesGET")]
-		public static IActionResult RolesGET([HttpTrigger(AuthorizationLevel.Anonymous, "GET", Route = "Roles")]
+		[FunctionName("Roles")]
+		public static IActionResult Run([HttpTrigger(AuthorizationLevel.Anonymous, "GET", "POST", Route = "Roles")]
 			HttpRequest req, ILogger log)
 		{
 			// Request body is supposed to contain the user's access token
@@ -20,7 +20,7 @@ namespace sas.api
 
 			RolesResult rr = new RolesResult()
 			{
-				Roles = new string[] { "some-fake-role" }
+				Roles = new string[] { "some-fake-role", "second-fake-role" }
 			};
 
 			return new OkObjectResult(rr);
