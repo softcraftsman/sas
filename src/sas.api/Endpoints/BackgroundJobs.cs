@@ -55,6 +55,7 @@ namespace sas.api
 					sb.AppendLine(msg);
 				}
 			}
+		}
 
 			return new OkObjectResult(sb.ToString());
 		}
