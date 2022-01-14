@@ -11,12 +11,12 @@ namespace sas.api
 	{
 		[FunctionName("RolesGET")]
 		public static IActionResult RolesGET([HttpTrigger(AuthorizationLevel.Anonymous, "GET", Route = "Roles")]
-			HttpRequest req)
+			HttpRequest req, ILogger log)
 		{
 			// Request body is supposed to contain the user's access token
 			//string Body = await new StreamReader(req.Body).ReadToEndAsync();
 
-			//log.LogInformation($"Looking for custom roles to assign to '...'.");
+			log.LogInformation($"Looking for custom roles to assign to '...'.");
 
 			RolesResult rr = new RolesResult()
 			{
