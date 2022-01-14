@@ -7,7 +7,7 @@ import DialogContent from '@mui/material/DialogContent'
 import DialogTitle from '@mui/material/DialogTitle'
 import Grid from '@mui/material/Grid'
 import TextField from '@mui/material/TextField'
-import CancelIcon from '@mui/icons-material/CancelOutlined'
+import CancelIcon from '@mui/icons-material/Close'
 import SaveIcon from '@mui/icons-material/SaveOutlined'
 import './DirectoryEditorModal.css'
 

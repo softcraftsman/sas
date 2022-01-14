@@ -15,6 +15,7 @@ const strings = {
         actionsLabel: 'Actions',
         folderLabel: 'Folder',
         fundCodeLabel: 'Fund Code',
+        members: count => `${count} members`,
         monthlyCostLabel: 'Monthly Cost',
         spaceUsedLabel: 'Space Used',
         whoHasAccessLabel: 'Who Has Access?',
