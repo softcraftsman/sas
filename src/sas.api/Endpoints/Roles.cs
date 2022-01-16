@@ -24,7 +24,13 @@ namespace sas.api
 			{
 				IdentityToken it = await JsonSerializer.DeserializeAsync<IdentityToken>(req.Body);
 
-				log.LogInformation($"Looking for custom roles to assign to '{it.UserDetails}'.");
+				log.LogInformation($"Looking for custom roles to assign to '{it.UserDetails}' (number of claims: {it.Claims.Count}).");
+
+				int AdditionalRolesCount = it.Claims
+					.Count(c => c.Type.Equals("http://schemas.microsoft.com/ws/2008/06/identity/claims/role")
+							 || c.Type.Equals("roles"));
+
+				log.LogInformation($"Assigning {AdditionalRolesCount} additional role(s) to '{it.UserDetails}'.");
 
 				string[] additionalRoles = it.Claims
 					// Find any roles claims in the token
