@@ -17,7 +17,7 @@ namespace sas.api
 		public static async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "GET", "POST", Route = "Roles")]
 			HttpRequest req, ILogger log)
 		{
-			RolesResult rr = new RolesResult();
+			RolesResult rr = new();
 
 			// Request body is supposed to contain the user's identity claim
 			if (req.Body.Length > 0)
@@ -27,16 +27,14 @@ namespace sas.api
 				log.LogInformation($"Looking for custom roles to assign to '{it.UserDetails}'.");
 
 				string[] additionalRoles = it.Claims
-					.Where(c => c.Type.Equals("http://schemas.microsoft.com/ws/2008/06/identity/claims/role"))
+					.Where(c => c.Type.Equals("http://schemas.microsoft.com/ws/2008/06/identity/claims/role")
+								|| c.Type.Equals("roles"))
 					.Select(c => c.Value)
 					.ToArray();
 
-				log.LogInformation($"Assigning additional roles '{additionalRoles}' to '{it.UserDetails}'");
+				log.LogInformation($"Assigning additional roles '{additionalRoles}' to '{it.UserDetails}'.");
 
-				rr = new RolesResult()
-				{
-					Roles = additionalRoles
-				};
+				rr.Roles = additionalRoles;
 			}
 
 			return new OkObjectResult(rr);
