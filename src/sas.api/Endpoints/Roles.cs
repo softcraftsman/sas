@@ -32,7 +32,7 @@ namespace sas.api
 					.Select(c => c.Value)
 					.ToArray();
 
-				log.LogInformation($"Assigning additional roles '{additionalRoles}' to '{it.UserDetails}'.");
+				log.LogInformation($"Assigning additional roles '{additionalRoles.SelectMany(r => r)}' to '{it.UserDetails}'.");
 
 				rr.Roles = additionalRoles;
 			}
