@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -24,13 +23,7 @@ namespace sas.api
 			{
 				IdentityToken it = await JsonSerializer.DeserializeAsync<IdentityToken>(req.Body);
 
-				log.LogInformation($"Looking for custom roles to assign to '{it.UserDetails}' (number of claims: {it.Claims.Count}).");
-
-				int AdditionalRolesCount = it.Claims
-					.Count(c => c.Type.Equals("http://schemas.microsoft.com/ws/2008/06/identity/claims/role")
-							 || c.Type.Equals("roles"));
-
-				log.LogInformation($"Assigning {AdditionalRolesCount} additional role(s) to '{it.UserDetails}'.");
+				log.LogInformation($"Looking for custom roles to assign to '{it.UserDetails}' (number of claims: {it.Claims.Length}).");
 
 				string[] additionalRoles = it.Claims
 					// Find any roles claims in the token
@@ -69,7 +62,7 @@ namespace sas.api
 			public string UserDetails { get; set; }
 
 			[JsonPropertyName("claims")]
-			public List<Claim> Claims { get; } = new List<Claim>();
+			public Claim[] Claims { get; set; }
 
 			[JsonPropertyName("accessToken")]
 			public string AccessToken { get; set; }
