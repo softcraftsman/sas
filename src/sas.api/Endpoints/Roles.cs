@@ -3,8 +3,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
-using System.IO;
 
 namespace sas.api
 {
@@ -16,26 +19,59 @@ namespace sas.api
 		{
 			RolesResult rr = new RolesResult();
 
-			// Request body is supposed to contain the user's access token
+			// Request body is supposed to contain the user's identity claim
 			if (req.Body.Length > 0)
 			{
-				string Body = await new StreamReader(req.Body).ReadToEndAsync();
+				IdentityToken it = await JsonSerializer.DeserializeAsync<IdentityToken>(req.Body);
 
-				//log.LogInformation($"Looking for custom roles to assign to '...'.");
-				log.LogInformation($"Input\n{Body}");
+				log.LogInformation($"Looking for custom roles to assign to '{it.UserDetails}'.");
+
+				string[] additionalRoles = it.Claims
+					.Where(c => c.Type.Equals("http://schemas.microsoft.com/ws/2008/06/identity/claims/role"))
+					.Select(c => c.Value)
+					.ToArray();
+
+				log.LogInformation($"Assigning additional roles '{additionalRoles}' to '{it.UserDetails}'");
 
 				rr = new RolesResult()
 				{
-					Roles = new string[] { "some-fake-role", "second-fake-role" }
+					Roles = additionalRoles
 				};
 			}
 
 			return new OkObjectResult(rr);
 		}
-	}
 
-	public class RolesResult
-	{
-		public string[] Roles { get; set; }
+		private class Claim
+		{
+			[JsonPropertyName("typ")]
+			public string Type { get; set; }
+
+			[JsonPropertyName("val")]
+			public string Value { get; set; }
+		}
+
+		private class IdentityToken
+		{
+			[JsonPropertyName("identityProvider")]
+			public string IdentityProvider { get; set; }
+
+			[JsonPropertyName("userId")]
+			public string UserId { get; set; }
+
+			[JsonPropertyName("userDetails")]
+			public string UserDetails { get; set; }
+
+			[JsonPropertyName("claims")]
+			public List<Claim> Claims { get; } = new List<Claim>();
+
+			[JsonPropertyName("accessToken")]
+			public string AccessToken { get; set; }
+		}
+
+		private class RolesResult
+		{
+			public string[] Roles { get; set; }
+		}
 	}
 }
