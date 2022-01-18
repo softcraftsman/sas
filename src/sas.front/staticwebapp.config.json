@@ -56,7 +56,7 @@
 				"POST"
 			],
 			"allowedRoles": [
-				"Folder-Create-All"
+				"FolderCreateAll"
 			]
 		}
 	]

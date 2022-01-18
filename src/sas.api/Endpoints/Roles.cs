@@ -31,7 +31,7 @@ namespace sas.api
 					.Where(c => c.Type.Equals("http://schemas.microsoft.com/ws/2008/06/identity/claims/role")
 							 || c.Type.Equals("roles"))
 					// Get those values as an array of strings
-					.Select(c => c.Value.Replace('.', '-'))
+					.Select(c => c.Value.Replace(".", ""))
 					.ToArray();
 
 				log.LogInformation($"Assigning {additionalRoles.Length} additional role(s) '{string.Join(',', additionalRoles)}' to '{it.UserDetails}'.");
