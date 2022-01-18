@@ -25,12 +25,13 @@ namespace sas.api
 
 				log.LogInformation($"Looking for custom roles to assign to '{it.UserDetails}' (number of claims: {it.Claims.Length}).");
 
+				// TODO: Change "." to "-" in custom roles because staticwebapp.config.json doesn't support periods.
 				string[] additionalRoles = it.Claims
 					// Find any roles claims in the token
 					.Where(c => c.Type.Equals("http://schemas.microsoft.com/ws/2008/06/identity/claims/role")
 							 || c.Type.Equals("roles"))
 					// Get those values as an array of strings
-					.Select(c => c.Value)
+					.Select(c => c.Value.Replace('.', '-'))
 					.ToArray();
 
 				log.LogInformation($"Assigning {additionalRoles.Length} additional role(s) '{string.Join(',', additionalRoles)}' to '{it.UserDetails}'.");
