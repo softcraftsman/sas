@@ -12,6 +12,8 @@ Some of the capabilities currently provided by the system are:
 * Dynamic addition of folder's owner under initial folder.
 * Exposure of "how to use" the storage infrastructure through Web UI.
 
+Just some content
+
 ## Deploy SAS for EDU
 
 In order to deploy this solution to your environment, you'll need to setup some variables in the build process and create a static web app in Azure. To accomplish this, do the following:
