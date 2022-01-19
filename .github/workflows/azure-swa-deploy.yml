@@ -47,7 +47,7 @@ jobs:
 
       - name: Build And Deploy
         id: builddeploy
-        if: ${{ env.swa_secret }} != ''
+        if: ${{ env.swa_secret }}
         uses: Azure/static-web-apps-deploy@v1
         with:
           azure_static_web_apps_api_token: ${{ secrets.SAS_DEPLOYMENT_TOKEN }}
@@ -68,7 +68,7 @@ jobs:
     name: Remove SWA Environment on Pull Request Close Job
     steps:
       - name: Remove SWA Environment
-        if: ${{ env.swa_secret }} != ''
+        if: ${{ env.swa_secret }}
         id: removeswaenvironment
         uses: Azure/static-web-apps-deploy@v1
         with:
