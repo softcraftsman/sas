@@ -1,7 +1,6 @@
 name: Azure Static Web Apps CI/CD
 env:
   swaconfig: src/sas.front/staticwebapp.config.json
-  swa_secret: ${{ secrets.SAS_DEPLOYMENT_TOKEN }}
 
 on:
   push:
@@ -21,7 +20,7 @@ jobs:
   build_and_deploy_job:
     if: github.event_name == 'workflow_dispatch'
       || github.event_name == 'push'
-      || (github.event_name == 'pull_request' && github.event.action != 'closed')
+      || (github.event_name == 'pull_request' && github.event.action != 'closed' && github.event.pull_request.head.repo.fork == false)
       || (github.event_name == 'pull_request_target' && github.event.action != 'closed' && contains(github.event.pull_request.labels.*.name, 'safe to test'))
     runs-on: ubuntu-latest
     name: Build and Deploy Job
@@ -36,7 +35,6 @@ jobs:
       # Replace __AZURE_TENANT_ID__ in staticwebapp.config.json variables
       - name: Add Azure Tenant ID in staticwebapp.config.json
         uses: falnyr/replace-env-vars-action@master
-        if: ${{ env.swa_secret }}
         with:
           filename: ${{env.swaconfig}}
         env:
@@ -47,7 +45,6 @@ jobs:
 
       - name: Build And Deploy
         id: builddeploy
-        if: ${{ env.swa_secret }}
         uses: Azure/static-web-apps-deploy@v1
         with:
           azure_static_web_apps_api_token: ${{ secrets.SAS_DEPLOYMENT_TOKEN }}
@@ -68,6 +65,8 @@ jobs:
       && github.event.action == 'closed'
     runs-on: ubuntu-latest
     name: Remove SWA Environment on Pull Request Close Job
+    env:
+      swa_secret: ${{ secrets.SAS_DEPLOYMENT_TOKEN }}
     steps:
       - name: Remove SWA Environment
         if: ${{ env.swa_secret }}
