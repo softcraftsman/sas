@@ -72,6 +72,7 @@ namespace sas.api
 				error = $"{nameof(TopLevelFolderParameters)} is malformed.";
 
 			// Call each of the steps in order and error out if anytyhing fails
+			// TODO: Get URI from central function
 			var storageUri = new Uri($"https://{tlfp.StorageAcount}.dfs.core.windows.net");
 			var fileSystemOperations = new FileSystemOperations(storageUri, log);
 			var folderOperations = new FolderOperations(storageUri, tlfp.FileSystem, log);
@@ -81,12 +82,12 @@ namespace sas.api
 			if (!result.Success)
 				return new BadRequestErrorMessageResult(result.Message);
 
-            result = await folderOperations.CreateNewFolder(tlfp.Folder);
-            if (!result.Success)
-                return new BadRequestErrorMessageResult(result.Message);
-            result = await folderOperations.AddMetaData(tlfp.Folder, tlfp.FundCode, tlfp.FolderOwner);
-            if (!result.Success)
-                return new BadRequestErrorMessageResult(result.Message);
+			result = await folderOperations.CreateNewFolder(tlfp.Folder);
+			if (!result.Success)
+				return new BadRequestErrorMessageResult(result.Message);
+			result = await folderOperations.AddMetaData(tlfp.Folder, tlfp.FundCode, tlfp.FolderOwner);
+			if (!result.Success)
+				return new BadRequestErrorMessageResult(result.Message);
 
 			result = await folderOperations.AssignFullRwx(tlfp.Folder, tlfp.FolderOwner);
 			if (!result.Success)
