@@ -73,7 +73,7 @@ const StorageAccountsPage = ({ strings }) => {
                 setDirectories(_directories)
 
                 // Display a toast
-                displayToast(strings.directoryCreated(newDirectory))
+                displayToast(strings.directoryCreated(newDirectory.name))
             })
             .catch(error => {
                 console.log(error)

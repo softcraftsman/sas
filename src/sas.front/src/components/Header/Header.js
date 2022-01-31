@@ -45,7 +45,7 @@ Header.propTypes = {
     strings: PropTypes.shape({
         logOut: PropTypes.string,
         title: PropTypes.string,
-        welcome: PropTypes.string,
+        welcome: PropTypes.func,
     })
 }
 
@@ -53,7 +53,7 @@ Header.defaultProps = {
     strings: {
         logOut: 'Log out',
         title: 'Storage as a Service',
-        welcome: 'Welcome'
+        welcome: name => `Welcome, ${name}`
     }
 }
 
