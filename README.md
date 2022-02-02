@@ -22,7 +22,6 @@ In order to deploy this solution to your environment, you'll need to setup some 
 1. [Prepare the storage accounts](#prepare-the-storage-accounts)
 1. [Add a GitHub secret](#add-a-github-secret)
 1. [Configure the Static Web App](#configure-the-static-web-app)
-1. [Configure Custom Authentication](#configure-custom-authentication)
 1. [Build](#build)
 
 ### Fork the code
@@ -97,13 +96,14 @@ If you named the application *Storage-as-a-Service*, the RBAC entry would look l
 
 ![image](assets/rbac-blob-owner.png)
 
-### Add a GitHub secret
+### Add GitHub secrets
 
 The GitHub workflow has a required secret that enables it to deploy the code to the app in Azure. Create the following repository secrets by going to Settings -> Secrets.
 
 Secret | Value | Notes
 --- | --- | ---
 SAS_DEPLOYMENT_TOKEN | | The deployment token of your Static Web App.
+AZURE_TENANT_ID | | Your Azure AD tenant ID.
 
 ### Configure the Static Web App
 
@@ -119,36 +119,9 @@ Add the following application settings to the Static Web App using the Configura
 
 ![App Settings](./assets/app-settings.png)
 
-### Configure Custom Authentication
-
-On GitHub, modify the fragment from *src/sas.front/staticwebapp.config.json* shown below:
-
-```json
-{
-  "auth": {
-    "rolesSource": "/api/Roles",
-    "identityProviders": {
-      "azureActiveDirectory": {
-        "registration": {
-          "openIdIssuer": "https://login.microsoftonline.com/<TENANT_ID>/v2.0",
-          "clientIdSettingName": "AZURE_CLIENT_ID",
-          "clientSecretSettingName": "AZURE_CLIENT_SECRET"
-        }
-      }
-    }
-  }
-}
-```
-
-Replace <TENANT_ID> with your Azure AD tenant ID that you copied earlier.
-
-Commit the change directly to the *main* branch.
-
 ### Build
 
-Go to **Actions** in GitHub and review the workflow. It should have run automatically when your configuration change above was committed.
-
-If it didn't, run the *Azure Static Web Apps CI/CD* workflow.
+Run the *Azure Static Web Apps CI/CD* workflow.
 
 [![Azure Static Web Apps CI/CD](../../actions/workflows/azure-swa-deploy.yml/badge.svg)](../../actions/workflows/azure-swa-deploy.yml)
 
