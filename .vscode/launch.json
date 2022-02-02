@@ -13,7 +13,8 @@
 				"hidden": true,
 				"group": "",
 				"order": 1
-			}
+			},
+			"postDebugTask": "Terminate All Tasks"
 		},
 		// {
 		// 	"name": "Launch Edge with Az Fx (non-debug)",
