@@ -2,6 +2,7 @@
 using Azure.Storage.Files.DataLake;
 using Azure.Storage.Files.DataLake.Models;
 using Microsoft.Extensions.Logging;
+using Microsoft.Graph;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -75,6 +76,8 @@ namespace sas.api.Services
                 Debug.WriteLine(ex.Message);
                 throw;
             }
+
+            var x = new RoleOperations(log);
 
             foreach (var filesystem in fileSystems)
             {

@@ -1,9 +1,7 @@
 using Azure.Core;
 using Azure.Identity;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging;
 using Microsoft.Graph;
-using Microsoft.Identity.Client;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -17,89 +15,25 @@ using System.Threading.Tasks;
 
 public class UserOperations
 {
-    //public static async Task<string> GetApiToken(HttpRequest req, ILogger log)
-    //{
-    //    try
-    //    {
-    //        var accessToken = GetAccessTokenFromRequest(req);
-    //        var userAssertion = new UserAssertion(accessToken);
-
-    //        ConfidentialClientApplicationOptions options = new()
-    //        {
-    //            TenantId = Environment.GetEnvironmentVariable("TENANT_ID"),
-    //            ClientId = Environment.GetEnvironmentVariable("APP_REGISTRATION_CLIENT_ID"),
-    //            ClientSecret = Environment.GetEnvironmentVariable("CLIENT_SECRET"),
-    //        };
-    //        var app = ConfidentialClientApplicationBuilder.CreateWithApplicationOptions(options).Build();
-
-    //        var scopes = new string[] { "https://graph.microsoft.com" };
-
-    //        var authResult = await app.AcquireTokenOnBehalfOf(scopes, userAssertion).ExecuteAsync();
-
-    //        return authResult.AccessToken;
-    //    }
-    //    catch (Exception ex)
-    //    {
-    //        log.LogError(ex.Message);
-    //        return null;
-    //    }
-    //}
-
-    //public static string GetAccessTokenFromRequest(HttpRequest req)
-    //{
-    //    // Get Caller Access Token
-    //    string accessToken = null;
-    //    if (req.Headers.ContainsKey("Authorization"))
-    //        accessToken = req.Headers.FirstOrDefault(x => x.Key == "Authorization")
-    //            .Value.First().Split(' ').LastOrDefault();
-    //    return accessToken;
-
-    //}
-    //public static async Task<string> GetObjectIdFromUPN(string upn)
-    //{
-    //    try
-    //    {
-    //        var tokenRequestContext = new TokenRequestContext(new[] { "https://graph.microsoft.com/.default" });
-    //        var accessToken = new DefaultAzureCredential().GetToken(tokenRequestContext);
-
-    //        var graphClient = new GraphServiceClient(new DelegateAuthenticationProvider((requestMessage) =>
-    //        {
-    //            requestMessage
-    //                .Headers
-    //                .Authorization = new AuthenticationHeaderValue("Bearer", accessToken.Token);
-
-    //            return Task.FromResult(0);
-    //        }));
-
-    //        // Retrieve a user by userPrincipalName
-    //        var user = await graphClient
-    //            .Users[upn]
-    //            .Request()
-    //            .GetAsync();
-
-    //        return user.Id;
-    //    }
-    //    catch (Exception ex)
-    //    {
-    //        Debug.WriteLine(ex.Message);
-    //        return null;
-    //    }
-    //}
-
     public static async Task<string> GetObjectIdFromUPN(string upn)
     {
         try
         {
             var tokenRequestContext = new TokenRequestContext(new[] { "https://graph.microsoft.com/.default" });
             var accessToken = new DefaultAzureCredential().GetToken(tokenRequestContext);
-            var graphClient = new GraphServiceClient( new DelegateAuthenticationProvider((requestMessage) =>
+            var authProvider = new DelegateAuthenticationProvider((requestMessage) =>
             {
                 requestMessage
                     .Headers
                     .Authorization = new AuthenticationHeaderValue("Bearer", accessToken.Token);
+                requestMessage
+                    .Headers
+                    .Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
                 return Task.FromResult(0);
-            }));
+            });
+
+            var graphClient = new GraphServiceClient(authProvider);
 
             // Retrieve a user by userPrincipalName
             var user = await graphClient

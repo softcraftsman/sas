@@ -97,7 +97,6 @@ namespace sas.api
             // Call each of the steps in order and error out if anytyhing fails
             var storageUri = new Uri($"https://{tlfp.StorageAcount}.dfs.core.windows.net");
             var fileSystemOperations = new FileSystemOperations(storageUri, log);
-            var folderOperations = new FolderOperations(storageUri, tlfp.FileSystem, log);
 
             // Create File System
             Result result = null;
@@ -109,11 +108,14 @@ namespace sas.api
             var ownerId = await UserOperations.GetObjectIdFromUPN(tlfp.Owner);
 
             // Add Blob Owner
-            new RoleOperations(log).AssignRoles(tlfp.StorageAcount, tlfp.FileSystem, ownerId);
+            var roleOperations = new RoleOperations(log);
+            roleOperations.AssignRoles(tlfp.StorageAcount, tlfp.FileSystem, ownerId);
 
-            //var folderDetail = folderOperations.GetFolderDetail(tlfp.Folder);
+            // Get Root Folder Details
+            var folderOperations = new FolderOperations(storageUri, tlfp.FileSystem, log);
+            var folderDetail = folderOperations.GetFolderDetail("/");
 
-            return new OkObjectResult(null);
+            return new OkObjectResult(folderDetail);
         }
 
         internal static async Task<FileSystemParameters> GetFileSystemParameters(HttpRequest req, ILogger log)

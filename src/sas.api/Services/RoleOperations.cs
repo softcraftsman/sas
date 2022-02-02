@@ -63,64 +63,81 @@ namespace sas.api.Services
             return accountResourceId;
         }
 
+        private RoleAssignment AddRoleAssignment(string scope, string roleName, string principalId)
+        {
+            VerifyToken();
+            var amClient = new AuthorizationManagementClient(tokenCredentials);
+            var roleDefinitions = amClient.RoleDefinitions.List(scope);
+            var roleDefinition = roleDefinitions.First(x => x.RoleName == roleName);
+
+            // TODO: Add OData Filter
+            var roleAssignments = amClient.RoleAssignments.ListForScope(scope);
+            var roleAssignment = roleAssignments.FirstOrDefault(ra => ra.PrincipalId == principalId && ra.RoleDefinitionId == roleDefinition.Id);
+
+            // Create New Role Assignment
+            if (roleAssignment == null)
+            {
+                var racp = new RoleAssignmentCreateParameters(roleDefinition.Id, principalId);
+                var roleAssignmentId = Guid.NewGuid().ToString();
+                roleAssignment = amClient.RoleAssignments.Create(scope, roleAssignmentId, racp);
+            }
+            return roleAssignment;
+        }
 
         public void AssignRoles(string account, string container, string ownerId)
         {
+            try
+            {
+                // Get Storage Account Resource ID
+                var accountResourceId = GetAccountResourceId(account);
 
-            // Get Storage Account Resource ID
-            var accountResourceId = GetAccountResourceId(account);
+                // Create Role Assignments
+                string containerScope = $"{accountResourceId}/blobServices/default/containers/{container}";
 
-            // Create Role Assignments
-            string containerScope = $"{accountResourceId}/blobServices/default/containers/{container}";
-
-            // Get Role Definitions
-            var amClient = new AuthorizationManagementClient(tokenCredentials);
-            var roleDefinitions = amClient.RoleDefinitions.List(containerScope);
-            var rdDataOwner = roleDefinitions.First(x => x.RoleName == "Storage Blob Data Owner");
-            var rdUserAccessAdministrator = roleDefinitions.First(x => x.RoleName == "User Access Administrator");
-            var racp = new RoleAssignmentCreateParameters(rdDataOwner.Id, ownerId);
-            var roleAssignment = amClient.RoleAssignments.Create(containerScope, "mytest", racp);
-
-            Console.WriteLine(roleAssignment);
-
-
-
-
-            //// test
-            //var credentials = SdkContext.AzureCredentialsFactory
-            //    .FromServicePrincipal("clientid", "clientSecret", "tenantId", AzureEnvironment.AzureGlobalCloud);
-
-            //// authenticate to Azure AD
-            //var authenticated = Microsoft.Azure.Management.Fluent.Azure
-            //            .Configure()
-            //            .Authenticate(credentials);
-
-            //// Find User
-            //var querieduser = authenticated.ActiveDirectoryUsers
-            //                    .GetById("user.Id");
-
-            //var x= Microsoft.Azure.Management.Graph.RBAC.Fluent.RoleAssignmentHelper;
-            //x.WithAccessTo
-
-            //var scope = "subscriptions/<Subscription ID>/resourceGroups/<Resource Group Name>/providers/Microsoft.Storage/storageAccounts/<Storage Account Name>";
-            //authenticated.RoleAssignments
-            //    .ListByScope(scope)
-            //    .
-            //    .Where( s => s.)
-
-
-            //// Create new RBAC Role Assignment
-            //IRoleAssignment roleAssignment = authenticated.RoleAssignments
-            //    .Define("raName")
-            //    .ForUser(querieduser)
-            //    .WithRoleDefinition("/subscriptions/<Subscription ID>/resourceGroups/<Resource Group Name>/providers/Microsoft.Storage/storageAccounts/<Storage Account Name>/blobServices/default/containers/<Blob Container Name>/providers/Microsoft.Authorization/roleDefinitions/<RBAC Role ID from step 4 above>")
-            //    .WithScope("subscriptions/<Subscription ID>/resourceGroups/<Resource Group Name>/providers/Microsoft.Storage/storageAccounts/<Storage Account Name>/blobServices/default/containers/<Blob Container Name>")
-            //    .Create();
-
-
-            //Console.WriteLine(roleAssignment);
+                // Allow user to manage ACL for container
+                var ra = AddRoleAssignment(containerScope, "Storage Blob Data Owner", ownerId);
+            }
+            catch (Exception ex)
+            {
+                log.LogError(ex, ex.Message);
+                Console.WriteLine(ex.Message);
+                throw;
+            }
         }
 
+        public void GetRoles(string account, string container, string ownerId)
+        {
+            try
+            {
+                // Get Storage Account Resource ID
+                var accountResourceId = GetAccountResourceId(account);
 
+                // Create Role Assignments
+                string containerScope = $"{accountResourceId}/blobServices/default/containers/{container}";
+
+                // Allow user to manage ACL for container
+                //var ra = AddRoleAssignment(containerScope, "Storage Blob Data Owner", ownerId);
+            }
+            catch (Exception ex)
+            {
+                log.LogError(ex, ex.Message);
+                Console.WriteLine(ex.Message);
+                throw;
+            }
+        }
+
+        private RoleAssignment GetRoleAssignment(string scope, string roleName, string principalId)
+        {
+            VerifyToken();
+            var amClient = new AuthorizationManagementClient(tokenCredentials);
+            var roleDefinitions = amClient.RoleDefinitions.List(scope);
+            var roleDefinition = roleDefinitions.First(x => x.RoleName == roleName);
+
+            // TODO: Add OData Filter
+            var roleAssignments = amClient.RoleAssignments.ListForScope(scope);
+            var roleAssignment = roleAssignments.FirstOrDefault(ra => ra.PrincipalId == principalId && ra.RoleDefinitionId == roleDefinition.Id);
+
+            return roleAssignment;
+        }
     }
 }
