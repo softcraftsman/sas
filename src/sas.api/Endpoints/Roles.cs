@@ -3,32 +3,31 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
-using System.Collections.Generic;
 
 namespace sas.api
 {
-	public static class Roles
-	{
-		[FunctionName("Roles")]
-		public static IActionResult Run([HttpTrigger(AuthorizationLevel.Anonymous, "GET", "POST", Route = "Roles")]
-			HttpRequest req, ILogger log)
-		{
-			// Request body is supposed to contain the user's access token
-			//string Body = await new StreamReader(req.Body).ReadToEndAsync();
+    public static class Roles
+    {
+        [FunctionName("Roles")]
+        public static IActionResult Run([HttpTrigger(AuthorizationLevel.Anonymous, "GET", "POST", Route = "Roles")]
+            HttpRequest req, ILogger log)
+        {
+            // Request body is supposed to contain the user's access token
+            //string Body = await new StreamReader(req.Body).ReadToEndAsync();
 
-			log.LogInformation($"Looking for custom roles to assign to '...'.");
+            log.LogInformation($"Looking for custom roles to assign to '...'.");
 
-			RolesResult rr = new RolesResult()
-			{
-				Roles = new string[] { "some-fake-role", "second-fake-role" }
-			};
+            RolesResult rr = new RolesResult()
+            {
+                Roles = new string[] { "some-fake-role", "second-fake-role" }
+            };
 
-			return new OkObjectResult(rr);
-		}
-	}
+            return new OkObjectResult(rr);
+        }
+    }
 
-	public class RolesResult
-	{
-		public string[] Roles { get; set; }
-	}
+    public class RolesResult
+    {
+        public string[] Roles { get; set; }
+    }
 }
