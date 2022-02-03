@@ -119,7 +119,7 @@
 			"type": "shell",
 			"label": "Start SWA and Launch Edge",
 			// TODO: Enable SSL
-			"command": "swa start ./src/sas.front --api-location http://localhost:7071",
+			"command": "swa start app",
 			"isBackground": true,
 			"problemMatcher": [
 				"$swa-watch"
