@@ -20,19 +20,19 @@ namespace sas.api
     {
         [FunctionName("FileSystems")]
         public static async Task<IActionResult> Run(
-            [HttpTrigger(AuthorizationLevel.Function, "POST", "GET", Route = "FileSystems/{account}")]
+            [HttpTrigger(AuthorizationLevel.Function, "POST", "GET", Route = "FileSystems/{account?}")]
             HttpRequest req, ILogger log, String account)
         {
             if (req.Method == HttpMethods.Post)
                 return await FileSystemsPOST(req, log, account);
 
             if (req.Method == HttpMethods.Get)
-                return FileSystemsGET(req, log, account);
+                return await FileSystemsGET(req, log, account);
 
             return null;
         }
 
-        private static IActionResult FileSystemsGET(HttpRequest req, ILogger log, string account)
+        private static async Task<IActionResult> FileSystemsGET(HttpRequest req, ILogger log, string account)
         {
             // Check for logged in user
             ClaimsPrincipal claimsPrincipal;
@@ -50,30 +50,51 @@ namespace sas.api
 
             // Calculate UPN
             var upn = claimsPrincipal.Identity.Name.ToLowerInvariant();
+            var principalId = claimsPrincipal.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
 
             // Get the Containers for a upn from each storage account
             var accounts = SasConfiguration.GetConfiguration().StorageAccounts;
-            if (account != null) accounts = accounts.Where(a => a.ToLowerInvariant() == upn).ToArray();
+            if (account != null)
+                accounts = accounts.Where(a => a.ToLowerInvariant() == account).ToArray();
 
             var result = new List<FileSystemResult>();
             foreach (var acct in accounts)
             {
+                var containers = new List<string>();
+
+                // Get RBAC Roles
+                var x = new RoleOperations(log);
+                var containerRoles = x.GetContainerRoleAssignments(acct, principalId);
+
+                if (containerRoles != null && containerRoles.Count > 0)
+                {
+                    containers.AddRange(containerRoles.Select(s => s.Container));
+                }                  
+
                 // TODO: Centralize this to account for other clouds
                 var serviceUri = new Uri($"https://{acct}.dfs.core.windows.net");
                 var adls = new FileSystemOperations(serviceUri, log);
 
-                List<string> containers;
                 try
                 {
-                    containers = adls.GetContainersForUpn(upn).ToList();
+                    var clist = adls.GetContainersForUpn(upn).ToArray();
+                    containers.AddRange(clist);
                 }
                 catch (Exception ex)
                 {
                     log.LogError(ex, ex.Message);
                     containers = new List<string>() { ex.Message };
                 }
-                result.Add(new FileSystemResult() { Name = account, FileSystems = containers });
+
+                // Send back the Accounts and FileSystems
+                result.Add(new FileSystemResult()
+                {
+                    Name = acct,
+                    FileSystems = containers.Distinct().OrderBy(c => c).ToList()
+                });
             }
+
+            log.LogTrace(JsonConvert.SerializeObject(result, Formatting.None));
 
             //
             return new OkObjectResult(result);
@@ -93,6 +114,15 @@ namespace sas.api
             string error = null;
             if (Extensions.AnyNull(tlfp.FileSystem, tlfp.Owner, tlfp.FundCode, tlfp.StorageAcount))
                 error = $"{nameof(FileSystemParameters)} is malformed.";
+            if (tlfp.Owner.Contains("#EXT#"))
+                error = "Guest accounts are not supported.";
+            if (error != null)
+                return new BadRequestErrorMessageResult(error);
+
+            // Get Blob Owner
+            var ownerId = await UserOperations.GetObjectIdFromUPN(tlfp.Owner);
+            if (ownerId == null)
+                return new BadRequestErrorMessageResult("Owner identity not found.");
 
             // Call each of the steps in order and error out if anytyhing fails
             var storageUri = new Uri($"https://{tlfp.StorageAcount}.dfs.core.windows.net");
@@ -104,16 +134,13 @@ namespace sas.api
             if (!result.Success)
                 return new BadRequestErrorMessageResult(result.Message);
 
-            // Get Blob Owner
-            var ownerId = await UserOperations.GetObjectIdFromUPN(tlfp.Owner);
-
             // Add Blob Owner
             var roleOperations = new RoleOperations(log);
             roleOperations.AssignRoles(tlfp.StorageAcount, tlfp.FileSystem, ownerId);
 
             // Get Root Folder Details
             var folderOperations = new FolderOperations(storageUri, tlfp.FileSystem, log);
-            var folderDetail = folderOperations.GetFolderDetail("/");
+            var folderDetail = folderOperations.GetFolderDetail(String.Empty);
 
             return new OkObjectResult(folderDetail);
         }
