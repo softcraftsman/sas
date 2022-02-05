@@ -148,26 +148,21 @@ namespace sas.api.Services
             return s.Replace('@', '_').ToLower();
         }
 
-        internal FolderDetail GetFolderDetail(string folder)
-        {
-            var rootClient = dlfsClient.GetDirectoryClient(folder);  // container (root)
-            var prop = rootClient.GetProperties().Value;
-            var acl = rootClient.GetAccessControl(userPrincipalName: true).Value.AccessControlList;
-            var uri = rootClient.Uri;
-            FolderDetail fd = BuildFolderDetail(folder, prop, acl, uri);
-            return fd;
-        }
-
         internal IList<FolderDetail> GetAccessibleFolders(string upn)
         {
             var accessibleFolders = new List<FolderDetail>();
             try
             {
-                //TODO: Add Root Folder to Folder List
+                // Translate for guest accounts
+                upn = Simplify(upn);
+
                 // Get Root Folder
-                //var fd = GetFolderDetail(string.Empty, upn);
-                //if (fd != null)
-                //    accessibleFolders.Add(fd);
+                var fd = GetFolderDetail(string.Empty);
+                if (fd != null)
+                {
+                    fd.Name = "{root}";
+                    accessibleFolders.Add(fd);
+                }
 
                 // Get all Top Level Folders
                 var flds = dlfsClient.GetPaths().ToList();
@@ -175,15 +170,11 @@ namespace sas.api.Services
                     pi => pi.IsDirectory != null && (bool)pi.IsDirectory)
                     .ToList();
 
-                // Translate for guest accounts
-                // TODO: Do not re-define var, create a new one
-                upn = Simplify(upn);
-
                 // Find folders that have ACL entries for upn
                 Parallel.ForEach(folders, folder =>
                     {
-                        var fd = GetFolderDetail(folder.Name, upn);
-                        if (fd != null)
+                        var fd = GetFolderDetail(folder.Name);
+                        if (fd != null)         // && fd.UserAccess.Any( u => u.StartsWithContains(upn))
                             accessibleFolders.Add(fd);
                     }
                 );
@@ -195,30 +186,65 @@ namespace sas.api.Services
             return accessibleFolders;
         }
 
-        private FolderDetail GetFolderDetail(string folderName, string upn )
+        //internal FolderDetail GetFolderDetail(string folder)
+        //{
+        //    var rootClient = dlfsClient.GetDirectoryClient(folder);  // container (root)
+        //    var metadata = rootClient.GetProperties().Value.Metadata;
+        //    var acl = rootClient.GetAccessControl(userPrincipalName: true).Value.AccessControlList;
+        //    var uri = rootClient.Uri;
+        //    FolderDetail fd = BuildFolderDetail(folder, metadata, acl, uri);
+        //    return fd;
+        //}
+
+        internal FolderDetail GetFolderDetail(string folderName )
         {
-            var rootClient = dlfsClient.GetDirectoryClient(folderName);  // container (root)
-            var uri = rootClient.Uri;
-            var prop = rootClient.GetProperties().Value;
-            var acl = rootClient.GetAccessControl(userPrincipalName: true).Value.AccessControlList;
-            if (acl.Any(p => p.EntityId is not null && Simplify(p.EntityId).StartsWith(upn)
-                   && p.Permissions.HasFlag(RolePermissions.Read)))
+            try
             {
-                FolderDetail fd = BuildFolderDetail(folderName, prop, acl, uri);
+                var isRoot = string.IsNullOrEmpty(folderName);
+
+                var rootClient = dlfsClient.GetDirectoryClient(folderName);  // container (root)
+                var acl = rootClient.GetAccessControl(userPrincipalName: true).Value.AccessControlList;
+                string createdOn = string.Empty, accessTier = string.Empty;
+                IDictionary<string, string> metadata;
+                if (isRoot)
+                    metadata = dlfsClient.GetProperties().Value.Metadata;
+                else
+                {
+                    var prop = rootClient.GetProperties().Value;
+                    metadata = prop.Metadata;
+                    createdOn = prop.CreatedOn.ToLocalTime().ToString();
+                    accessTier = prop.AccessTier;
+                }
+                FolderDetail fd = BuildFolderDetail(folderName, metadata, acl, rootClient.Uri);
+
+                if (!isRoot)
+				{
+                    fd.CreatedOn = createdOn;
+                    fd.AccessTier = accessTier;
+                }
+
                 return fd;
+            }
+            catch(Exception ex)
+            {
+                log.LogError(ex.Message, ex);
             }
             return null;
         }
 
-        private FolderDetail BuildFolderDetail(string folder, PathProperties prop, IEnumerable<PathAccessControlItem> acl, Uri uri)
+        private FolderDetail BuildFolderDetail(
+            string folder, IDictionary<string,string> metadata, 
+            IEnumerable<PathAccessControlItem> acl, Uri uri)
         {
             // Get Metadata
-            long? size = prop.Metadata.ContainsKey("Size") ? long.Parse(prop.Metadata["Size"]) : null;
+            long? size = metadata.ContainsKey("Size") ? long.Parse(metadata["Size"]) : null;
             decimal? cost = (size == null) ? null : size * costPerTB / 1000000000000;
 
             // Calculate UserAccess
             var userAccess = acl
-                .Where(p => p.AccessControlType == AccessControlType.User && p.EntityId != null && !p.DefaultScope)
+                .Where(p => p.AccessControlType == AccessControlType.User 
+                            && p.EntityId != null && !p.DefaultScope
+                            && p.Permissions.HasFlag(RolePermissions.Read))
                 .Select(p => p.EntityId)
                 .ToList();
 
@@ -226,14 +252,12 @@ namespace sas.api.Services
             var fd = new FolderDetail()
             {
                 Name = folder,
-                Size = prop.Metadata.ContainsKey("Size") ? prop.Metadata["Size"] : null,
+                Size = size.HasValue ? size.Value.ToString() : null,
                 Cost = cost.HasValue ? cost.Value.ToString() : null,
-                FundCode = prop.Metadata.ContainsKey("FundCode") ? prop.Metadata["FundCode"] : null,
-                CreatedOn = prop.CreatedOn.ToLocalTime().ToString(),
+                FundCode = metadata.ContainsKey("FundCode") ? metadata["FundCode"] : null,
                 UserAccess = userAccess,
                 URI = uri.ToString(),
-                Owner = prop.Metadata.ContainsKey("Owner") ? prop.Metadata["Owner"] : null,
-                AccessTier = prop.AccessTier
+                Owner = metadata.ContainsKey("Owner") ? metadata["Owner"] : null,
             };
             return fd;
         }

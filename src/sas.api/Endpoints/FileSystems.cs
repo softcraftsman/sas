@@ -85,8 +85,13 @@ namespace sas.api
                     log.LogError(ex, ex.Message);
                     containers = new List<string>() { ex.Message };
                 }
-                result.Add(new FileSystemResult() { Name = acct, FileSystems = containers });
+
+                // Send back the Accounts and FileSystems
+                result.Add( new FileSystemResult() 
+                    { Name = acct, FileSystems = containers.Distinct().ToList() });
             }
+
+            log.LogTrace(JsonConvert.SerializeObject(result, Formatting.None));
 
             //
             return new OkObjectResult(result);
