@@ -87,8 +87,11 @@ namespace sas.api
                 }
 
                 // Send back the Accounts and FileSystems
-                result.Add( new FileSystemResult() 
-                    { Name = acct, FileSystems = containers.Distinct().ToList() });
+                result.Add(new FileSystemResult()
+                {
+                    Name = acct,
+                    FileSystems = containers.Distinct().OrderBy(c => c).ToList()
+                });
             }
 
             log.LogTrace(JsonConvert.SerializeObject(result, Formatting.None));
@@ -111,6 +114,15 @@ namespace sas.api
             string error = null;
             if (Extensions.AnyNull(tlfp.FileSystem, tlfp.Owner, tlfp.FundCode, tlfp.StorageAcount))
                 error = $"{nameof(FileSystemParameters)} is malformed.";
+            if (tlfp.Owner.Contains("#EXT#"))
+                error = "Guest accounts are not supported.";
+            if (error != null)
+                return new BadRequestErrorMessageResult(error);
+
+            // Get Blob Owner
+            var ownerId = await UserOperations.GetObjectIdFromUPN(tlfp.Owner);
+            if (ownerId == null)
+                return new BadRequestErrorMessageResult("Owner identity not found.");
 
             // Call each of the steps in order and error out if anytyhing fails
             var storageUri = new Uri($"https://{tlfp.StorageAcount}.dfs.core.windows.net");
@@ -122,16 +134,13 @@ namespace sas.api
             if (!result.Success)
                 return new BadRequestErrorMessageResult(result.Message);
 
-            // Get Blob Owner
-            var ownerId = await UserOperations.GetObjectIdFromUPN(tlfp.Owner);
-
             // Add Blob Owner
             var roleOperations = new RoleOperations(log);
             roleOperations.AssignRoles(tlfp.StorageAcount, tlfp.FileSystem, ownerId);
 
             // Get Root Folder Details
             var folderOperations = new FolderOperations(storageUri, tlfp.FileSystem, log);
-            var folderDetail = folderOperations.GetFolderDetail("/");
+            var folderDetail = folderOperations.GetFolderDetail(String.Empty);
 
             return new OkObjectResult(folderDetail);
         }

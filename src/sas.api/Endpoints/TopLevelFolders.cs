@@ -7,6 +7,7 @@ using Newtonsoft.Json;
 using sas.api.Services;
 using System;
 using System.IO;
+using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
@@ -49,7 +50,7 @@ namespace sas.api
             var storageUri = new Uri($"https://{account}.dfs.core.windows.net");
             var folderOperations = new FolderOperations(storageUri, filesystem, log);
             var folders = folderOperations.GetAccessibleFolders(user);
-            return new OkObjectResult(folders);
+            return new OkObjectResult(folders.OrderBy(f => f.URI).ToList());
         }
 
         [FunctionName("TopLevelFoldersPOST")]
