@@ -20,19 +20,19 @@ namespace sas.api
     {
         [FunctionName("FileSystems")]
         public static async Task<IActionResult> Run(
-            [HttpTrigger(AuthorizationLevel.Function, "POST", "GET", Route = "FileSystems/{account}")]
+            [HttpTrigger(AuthorizationLevel.Function, "POST", "GET", Route = "FileSystems/{account?}")]
             HttpRequest req, ILogger log, String account)
         {
             if (req.Method == HttpMethods.Post)
                 return await FileSystemsPOST(req, log, account);
 
             if (req.Method == HttpMethods.Get)
-                return FileSystemsGET(req, log, account);
+                return await FileSystemsGET(req, log, account);
 
             return null;
         }
 
-        private static IActionResult FileSystemsGET(HttpRequest req, ILogger log, string account)
+        private static async Task<IActionResult> FileSystemsGET(HttpRequest req, ILogger log, string account)
         {
             // Check for logged in user
             ClaimsPrincipal claimsPrincipal;
@@ -50,29 +50,42 @@ namespace sas.api
 
             // Calculate UPN
             var upn = claimsPrincipal.Identity.Name.ToLowerInvariant();
+            var principalId = claimsPrincipal.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
 
             // Get the Containers for a upn from each storage account
             var accounts = SasConfiguration.GetConfiguration().StorageAccounts;
-            if (account != null) accounts = accounts.Where(a => a.ToLowerInvariant() == upn).ToArray();
+            if (account != null)
+                accounts = accounts.Where(a => a.ToLowerInvariant() == account).ToArray();
 
             var result = new List<FileSystemResult>();
             foreach (var acct in accounts)
             {
+                var containers = new List<string>();
+
+                // Get RBAC Roles
+                var x = new RoleOperations(log);
+                var containerRoles = x.GetContainerRoleAssignments(acct, principalId);
+
+                if (containerRoles != null && containerRoles.Count > 0)
+                {
+                    containers.AddRange(containerRoles.Select(s => s.Container));
+                }                  
+
                 // TODO: Centralize this to account for other clouds
                 var serviceUri = new Uri($"https://{acct}.dfs.core.windows.net");
                 var adls = new FileSystemOperations(serviceUri, log);
 
-                List<string> containers;
                 try
                 {
-                    containers = adls.GetContainersForUpn(upn).ToList();
+                    var clist = adls.GetContainersForUpn(upn).ToArray();
+                    containers.AddRange(clist);
                 }
                 catch (Exception ex)
                 {
                     log.LogError(ex, ex.Message);
                     containers = new List<string>() { ex.Message };
                 }
-                result.Add(new FileSystemResult() { Name = account, FileSystems = containers });
+                result.Add(new FileSystemResult() { Name = acct, FileSystems = containers });
             }
 
             //

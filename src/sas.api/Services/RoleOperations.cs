@@ -7,6 +7,7 @@ using Microsoft.Azure.Management.ResourceGraph.Models;
 using Microsoft.Extensions.Logging;
 using Microsoft.Rest;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace sas.api.Services
@@ -105,39 +106,40 @@ namespace sas.api.Services
             }
         }
 
-        public void GetRoles(string account, string container, string ownerId)
-        {
-            try
-            {
-                // Get Storage Account Resource ID
-                var accountResourceId = GetAccountResourceId(account);
-
-                // Create Role Assignments
-                string containerScope = $"{accountResourceId}/blobServices/default/containers/{container}";
-
-                // Allow user to manage ACL for container
-                //var ra = AddRoleAssignment(containerScope, "Storage Blob Data Owner", ownerId);
-            }
-            catch (Exception ex)
-            {
-                log.LogError(ex, ex.Message);
-                Console.WriteLine(ex.Message);
-                throw;
-            }
-        }
-
-        private RoleAssignment GetRoleAssignment(string scope, string roleName, string principalId)
+        public List<ContainerRole> GetContainerRoleAssignments(string account, string principalId)
         {
             VerifyToken();
+
+            // Get Storage Account Resource ID
+            var accountResourceId = GetAccountResourceId(account);
+
+            // TODO: Optimize for cache and performance. Too many calls.
+
             var amClient = new AuthorizationManagementClient(tokenCredentials);
-            var roleDefinitions = amClient.RoleDefinitions.List(scope);
-            var roleDefinition = roleDefinitions.First(x => x.RoleName == roleName);
+            var roleDefinitions = amClient.RoleDefinitions.List(accountResourceId)
+                .Where(r => r.RoleName.StartsWith("Storage Blob")).ToList();
+            var roleAssignments = amClient.RoleAssignments.ListForScope(accountResourceId)
+                    .Where(ra => ra.PrincipalId == principalId && ra.Scope.Contains("containers"))
+                    .ToList();
 
-            // TODO: Add OData Filter
-            var roleAssignments = amClient.RoleAssignments.ListForScope(scope);
-            var roleAssignment = roleAssignments.FirstOrDefault(ra => ra.PrincipalId == principalId && ra.RoleDefinitionId == roleDefinition.Id);
+            var roles = new List<ContainerRole>();
+            foreach (var ra in roleAssignments)
+            {
+                var rd = roleDefinitions.FirstOrDefault(r => r.Id == ra.RoleDefinitionId);
+                if (rd != null)
+                {
+                    var container = ra.Scope.Split("/").Last();
+                    roles.Add(new ContainerRole { RoleName = rd.RoleName, Container = container });
+                }
+            }
 
-            return roleAssignment;
+            return roles;
+        }
+
+        public class ContainerRole
+        {
+            public string RoleName { get; set; }
+            public string Container { get; set; }
         }
     }
 }

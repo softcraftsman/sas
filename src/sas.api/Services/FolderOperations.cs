@@ -158,31 +158,56 @@ namespace sas.api.Services
             return fd;
         }
 
-        internal IEnumerable<FolderDetail> GetAccessibleFolders(string upn)
+        internal IList<FolderDetail> GetAccessibleFolders(string upn)
         {
-            // Get all Top Level Folders
-            var folders = dlfsClient.GetPaths().Where<PathItem>(
-                pi => pi.IsDirectory != null && (bool)pi.IsDirectory)
-                .ToList();
-
-            // Translate for guest accounts
-            // TODO: Do not re-define var, create a new one
-            upn = Simplify(upn);
-
-            // Find folders that have ACL entries for upn
-            foreach (var folder in folders)
+            var accessibleFolders = new List<FolderDetail>();
+            try
             {
-                var rootClient = dlfsClient.GetDirectoryClient(folder.Name);  // container (root)
-                var uri = rootClient.Uri;
-                var prop = rootClient.GetProperties().Value;
-                var acl = rootClient.GetAccessControl(userPrincipalName: true).Value.AccessControlList;
-                if (acl.Any(p => p.EntityId is not null && Simplify(p.EntityId).StartsWith(upn)
-                       && p.Permissions.HasFlag(RolePermissions.Read)))
-                {
-                    FolderDetail fd = BuildFolderDetail(folder.Name, prop, acl, uri);
-                    yield return fd;
-                }
+                //TODO: Add Root Folder to Folder List
+                // Get Root Folder
+                //var fd = GetFolderDetail(string.Empty, upn);
+                //if (fd != null)
+                //    accessibleFolders.Add(fd);
+
+                // Get all Top Level Folders
+                var flds = dlfsClient.GetPaths().ToList();
+                var folders = flds.Where<PathItem>(
+                    pi => pi.IsDirectory != null && (bool)pi.IsDirectory)
+                    .ToList();
+
+                // Translate for guest accounts
+                // TODO: Do not re-define var, create a new one
+                upn = Simplify(upn);
+
+                // Find folders that have ACL entries for upn
+                Parallel.ForEach(folders, folder =>
+                    {
+                        var fd = GetFolderDetail(folder.Name, upn);
+                        if (fd != null)
+                            accessibleFolders.Add(fd);
+                    }
+                );
             }
+            catch (Exception ex)
+            {
+                log.LogError(ex.Message);
+            }
+            return accessibleFolders;
+        }
+
+        private FolderDetail GetFolderDetail(string folderName, string upn )
+        {
+            var rootClient = dlfsClient.GetDirectoryClient(folderName);  // container (root)
+            var uri = rootClient.Uri;
+            var prop = rootClient.GetProperties().Value;
+            var acl = rootClient.GetAccessControl(userPrincipalName: true).Value.AccessControlList;
+            if (acl.Any(p => p.EntityId is not null && Simplify(p.EntityId).StartsWith(upn)
+                   && p.Permissions.HasFlag(RolePermissions.Read)))
+            {
+                FolderDetail fd = BuildFolderDetail(folderName, prop, acl, uri);
+                return fd;
+            }
+            return null;
         }
 
         private FolderDetail BuildFolderDetail(string folder, PathProperties prop, IEnumerable<PathAccessControlItem> acl, Uri uri)
