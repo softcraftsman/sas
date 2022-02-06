@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react'
 import PropTypes from 'prop-types'
 import useAuthentication from '../../hooks/useAuthentication'
 import { getFileSystems, getDirectories } from '../../services/StorageManager.service'
+// TODO: Collapase with import above
 import { createFolder } from '../../services/StorageManager.service'
 import Alert from '@mui/material/Alert'
 import Container from '@mui/material/Container'
@@ -25,38 +26,52 @@ const StorageAccountsPage = ({ strings }) => {
 	const [toastMessage, setToastMessage] = useState()
 	const [isToastOpen, setToastOpen] = useState(false)
 
-	// Retrieve the list of File Systems for the selected Azure Data Lake Storage Account
+	// When authenticated, retrieve the list of File Systems for the selected Azure Data Lake Storage Account
 	useEffect(() => {
-		const retrieveStorageAccounts = async () => {
+		const retrieveAccountsAndFileSystems = async () => {
 			try {
+				console.debug('Calling `getFileSystems()`')
 				const _storageAccounts = await getFileSystems()
 				setStorageAccounts(_storageAccounts)
 			}
 			catch (error) {
-				console.error(error);
+				console.error(error)
 			}
 		}
 
-		isAuthenticated && retrieveStorageAccounts()
+		console.debug('Entered effect to retrieve accounts and file systems')
+
+		isAuthenticated
+			&& retrieveAccountsAndFileSystems()
 	}, [isAuthenticated])
 
 
-	// Retrieve the list of Directories for the selected File System
+	// When the selected file system (container) changes, retrieve the list of Directories for the selected File System
 	useEffect(() => {
-		const retrieveDirectories = async (storageAccount, fileSystem) => {
-			//const toSpace = kb => `${kb} KB`
+		const clearDirectories = () => {
+			setDirectories([])
+		}
 
+		const retrieveDirectories = async (storageAccount, fileSystem) => {
 			try {
+				console.debug('Calling `getDirectories(%s, %s)`', storageAccount, fileSystem)
 				const _directories = await getDirectories(storageAccount, fileSystem)
 				setDirectories(_directories)
 			}
 			catch (error) {
-				console.error(error);
+				console.error(error)
 			}
 		}
 
-		selectedFileSystem && retrieveDirectories(selectedStorageAccount, selectedFileSystem)
-	}, [selectedStorageAccount, selectedFileSystem])
+		console.debug('Entered effect to retrieve directories with storage account "%s" and container "%s"', selectedStorageAccount, selectedFileSystem)
+
+		clearDirectories()
+
+		// Only retrieve directories if there is a file system (container) selected
+		selectedFileSystem
+			&& retrieveDirectories(selectedStorageAccount, selectedFileSystem)
+	}, [selectedFileSystem]) // eslint-disable-line react-hooks/exhaustive-deps 
+	// Disabling because we don't want to trigger on change of selectedStorageAccount
 
 
 	const displayToast = message => {
@@ -83,17 +98,23 @@ const StorageAccountsPage = ({ strings }) => {
 
 
 	const handleStorageAccountChange = useCallback(id => {
+		console.debug('Selected storage account is now "%s"', id)
+		// To avoid a warning from MUI, clear the selected file system first
+		setSelectedFileSystem('')
 		setSelectedStorageAccount(id)
 	}, [])
 
 
 	const handleFileSystemChange = useCallback(id => {
+		console.debug('Selected file system is now "%s"', id)
 		setSelectedFileSystem(id)
 	}, [])
 
 
 	const storageAccountItems = storageAccounts.map(account => account.name)
-	const fileSystemItems = selectedStorageAccount ? storageAccounts.find(account => account.name === selectedStorageAccount).fileSystems : []
+	const fileSystemItems = selectedStorageAccount ?
+		storageAccounts.find(account => account.name === selectedStorageAccount).fileSystems
+		: []
 
 
 	return (
