@@ -33,6 +33,7 @@ const StorageAccountsPage = ({ strings }) => {
 				console.debug('Calling `getFileSystems()`')
 				const _storageAccounts = await getFileSystems()
 				setStorageAccounts(_storageAccounts)
+				displayToast(strings.accountsLoaded)
 			}
 			catch (error) {
 				console.error(error)
@@ -43,7 +44,7 @@ const StorageAccountsPage = ({ strings }) => {
 
 		isAuthenticated
 			&& retrieveAccountsAndFileSystems()
-	}, [isAuthenticated])
+	}, [isAuthenticated, strings.accountsLoaded])
 
 
 	// When the selected file system (container) changes, retrieve the list of Directories for the selected File System
