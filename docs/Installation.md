@@ -94,7 +94,7 @@ When done, select the button that says **Grant admin consent for (your appliatio
 
 ### Prepare the storage accounts
 
-In order to allow this application to modify storage accounts, you need to assign the *Storage Blob Data Owner* role to the application registration for each of the storage accounts to be managed.
+In order to allow this application to modify storage accounts, you need to assign two permissions, *Storage Blob Data Owner* and *User Access Administrator*, roles to the application registration for each of the storage accounts to be managed.
 
 If you named the application *Storage-as-a-Service*, the RBAC entry would look like this:
 
