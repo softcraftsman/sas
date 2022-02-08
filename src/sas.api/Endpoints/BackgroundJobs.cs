@@ -13,59 +13,59 @@ using System.Threading.Tasks;
 
 namespace sas.api
 {
-    public static class BackgroundJobs
-    {
-        [FunctionName("CalculateAllFolderSizes")]
-        public static async Task<IActionResult> CalculateAllFolderSizes(
-            [HttpTrigger(AuthorizationLevel.Function, "POST", Route = "Configuration/CalculateFolderSizes")]
-            HttpRequest req, ILogger log)
-        {
-            var configResult = SasConfiguration.GetConfiguration();
-            var sb = new System.Text.StringBuilder();
-            foreach (var account in configResult.StorageAccounts)
-            {
-                var serviceUri = new Uri($"https://{account}.dfs.core.windows.net");
-                var serviceCLient = CreateDlsClientForUri(serviceUri);
-                var fileSystems = serviceCLient.GetFileSystems();
+	public static class BackgroundJobs
+	{
+		[FunctionName("CalculateAllFolderSizes")]
+		public static async Task<IActionResult> CalculateAllFolderSizes(
+			[HttpTrigger(AuthorizationLevel.Function, "POST", Route = "Configuration/CalculateFolderSizes")]
+			HttpRequest req, ILogger log)
+		{
+			if (!SasConfiguration.ValidateSharedKey(req, SasConfiguration.ApiKey.Configuration))
+			{
+				return new UnauthorizedResult();
+			}
 
-                var msg = $"Analyzing {account}";
-                log.LogInformation(msg);
-                sb.AppendLine(msg);
+			var configResult = SasConfiguration.GetConfiguration();
+			var sb = new System.Text.StringBuilder();
 
-                foreach (var filesystem in fileSystems)
-                {
-                    var containerUri = new Uri($"https://{account}.dfs.core.windows.net/{filesystem.Name}");
-                    var containerClient = CreateDlsClientForUri(serviceUri);
-                    var fileSystemClient = containerClient.GetFileSystemClient(filesystem.Name);
-                    var folders = fileSystemClient.GetPaths().Where<PathItem>(
-                        pi => pi.IsDirectory == null ? false : (bool)pi.IsDirectory);
+			foreach (var account in configResult.StorageAccounts)
+			{
+				var serviceUri = new Uri($"https://{account}.dfs.core.windows.net");
+				var serviceCLient = CreateDlsClientForUri(serviceUri);
+				var fileSystems = serviceCLient.GetFileSystems();
 
-                    var folderOperations = new FolderOperations(serviceUri, filesystem.Name, log);
+				var msg = $"Analyzing {account}";
+				log.LogInformation(msg);
+				sb.AppendLine(msg);
 
-                    long size = 0;
-                    foreach (var folder in folders)
-                    {
-                        size += await folderOperations.CalculateFolderSize(folder.Name);
-                    }
+				foreach (var filesystem in fileSystems)
+				{
+					var containerUri = new Uri($"https://{account}.dfs.core.windows.net/{filesystem.Name}");
+					var containerClient = CreateDlsClientForUri(serviceUri);
+					var fileSystemClient = containerClient.GetFileSystemClient(filesystem.Name);
+					var folders = fileSystemClient.GetPaths().Where<PathItem>(
+						pi => pi.IsDirectory == null ? false : (bool)pi.IsDirectory);
 
-                    msg = $"  {filesystem.Name} aggregate size {size} bytes";
-                    log.LogInformation(msg);
-                    sb.AppendLine(msg);
-                }
-            }
+					var folderOperations = new FolderOperations(serviceUri, filesystem.Name, log);
 
-            return new OkObjectResult(sb.ToString());
-        }
+					long size = 0;
+					foreach (var folder in folders)
+					{
+						size += await folderOperations.CalculateFolderSize(folder.Name);
+					}
 
-        private static DataLakeServiceClient CreateDlsClientForUri(Uri containerUri)
-        {
-            /*   var tenantId = Environment.GetEnvironmentVariable("TENANT_ID");
-               var clientId = Environment.GetEnvironmentVariable("APP_REGISTRATION_CLIENT_ID");
-               var clientSecret = Environment.GetEnvironmentVariable("CLIENT_SECRET");
-               var tokenCred = new ClientSecretCredential(tenantId, clientId, clientSecret);
-               var dlsClient = new DataLakeServiceClient(containerUri, tokenCred);
-               return dlsClient; */
-            return new DataLakeServiceClient(containerUri, new DefaultAzureCredential());
-        }
-    }
+					msg = $"  {filesystem.Name} aggregate size {size} bytes";
+					log.LogInformation(msg);
+					sb.AppendLine(msg);
+				}
+			}
+
+			return new OkObjectResult(sb.ToString());
+		}
+
+		private static DataLakeServiceClient CreateDlsClientForUri(Uri containerUri)
+		{
+			return new DataLakeServiceClient(containerUri, new DefaultAzureCredential());
+		}
+	}
 }

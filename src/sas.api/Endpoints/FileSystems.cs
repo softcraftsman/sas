@@ -30,6 +30,7 @@ namespace sas.api
 			if (req.Method == HttpMethods.Get)
 				return await FileSystemsGET(req, log, account);
 
+			// TODO: If this is even possible (accepted methods are defined above?) return HTTP error code 405, response must include an Allow header with allowed methods
 			return null;
 		}
 
@@ -127,6 +128,11 @@ namespace sas.api
 
 		private static async Task<IActionResult> FileSystemsPOST(HttpRequest req, ILogger log, string account)
 		{
+			if (!SasConfiguration.ValidateSharedKey(req, SasConfiguration.ApiKey.FileSystems))
+			{
+				return new UnauthorizedResult();
+			}
+
 			// Extracting body object from the call and deserializing it.
 			var tlfp = await GetFileSystemParameters(req, log);
 			if (tlfp == null)
@@ -154,8 +160,7 @@ namespace sas.api
 			var fileSystemOperations = new FileSystemOperations(storageUri, log);
 
 			// Create File System
-			Result result = null;
-			result = await fileSystemOperations.CreateFileSystem(tlfp.FileSystem, tlfp.Owner, tlfp.FundCode);
+			Result result = await fileSystemOperations.CreateFileSystem(tlfp.FileSystem, tlfp.Owner, tlfp.FundCode);
 			if (!result.Success)
 				return new BadRequestErrorMessageResult(result.Message);
 
@@ -169,6 +174,7 @@ namespace sas.api
 
 			return new OkObjectResult(folderDetail);
 		}
+
 
 		internal static async Task<FileSystemParameters> GetFileSystemParameters(HttpRequest req, ILogger log)
 		{
