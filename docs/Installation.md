@@ -120,6 +120,8 @@ Add the following application settings to the Static Web App using the Configura
 | AZURE_TENANT_ID | The tenant ID of your Azure AD. |
 | COST_PER_TB | A numeric value for your monthly cost per terabyte of storage. |
 | DATALAKE_STORAGE_ACCOUNTS | A comma-separated list of one or more ADLS Gen2 storage account names that have been prepared following the instructions above. |
+| FILESYSTEMS_API_KEY | The shared API key to POST to the FileSystems API to create new containers. We recommend retrieving this secret from Key Vault. |
+| CONFIGURATION_API_KEY | The shared API key to call the Configuration API. We recommend retrieving this secret from Key Vault. |
 
 ![App Settings](/assets/app-settings.png)
 
