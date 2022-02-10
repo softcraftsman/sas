@@ -8,8 +8,6 @@ on:
       - main
   pull_request:
     types: [opened, synchronize, reopened, closed]
-    branches:
-      - main
   pull_request_target:
     # Only run when the pull request has at least one label
     # Exact label will be checked below

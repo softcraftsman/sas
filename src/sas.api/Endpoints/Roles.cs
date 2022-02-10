@@ -13,7 +13,7 @@ namespace sas.api
 	public static class Roles
 	{
 		[FunctionName("Roles")]
-		public static async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "GET", "POST", Route = "Roles")]
+		public static IActionResult Run([HttpTrigger(AuthorizationLevel.Anonymous, "POST", Route = "Roles")]
 			HttpRequest req, ILogger log)
 		{
 			RolesResult rr = new();
