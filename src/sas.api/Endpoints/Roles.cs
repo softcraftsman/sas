@@ -3,14 +3,13 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
-using System.Collections.Generic;
 
 namespace sas.api
 {
 	public static class Roles
 	{
 		[FunctionName("Roles")]
-		public static IActionResult Run([HttpTrigger(AuthorizationLevel.Anonymous, "GET", "POST", Route = "Roles")]
+		public static IActionResult Run([HttpTrigger(AuthorizationLevel.Anonymous, "POST", Route = "Roles")]
 			HttpRequest req, ILogger log)
 		{
 			// Request body is supposed to contain the user's access token

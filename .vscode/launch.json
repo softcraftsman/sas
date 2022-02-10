@@ -4,26 +4,16 @@
 		{
 			"name": "Edge - Debug GUI + API",
 			"request": "launch",
-			//"request": "attach",
 			"type": "pwa-msedge",
 			"url": "http://localhost:4280",
-			//"webRoot": "${workspaceFolder}",
 			"preLaunchTask": "Start SWA and Launch Edge",
 			"presentation": {
-				"hidden": true,
+				"hidden": false,
 				"group": "",
 				"order": 1
 			},
 			"postDebugTask": "Terminate All Tasks"
 		},
-		// {
-		// 	"name": "Launch Edge with Az Fx (non-debug)",
-		// 	"request": "launch",
-		// 	"type": "pwa-msedge",
-		// 	"url": "http://localhost:4280",
-		// 	"webRoot": "${workspaceFolder}",
-		// 	"preLaunchTask": "Launch Edge with Az Fx (non-debug)"
-		// },
 		{
 			"name": "Attach to .NET Functions",
 			"type": "coreclr",
