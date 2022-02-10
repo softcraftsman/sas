@@ -15,19 +15,6 @@ on:
   workflow_dispatch:
 
 jobs:
-  determine_fork_job:
-    if: github.event_name == 'pull_request'
-      || github.event_name == 'pull_request_target'
-    name: Determine if PR from fork
-    runs-on: ubuntu-latest
-    steps:
-      - name: Display value of github.event.pull_request.head.repo.fork
-        run: echo ${{github.event.pull_request.head.repo.fork}}
-      - name: Display value of github.event.pull_request.head.repo.full_name
-        run: echo ${{github.event.pull_request.head.repo.full_name}}
-      - name: Display value of github.event.pull_request.base.repo.fork
-        run: echo ${{github.event.pull_request.base.repo.full_name}}
-
   build_and_deploy_job:
     if: github.event_name == 'workflow_dispatch'
       || github.event_name == 'push'
