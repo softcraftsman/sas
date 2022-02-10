@@ -1,9 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import PropTypes from 'prop-types'
 import useAuthentication from '../../hooks/useAuthentication'
-import { getFileSystems, getDirectories } from '../../services/StorageManager.service'
-// TODO: Collapase with import above
-import { createFolder } from '../../services/StorageManager.service'
+import { getFileSystems, getDirectories, createFolder } from '../../services/StorageManager.service'
 import Alert from '@mui/material/Alert'
 import Container from '@mui/material/Container'
 import Grid from '@mui/material/Grid'
@@ -33,6 +31,9 @@ const StorageAccountsPage = ({ strings }) => {
 				console.debug('Calling `getFileSystems()`')
 				const _storageAccounts = await getFileSystems()
 				setStorageAccounts(_storageAccounts)
+				// Set the first storage account retrieved from the API as the selected one
+				setSelectedStorageAccount(_storageAccounts[0].name)
+				displayToast(strings.accountsLoaded)
 			}
 			catch (error) {
 				console.error(error)
@@ -43,7 +44,7 @@ const StorageAccountsPage = ({ strings }) => {
 
 		isAuthenticated
 			&& retrieveAccountsAndFileSystems()
-	}, [isAuthenticated])
+	}, [isAuthenticated, strings.accountsLoaded])
 
 
 	// When the selected file system (container) changes, retrieve the list of Directories for the selected File System
@@ -70,7 +71,7 @@ const StorageAccountsPage = ({ strings }) => {
 		// Only retrieve directories if there is a file system (container) selected
 		selectedFileSystem
 			&& retrieveDirectories(selectedStorageAccount, selectedFileSystem)
-	}, [selectedFileSystem]) // eslint-disable-line react-hooks/exhaustive-deps 
+	}, [selectedFileSystem]) // eslint-disable-line react-hooks/exhaustive-deps
 	// Disabling because we don't want to trigger on change of selectedStorageAccount
 
 

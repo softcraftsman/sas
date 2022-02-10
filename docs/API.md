@@ -19,7 +19,8 @@ It will return a list of storage accounts and containers the current user has ac
 
 POST api/FileSystems/{account?}
 
-This endpoint requires a shared key that is stored in a KeyVault to access it.
+This endpoint requires a shared key that is stored in a KeyVault to access it. Provide the shared key in a custom header `Saas-FileSystems-Api-Key`.
+
 It will create a new container for a user using the following body contents.
 
 BODY:
@@ -50,7 +51,8 @@ They will also be given the X rights in the root folder.
 
 POST api/Configuration/CalculateFolderSizes
 
-This endpoint requires a shared key that is stored in a KeyVault to access it.
+This endpoint requires a shared key that is stored in a KeyVault to access it. Provide the shared key in a custom header `Saas-Configuration-Api-Key`.
+
 This background job will calculate the folder sizes based on the files present and store the data in the MetaData of the Top Level Folder.
 
 

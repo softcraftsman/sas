@@ -25,14 +25,6 @@
 	},
 	"routes": [
 		{
-			"route": "/.auth/login/github",
-			"statusCode": 404
-		},
-		{
-			"route": "/.auth/login/twitter",
-			"statusCode": 404
-		},
-		{
 			"route": "/login",
 			"rewrite": "/.auth/login/aad"
 		},
@@ -52,19 +44,11 @@
 		{
 			"route": "/api/TopLevelFolders",
 			"methods": [
-				"GET"
-			],
-			"allowedRoles": [
-				"authenticated"
-			]
-		},
-		{
-			"route": "/api/TopLevelFolders",
-			"methods": [
+				"GET",
 				"POST"
 			],
 			"allowedRoles": [
-				"administrator"
+				"authenticated"
 			]
 		}
 	]
