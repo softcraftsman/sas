@@ -14,7 +14,7 @@ Some of the capabilities currently provided by the system are:
 
 ## Background
 
-Why do we need this? There are many reasons to want this simplified portal.  We have observed that many research institutions are not comfortable with providing their users with access to Azure portal. As such, they want to provide a limited
+Why do we need this? There are many reasons to want this simplified portal. We have observed that many research institutions are not comfortable with providing their users with access to Azure portal. As such, they want to provide a limited UI.
 
 ### Azure "limitations" regarding permissions
 
@@ -30,6 +30,6 @@ In the Azure Data Lake, each diretory or file can have 32 ACL entries, of which 
 
 ## Installation
 
-The installation requires a GitHub account, an Azure Static Web App, a Key Vault, an Application Registration in Azure AD, and of course the Azure Storage Accounts with Heirarchical Naming Service. 
+The installation requires a GitHub account, an Azure Static Web App, a Key Vault, an Application Registration in Azure AD, and of course the Azure Storage Accounts with Hierarchical Namespace enabled.
 
 The installation instructions can be found at [Installation](/docs/Installation.md)
