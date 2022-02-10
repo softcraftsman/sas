@@ -33,4 +33,3 @@ In the Azure Data Lake, each diretory or file can have 32 ACL entries, of which 
 The installation requires a GitHub account, an Azure Static Web App, a Key Vault, an Application Registration in Azure AD, and of course the Azure Storage Accounts with Hierarchical Namespace enabled.
 
 The installation instructions can be found at [Installation](/docs/Installation.md)
-
